@@ -2,15 +2,19 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>http://liuwangshu.cn/system.html</loc>
-    <lastmod>2021-02-22</lastmod>
+    <lastmod>2021-03-07</lastmod>
+  </url>
+  <url>
+    <loc>http://liuwangshu.cn/batcoder/aosp/3-compiling-aosp.html</loc>
+    <lastmod>2021-03-07</lastmod>
+  </url>
+  <url>
+    <loc>http://liuwangshu.cn/batcoder/aosp/2-download-aosp.html</loc>
+    <lastmod>2021-03-07</lastmod>
   </url>
   <url>
     <loc>http://liuwangshu.cn/batcoder/android-framework.html</loc>
     <lastmod>2021-02-22</lastmod>
-  </url>
-  <url>
-    <loc>http://liuwangshu.cn/batcoder/aosp/2-download-aosp.html</loc>
-    <lastmod>2021-02-10</lastmod>
   </url>
   <url>
     <loc>http://liuwangshu.cn/show/2020-summarize.html</loc>
