@@ -1,3 +1,4 @@
+http://liuwangshu.cn/life/android-advanced-light.2.html
 http://liuwangshu.cn/batcoder/aosp/3-compiling-aosp.html
 http://liuwangshu.cn/batcoder/aosp/2-download-aosp.html
 http://liuwangshu.cn/show/2020-summarize.html
@@ -47,4 +48,3 @@ http://liuwangshu.cn/framework/aosp/1-install-ubuntu.html
 http://liuwangshu.cn/application/gradle/6-custonplugin.html
 http://liuwangshu.cn/application/gradle/5-plugins.html
 http://liuwangshu.cn/application/gradle/4-wrapper.html
-http://liuwangshu.cn/framework/ims/4-inputtarget.html

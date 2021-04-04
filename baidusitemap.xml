@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://liuwangshu.cn/life/android-advanced-light.2.html</loc>
+    <lastmod>2021-04-04</lastmod>
+  </url>
+  <url>
+    <loc>http://liuwangshu.cn/framework/booting/2-zygote.html</loc>
+    <lastmod>2021-03-19</lastmod>
+  </url>
+  <url>
     <loc>http://liuwangshu.cn/system.html</loc>
     <lastmod>2021-03-07</lastmod>
   </url>
@@ -382,10 +390,6 @@
   </url>
   <url>
     <loc>http://liuwangshu.cn/framework/component/1-activity-start-2.html</loc>
-    <lastmod>2020-01-12</lastmod>
-  </url>
-  <url>
-    <loc>http://liuwangshu.cn/framework/booting/2-zygote.html</loc>
     <lastmod>2020-01-12</lastmod>
   </url>
   <url>
