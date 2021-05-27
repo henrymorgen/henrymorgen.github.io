@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://liuwangshu.cn/life/android-advanced-light.2.html</loc>
+    <lastmod>2021-05-14</lastmod>
+  </url>
+  <url>
     <loc>http://liuwangshu.cn/batcoder/aosp/2-download-aosp.html</loc>
     <lastmod>2021-05-14</lastmod>
   </url>
@@ -11,10 +15,6 @@
   <url>
     <loc>http://liuwangshu.cn/system.html</loc>
     <lastmod>2021-05-14</lastmod>
-  </url>
-  <url>
-    <loc>http://liuwangshu.cn/life/android-advanced-light.2.html</loc>
-    <lastmod>2021-04-06</lastmod>
   </url>
   <url>
     <loc>http://liuwangshu.cn/framework/booting/2-zygote.html</loc>
