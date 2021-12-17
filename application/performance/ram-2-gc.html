@@ -1,0 +1,208 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android内存优化（二）DVM和ART的GC日志分析 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  相关文章Android性能优化系列Java虚拟机系列 前言在Java虚拟机（三）垃圾标记算法与Java对象的生命周期这篇文章中，提到了Java虚拟机的GC日志。DVM和ART的GC日志与Java虚拟机的日志有较大的区别，这篇文章就对DVM和ART的GC日志进行分析。  1.DVM的GC日志在 DVM 中，每次垃圾收集都会将GC日志打印到 logcat 中，具"><meta name="keywords" content="Android性能优化,Android内存优化"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/performance/ram-2-gc.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android内存优化（二）DVM和ART的GC日志分析"><meta property="og:url" content="http://liuwangshu.cn/application/performance/ram-2-gc.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  相关文章Android性能优化系列Java虚拟机系列 前言在Java虚拟机（三）垃圾标记算法与Java对象的生命周期这篇文章中，提到了Java虚拟机的GC日志。DVM和ART的GC日志与Java虚拟机的日志有较大的区别，这篇文章就对DVM和ART的GC日志进行分析。  1.DVM的GC日志在 DVM 中，每次垃圾收集都会将GC日志打印到 logcat 中，具"><meta property="og:image" content="https://p.pstatp.com/origin/ff850001720b5e8178e7"><meta property="article:published_time" content="2017-06-12T16:16:00.000Z"><meta property="article:modified_time" content="2020-01-12T07:14:24.505Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 15:14:24'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-DVM%E7%9A%84GC%E6%97%A5%E5%BF%97"><span class="toc-number">2.</span> <span class="toc-text">1.DVM的GC日志</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%95%E8%B5%B7GC%E5%8E%9F%E5%9B%A0"><span class="toc-number">2.1.</span> <span class="toc-text">引起GC原因</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E4%BF%A1%E6%81%AF"><span class="toc-number">2.2.</span> <span class="toc-text">其他信息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="toc-number">2.3.</span> <span class="toc-text">实例分析</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-ART%E7%9A%84GC%E6%97%A5%E5%BF%97"><span class="toc-number">3.</span> <span class="toc-text">2.ART的GC日志</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%95%E8%B5%B7GC%E5%8E%9F%E5%9B%A0-1"><span class="toc-number">3.1.</span> <span class="toc-text">引起GC原因</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8%E5%90%8D%E7%A7%B0"><span class="toc-number">3.2.</span> <span class="toc-text">垃圾收集器名称</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%B6%E4%BB%96%E4%BF%A1%E6%81%AF-1"><span class="toc-number">3.3.</span> <span class="toc-text">其他信息</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90-1"><span class="toc-number">3.4.</span> <span class="toc-text">实例分析</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://p.pstatp.com/origin/ff850001720b5e8178e7)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android内存优化（二）DVM和ART的GC日志分析</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-06-12T16:16:00.000Z" title="发表于 2017-06-13 00:16:00">2017-06-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T07:14:24.505Z" title="更新于 2020-01-12 15:14:24">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>相关文章<br><a href="http://liuwangshu.cn/tags/Android%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">Android性能优化系列</a><br><a href="http://liuwangshu.cn/tags/Java%E8%99%9A%E6%8B%9F%E6%9C%BA/">Java虚拟机系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>在<a href="http://liuwangshu.cn/java/jvm/3-garbage-mark.html">Java虚拟机（三）垃圾标记算法与Java对象的生命周期</a>这篇文章中，提到了Java虚拟机的GC日志。DVM和ART的GC日志与Java虚拟机的日志有较大的区别，这篇文章就对DVM和ART的GC日志进行分析。</p>
+<a id="more"></a>
+<h3 id="1-DVM的GC日志"><a href="#1-DVM的GC日志" class="headerlink" title="1.DVM的GC日志"></a><strong>1.DVM的GC日志</strong></h3><p>在 DVM 中，每次垃圾收集都会将GC日志打印到 logcat 中，具体的格式为：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">D&#x2F;dalvikvm: &lt;GC_Reason&gt; &lt;Amount_freed&gt;, &lt;Heap_stats&gt;, &lt;External_memory_stats&gt;, &lt;Pause_time&gt;</span><br></pre></td></tr></table></figure>
+<p>可以看到DVM的日志共有5个信息，其中GC Reason有很多种，这里将它单独拿出来进行介绍。</p>
+<h4 id="引起GC原因"><a href="#引起GC原因" class="headerlink" title="引起GC原因"></a><strong>引起GC原因</strong></h4><p>GC Reason就是指引起GC原因，有以下几种：</p>
+<ul>
+<li>GC_CONCURRENT：当堆开始填充时，并发GC可以释放内存。</li>
+<li>GC_FOR_MALLOC：当堆内存已满时，app尝试分配内存而引起的GC，系统必须停止app并回收内存。</li>
+<li>GC_HPROF_DUMP_HEAP：当你请求创建 HPROF 文件来分析堆内存时出现的GC。</li>
+<li>GC_EXPLICIT：显示的GC，例如调用System.gc()（应该避免调用显示的GC，信任GC会在需要时运行）。</li>
+<li>GC_EXTERNAL_ALLOC：仅适用于 API 级别小于等于10 ，用于外部分配内存的GC。</li>
+</ul>
+<h4 id="其他信息"><a href="#其他信息" class="headerlink" title="其他信息"></a><strong>其他信息</strong></h4><p> 除了引起GC原因，其他的信息为：</p>
+<ul>
+<li>Amount_freed：本次GC释放内存的大小。</li>
+<li>Heap_stats：堆的空闲内存百分比 （已用内存）/（堆的总内存）。</li>
+<li>External_memory_stats：API 级别 10 及更低级别的内存分配 （已分配的内存）/（引起GC的阀值）。</li>
+<li>Pause time：暂停时间，更大的堆会有更长的暂停时间。并发暂停时间显示了两个暂停：一个出现在垃圾收集开始时，另一个出现在垃圾收集快要完成时。</li>
+</ul>
+<h4 id="实例分析"><a href="#实例分析" class="headerlink" title="实例分析"></a><strong>实例分析</strong></h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">D&#x2F;dalvikvm: GC_CONCURRENT freed 2012K, 63% free 3213K&#x2F;9291K, external 4501K&#x2F;5161K, paused 2ms+2ms</span><br></pre></td></tr></table></figure>
+<p>这个GC日志的含义为：引起GC的原因是GC_CONCURRENT；本次GC释放的内存为2012K；堆的空闲内存百分比为63%，已用内存为3213K，堆的总内存为9291K；暂停的总时长为4ms。</p>
+<h3 id="2-ART的GC日志"><a href="#2-ART的GC日志" class="headerlink" title="2.ART的GC日志"></a><strong>2.ART的GC日志</strong></h3><p>ART的GC日志与DVM不同，ART 不会为没有明确请求的垃圾收集打印GC日志。只有在认为GC速度慢时才会打印GC日志，更确切来说，仅在GC暂停超过5ms 或GC持续时间超过 100ms 时才会打印GC日志。如果app未处于可察觉的暂停进程状态，那么它的GC不会被认为是慢速的。ART的GC日志始终会记录显式的垃圾收集。</p>
+<p>ART的GC日志具体的格式为：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">I&#x2F;art: &lt;GC_Reason&gt; &lt;GC_Name&gt; &lt;Objects_freed&gt;(&lt;Size_freed&gt;) AllocSpace Objects,</span><br><span class="line"> &lt;Large_objects_freed&gt;(&lt;Large_object_size_freed&gt;) &lt;Heap_stats&gt; LOS objects, &lt;Pause_time(s)&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="引起GC原因-1"><a href="#引起GC原因-1" class="headerlink" title="引起GC原因"></a><strong>引起GC原因</strong></h4><p>ART的引起GC原因（GC_Reason）要比DVM多一些，有以下几种：</p>
+<ul>
+<li>Concurrent： 并发GC，不会使App的线程暂停，该GC是在后台线程运行的，并不会阻止内存分配。</li>
+<li>Alloc：当堆内存已满时，App尝试分配内存而引起的GC，这个GC会发生在正在分配内存的线程。</li>
+<li>Explicit：App显示的请求垃圾收集，例如调用System.gc()。与DVM一样，最佳做法是应该信任GC并避免显示的请求GC，显示的请求GC会阻止分配线程并不必要的浪费 CPU 周期。如果显式的请求GC导致其他线程被抢占，那么有可能会导致 jank（App同一帧画了多次)。</li>
+<li>NativeAlloc：Native内存分配时，比如为Bitmaps或者RenderScript分配对象， 这会导致Native内存压力，从而触发GC。</li>
+<li>CollectorTransition：由堆转换引起的回收，这是运行时切换GC而引起的。收集器转换包括将所有对象从空闲列表空间复制到碰撞指针空间（反之亦然）。当前，收集器转换仅在以下情况下出现：在内存较小的设备上，App将进程状态从可察觉的暂停状态变更为可察觉的非暂停状态（反之亦然）。</li>
+<li>HomogeneousSpaceCompact：齐性空间压缩是指空闲列表到压缩的空闲列表空间，通常发生在当App已经移动到可察觉的暂停进程状态。这样做的主要原因是减少了内存使用并对堆内存进行碎片整理。</li>
+<li>DisableMovingGc：不是真正的触发GC原因，发生并发堆压缩时，由于使用了 GetPrimitiveArrayCritical，收集会被阻塞。一般情况下，强烈建议不要使用 GetPrimitiveArrayCritical，因为它在移动收集器方面具有限制。</li>
+<li>HeapTrim：不是触发GC原因，但是请注意，收集会一直被阻塞，直到堆内存整理完毕。</li>
+</ul>
+<h4 id="垃圾收集器名称"><a href="#垃圾收集器名称" class="headerlink" title="垃圾收集器名称"></a><strong>垃圾收集器名称</strong></h4><p>GC_Name指的是垃圾收集器名称，有以下几种：</p>
+<ul>
+<li>Concurrent mark sweep (CMS)：CMS收集器是一种以获取最短收集暂停时间为目标收集器，采用了标记-清除算法（Mark-Sweep）实现。 它是完整的堆垃圾收集器，能释放除了Image Space之外的所有的空间。</li>
+<li>Concurrent partial mark sweep：部分完整的堆垃圾收集器，能释放除了Image Space和Zygote Spaces之外的所有空间。关于Image Space和Zygote Spaces可以查看<a href="http://liuwangshu.cn/application/performance/ram-1-dvm-art.html">Android内存优化（一）DVM和ART原理初探</a>这篇文章。</li>
+<li>Concurrent sticky mark sweep：分代收集器，它只能释放自上次GC以来分配的对象。这个垃圾收集器比一个完整的或部分完整的垃圾收集器扫描的更频繁，因为它更快并且有更短的暂停时间。</li>
+<li>Marksweep + semispace：非并发的GC，复制GC用于堆转换以及齐性空间压缩（堆碎片整理）。</li>
+</ul>
+<h4 id="其他信息-1"><a href="#其他信息-1" class="headerlink" title="其他信息"></a><strong>其他信息</strong></h4><ul>
+<li>Objects freed：本次GC从非Large Object Space中回收的对象的数量。</li>
+<li>Size_freed：本次GC从非Large Object Space中回收的字节数。</li>
+<li>Large objects freed： 本次GC从Large Object Space中回收的对象的数量。</li>
+<li>Large object size freed：本次GC从Large Object Space中回收的字节数。</li>
+<li>Heap stats：堆的空闲内存百分比 （已用内存）/（堆的总内存）。</li>
+<li>Pause times：暂停时间，暂停时间与在GC运行时修改的对象引用的数量成比例。目前，ART的CMS收集器仅有一次暂停，它出现GC的结尾附近。移动的垃圾收集器暂停时间会很长，会在大部分垃圾回收期间持续出现。</li>
+</ul>
+<h4 id="实例分析-1"><a href="#实例分析-1" class="headerlink" title="实例分析"></a><strong>实例分析</strong></h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">I&#x2F;art : Explicit concurrent mark sweep GC freed 104710(7MB) AllocSpace objects, </span><br><span class="line">21(416KB) LOS objects, 33% free, 25MB&#x2F;38MB, paused 1.230ms total 67.216ms</span><br></pre></td></tr></table></figure>
+<p>这个GC日志的含义为：引起GC原因是Explicit ；垃圾收集器为CMS收集器；释放对象的数量为104710个，释放字节数为7MB；释放大对象的数量为21个，释放大对象字节数为416KB；堆的空闲内存百分比为33%，已用内存为25MB，堆的总内存为38MB；GC暂停时长为1.230ms，GC总时长为67.216ms。</p>
+<p>参考资料<br><a target="_blank" rel="noopener" href="https://developer.android.com/studio/profile/investigate-ram.html">Investigating Your RAM Usage</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/performance/ram-2-gc.html">http://liuwangshu.cn/application/performance/ram-2-gc.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">Android性能优化</a><a class="post-meta__tags" href="/tags/Android%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/">Android内存优化</a></div><div class="post_share"><div class="social-share" data-image="https://p.pstatp.com/origin/ff850001720b5e8178e7" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/rn/component/1-lifecycle.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">React Native组件（一）组件的生命周期</div></div></a></div><div class="next-post pull-right"><a href="/framework/context/2-activity-service.html"><img class="next-cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android深入理解Context（二）Activity和Service的Context创建过程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/performance/ram-1-dvm-art.html" title="Android内存优化（一）DVM和ART原理初探"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-05</div><div class="title">Android内存优化（一）DVM和ART原理初探</div></div></a></div><div><a href="/application/performance/ram-3-memory-leak.html" title="Android内存优化（三）避免可控的内存泄漏"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-21</div><div class="title">Android内存优化（三）避免可控的内存泄漏</div></div></a></div><div><a href="/application/performance/ram-4-memory-tools.html" title="Android内存优化（四）解析Memory Monitor、Allocation Tracker和Heap Dump"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-07-10</div><div class="title">Android内存优化（四）解析Memory Monitor、Allocation Tracker和Heap Dump</div></div></a></div><div><a href="/application/performance/ram-5-mat.html" title="Android内存优化（五）详解内存分析工具MAT"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-08-11</div><div class="title">Android内存优化（五）详解内存分析工具MAT</div></div></a></div><div><a href="/application/performance/ram-6-leakcanary.html" title="Android内存优化（六）LeakCanary使用详解"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-09-04</div><div class="title">Android内存优化（六）LeakCanary使用详解</div></div></a></div><div><a href="/application/performance/draw-1-performance.html" title="Android绘制优化（一）绘制性能分析"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-03-13</div><div class="title">Android绘制优化（一）绘制性能分析</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

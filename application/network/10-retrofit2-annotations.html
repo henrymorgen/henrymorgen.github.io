@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android网络编程（十）Retrofit2后篇[注解] | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  相关文章Android网络编程系列 前言在上一篇Android网络编程（九）Retrofit2前篇[基本使用]中我们了解了Retrofit的最基本的GET方式访问网络的写法以及请求参数的简单介绍。这一篇我们来详细的了解Retrofit的注解。  1.GET请求访问网络动态配置URL地址：@PathRetrofit提供了很多的请求参数注解，使得请求网路时更加便"><meta name="keywords" content="Android应用层,Android网络编程"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/network/10-retrofit2-annotations.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android网络编程（十）Retrofit2后篇[注解]"><meta property="og:url" content="http://liuwangshu.cn/application/network/10-retrofit2-annotations.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  相关文章Android网络编程系列 前言在上一篇Android网络编程（九）Retrofit2前篇[基本使用]中我们了解了Retrofit的最基本的GET方式访问网络的写法以及请求参数的简单介绍。这一篇我们来详细的了解Retrofit的注解。  1.GET请求访问网络动态配置URL地址：@PathRetrofit提供了很多的请求参数注解，使得请求网路时更加便"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><meta property="article:published_time" content="2016-11-02T08:14:00.000Z"><meta property="article:modified_time" content="2020-01-12T06:49:05.137Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 14:49:05'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-GET%E8%AF%B7%E6%B1%82%E8%AE%BF%E9%97%AE%E7%BD%91%E7%BB%9C"><span class="toc-number">2.</span> <span class="toc-text">1.GET请求访问网络</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E9%85%8D%E7%BD%AEURL%E5%9C%B0%E5%9D%80%EF%BC%9A-Path"><span class="toc-number">2.1.</span> <span class="toc-text">动态配置URL地址：@Path</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8A%A8%E6%80%81%E6%8C%87%E5%AE%9A%E6%9F%A5%E8%AF%A2%E6%9D%A1%E4%BB%B6%EF%BC%9A-Query%E4%B8%8E-QueryMap"><span class="toc-number">2.2.</span> <span class="toc-text">动态指定查询条件：@Query与@QueryMap</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-POST%E8%AF%B7%E6%B1%82%E8%AE%BF%E9%97%AE%E7%BD%91%E7%BB%9C"><span class="toc-number">3.</span> <span class="toc-text">2.POST请求访问网络</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%A0%E8%BE%93%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B%E4%B8%BA%E9%94%AE%E5%80%BC%E5%AF%B9%EF%BC%9A-Field"><span class="toc-number">3.1.</span> <span class="toc-text">传输数据类型为键值对：@Field</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%A0%E8%BE%93%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8BJson%E5%AD%97%E7%AC%A6%E4%B8%B2%EF%BC%9A-Body"><span class="toc-number">3.2.</span> <span class="toc-text">传输数据类型Json字符串：@Body</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8D%95%E4%B8%AA%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%EF%BC%9A-Part"><span class="toc-number">3.3.</span> <span class="toc-text">单个文件上传：@Part</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E4%B8%AA%E6%96%87%E4%BB%B6%E4%B8%8A%E4%BC%A0%EF%BC%9A-PartMap"><span class="toc-number">3.4.</span> <span class="toc-text">多个文件上传：@PartMap</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%B6%88%E6%81%AF%E6%8A%A5%E5%A4%B4Header"><span class="toc-number">4.</span> <span class="toc-text">**3.消息报头Header **</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZWhn0.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android网络编程（十）Retrofit2后篇[注解]</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2016-11-02T08:14:00.000Z" title="发表于 2016-11-02 16:14:00">2016-11-02</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T06:49:05.137Z" title="更新于 2020-01-12 14:49:05">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>相关文章<br><a href="http://liuwangshu.cn/tags/Android%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">Android网络编程系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>在上一篇<a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85/article/details/52469902">Android网络编程（九）Retrofit2前篇[基本使用]</a>中我们了解了Retrofit的最基本的GET方式访问网络的写法以及请求参数的简单介绍。这一篇我们来详细的了解Retrofit的注解。</p>
+<a id="more"></a>
+<h3 id="1-GET请求访问网络"><a href="#1-GET请求访问网络" class="headerlink" title="1.GET请求访问网络"></a><strong>1.GET请求访问网络</strong></h3><h4 id="动态配置URL地址：-Path"><a href="#动态配置URL地址：-Path" class="headerlink" title="动态配置URL地址：@Path"></a><strong>动态配置URL地址：@Path</strong></h4><p>Retrofit提供了很多的请求参数注解，使得请求网路时更加便捷。在这里我们仍旧访问淘宝ip库。其中，@Path用来动态的配置URL地址。请求网络接口代码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IpServiceForPath</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(&quot;&#123;path&#125;/getIpInfo.php?ip=59.108.54.37&quot;)</span></span><br><span class="line">    <span class="function">Call&lt;IpModel&gt; <span class="title">getIpMsg</span><span class="params">(<span class="meta">@Path(&quot;path&quot;)</span> String path)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在GET注解中包含了{path}，它对应着@Path注解中的”path”，而用来替换{path}的正是需要传入的 “String path”的值。接下来请求网络的代码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String url = <span class="string">&quot;http://ip.taobao.com/&quot;</span>;</span><br><span class="line">        Retrofit retrofit = <span class="keyword">new</span> Retrofit.Builder()</span><br><span class="line">                .baseUrl(url)</span><br><span class="line">                .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">                .build();</span><br><span class="line">        IpServiceForPath ipService = retrofit.create(IpServiceForPath.class);</span><br><span class="line">        Call&lt;IpModel&gt;call=ipService.getIpMsg(<span class="string">&quot;service&quot;</span>);<span class="comment">//1</span></span><br><span class="line">        call.enqueue(<span class="keyword">new</span> Callback&lt;IpModel&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span><span class="params">(Call&lt;IpModel&gt; call, Response&lt;IpModel&gt; response)</span> </span>&#123;</span><br><span class="line">                String country= response.body().getData().getCountry();</span><br><span class="line">                Toast.makeText(getApplicationContext(),country,Toast.LENGTH_SHORT).show();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Call&lt;IpModel&gt; call, Throwable t)</span> </span>&#123;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br></pre></td></tr></table></figure>
+<p>在注释1处，传入”service”来替换 @GET注解中的{path}的值。</p>
+<h4 id="动态指定查询条件：-Query与-QueryMap"><a href="#动态指定查询条件：-Query与-QueryMap" class="headerlink" title="动态指定查询条件：@Query与@QueryMap"></a><strong>动态指定查询条件：@Query与@QueryMap</strong></h4><p>在上一篇中我们用@Query来动态的替换ip地址为了能更方便的得到该ip所对应的地理信息：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IpServiceForQuery</span></span>&#123;</span><br><span class="line">    <span class="meta">@GET(&quot;getIpInfo.php&quot;)</span></span><br><span class="line">    <span class="function">Call&lt;IpModel&gt; <span class="title">getIpMsg</span><span class="params">(<span class="meta">@Query(&quot;ip&quot;)</span>String ip)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>但是在网络请求中一般为了更精确的查找到我们所需要的数据，需要传入很多的查询参数，如果用@Query会比较麻烦，这时我们可以采用@QueryMap，将所有的参数集成在一个Map统一传递：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IpServiceForQueryMap</span> </span>&#123;</span><br><span class="line">    <span class="meta">@GET(&quot;getIpInfo.php&quot;)</span></span><br><span class="line">    <span class="function">Call&lt;IpModel&gt; <span class="title">getIpMsg</span><span class="params">(<span class="meta">@QueryMap</span> Map&lt;String, String&gt; options)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-POST请求访问网络"><a href="#2-POST请求访问网络" class="headerlink" title="2.POST请求访问网络"></a><strong>2.POST请求访问网络</strong></h3><h4 id="传输数据类型为键值对：-Field"><a href="#传输数据类型为键值对：-Field" class="headerlink" title="传输数据类型为键值对：@Field"></a><strong>传输数据类型为键值对：@Field</strong></h4><p>传输数据类型为键值对，这是我们最常用的POST请求数据类型，淘宝ip库支持数据类型为键值对的POST请求：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IpServiceForPost</span> </span>&#123;</span><br><span class="line">    <span class="meta">@FormUrlEncoded</span></span><br><span class="line">    <span class="meta">@POST(&quot;getIpInfo.php&quot;)</span></span><br><span class="line">    <span class="function">Call&lt;IpModel&gt; <span class="title">getIpMsg</span><span class="params">(<span class="meta">@Field(&quot;ip&quot;)</span> String first)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先用到@FormUrlEncoded注解来标明这是一个表单请求，然后在getIpMsg方法中使用@Field注解来标示所对应的String类型数据的键，从而组成一组键值对进行传递。接下来请求网络的代码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String url = <span class="string">&quot;http://ip.taobao.com/service/&quot;</span>;</span><br><span class="line">       Retrofit retrofit = <span class="keyword">new</span> Retrofit.Builder()</span><br><span class="line">               .baseUrl(url)</span><br><span class="line">               .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">               .build();</span><br><span class="line">       IpServiceForPost ipService = retrofit.create(IpServiceForPost.class);</span><br><span class="line">       Call&lt;IpModel&gt;call=ipService.getIpMsg(<span class="string">&quot;59.108.54.37&quot;</span>);</span><br><span class="line">       call.enqueue(<span class="keyword">new</span> Callback&lt;IpModel&gt;() &#123;</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span><span class="params">(Call&lt;IpModel&gt; call, Response&lt;IpModel&gt; response)</span> </span>&#123;</span><br><span class="line">               String country= response.body().getData().getCountry();</span><br><span class="line">               Toast.makeText(getApplicationContext(),country,Toast.LENGTH_SHORT).show();</span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Call&lt;IpModel&gt; call, Throwable t)</span> </span>&#123;</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;);</span><br></pre></td></tr></table></figure>
+
+<h4 id="传输数据类型Json字符串：-Body"><a href="#传输数据类型Json字符串：-Body" class="headerlink" title="传输数据类型Json字符串：@Body"></a><strong>传输数据类型Json字符串：@Body</strong></h4><p>我们也可以用POST方式将Json字符串作为请求体发送到服务器，请求网络接口代码为：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IpServiceForPostBody</span> </span>&#123;</span><br><span class="line">    <span class="meta">@POST(&quot;getIpInfo.php&quot;)</span></span><br><span class="line">    <span class="function">Call&lt;IpModel&gt; <span class="title">getIpMsg</span><span class="params">(<span class="meta">@Body</span> Ip ip)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用@Body这个注解标识参数对象即可，retrofit会将Ip对象转换为字符串。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Ip</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String ip;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Ip</span><span class="params">(String ip)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.ip = ip;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>请求网络的代码基本上都是一致的：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">String url = <span class="string">&quot;http://ip.taobao.com/service/&quot;</span>;</span><br><span class="line">       Retrofit retrofit = <span class="keyword">new</span> Retrofit.Builder()</span><br><span class="line">               .baseUrl(url)</span><br><span class="line">               .addConverterFactory(GsonConverterFactory.create())</span><br><span class="line">               .build();</span><br><span class="line">       IpServiceForPostBody ipService = retrofit.create(IpServiceForPostBody.class);</span><br><span class="line">       Call&lt;IpModel&gt;call=ipService.getIpMsg(<span class="keyword">new</span> Ip(ip));</span><br><span class="line">       call.enqueue(<span class="keyword">new</span> Callback&lt;IpModel&gt;() &#123;</span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span><span class="params">(Call&lt;IpModel&gt; call, Response&lt;IpModel&gt; response)</span> </span>&#123;</span><br><span class="line">               String country= response.body().getData().getCountry();</span><br><span class="line">               Log.i(<span class="string">&quot;wangshu&quot;</span>,<span class="string">&quot;country&quot;</span>+country);</span><br><span class="line">               Toast.makeText(getApplicationContext(),country,Toast.LENGTH_SHORT).show();</span><br><span class="line">           &#125;</span><br><span class="line"></span><br><span class="line">           <span class="meta">@Override</span></span><br><span class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Call&lt;IpModel&gt; call, Throwable t)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">           &#125;</span><br><span class="line">       &#125;);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>运行程序用Fiddler抓包，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJuff.jpg"></p>
+<p>可以看到请求数据是一个Json字符串，因为淘宝ip库并不支持此类型所以不会返回我们需要的地理信息数据。</p>
+<h4 id="单个文件上传：-Part"><a href="#单个文件上传：-Part" class="headerlink" title="单个文件上传：@Part"></a><strong>单个文件上传：@Part</strong></h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">UploadFileForPart</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Multipart</span></span><br><span class="line">    <span class="meta">@POST(&quot;user/photo&quot;)</span></span><br><span class="line">    <span class="function">Call&lt;User&gt; <span class="title">updateUser</span><span class="params">(<span class="meta">@Part</span> MultipartBody.Part photo, <span class="meta">@Part(&quot;description&quot;)</span> RequestBody description)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>Multipart注解表示允许多个@Part，updateUser方法第一个参数是准备上传的图片文件，使用了MultipartBody.Part类型，另一个参数是RequestBody类型，它用来传递简单的键值对。请求网络代码如下所示。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line">File file &#x3D; new File(Environment.getExternalStorageDirectory(), &quot;wangshu.png&quot;);</span><br><span class="line">RequestBody photoRequestBody &#x3D; RequestBody.create(MediaType.parse(&quot;image&#x2F;png&quot;), file);</span><br><span class="line">MultipartBody.Part photo &#x3D; MultipartBody.Part.createFormData(&quot;photos&quot;, &quot;wangshu.png&quot;, photoRequestBody);</span><br><span class="line">UploadFileForPart uploadFile &#x3D; retrofit.create(UploadFileForPart.class);</span><br><span class="line">Call&lt;User&gt; call &#x3D; uploadFile.updateUser(photo, RequestBody.create(null, &quot;wangshu&quot;));</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h4 id="多个文件上传：-PartMap"><a href="#多个文件上传：-PartMap" class="headerlink" title="多个文件上传：@PartMap"></a><strong>多个文件上传：@PartMap</strong></h4><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Multipart</span></span><br><span class="line"><span class="meta">@POST(&quot;user/photo&quot;)</span></span><br><span class="line"><span class="function">Call&lt;User&gt; <span class="title">updateUser</span><span class="params">(<span class="meta">@PartMap</span> Map&lt;String, RequestBody&gt; photos, <span class="meta">@Part(&quot;description&quot;)</span> RequestBody description)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>和单文件上传是类似的，只是使用Map封装了上传的文件，并用@PartMap注解来标示起来。其他的都一样，这里就不赘述了。</p>
+<h3 id="3-消息报头Header"><a href="#3-消息报头Header" class="headerlink" title="**3.消息报头Header **"></a>**3.消息报头Header **</h3><p>Http请求中，为了防止攻击或是过滤掉不安全的访问或是添加特殊加密的访问等等，用来减轻服务器的压力和保证请求的安全，通常都会在消息报头中携带一些特殊的消息头处理。Retrofit也提供了@Header来添加消息报头。添加消息报头有两种方式，一种是静态的，另一种是动态的，先来看静态的方式，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">SomeService</span> </span>&#123;</span><br><span class="line"> <span class="meta">@GET(&quot;some/endpoint&quot;)</span></span><br><span class="line"> <span class="meta">@Headers(&quot;Accept-Encoding: application/json&quot;)</span></span><br><span class="line"> <span class="function">Call&lt;ResponseBody&gt; <span class="title">getCarType</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用@Headers注解添加消息报头，如果想要添加多个消息报头，则可以使用{}包含起来：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">SomeService</span> </span>&#123;</span><br><span class="line"> <span class="meta">@GET(&quot;some/endpoint&quot;)</span></span><br><span class="line"> <span class="meta">@Headers(&#123;</span></span><br><span class="line"><span class="meta">            &quot;Accept-Encoding: application/json&quot;,</span></span><br><span class="line"><span class="meta">            &quot;User-Agent: MoonRetrofit&quot;</span></span><br><span class="line"><span class="meta">    &#125;)</span></span><br><span class="line"> <span class="function">Call&lt;ResponseBody&gt; <span class="title">getCarType</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>动态的方式添加消息报头如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">SomeService</span> </span>&#123;</span><br><span class="line"> <span class="meta">@GET(&quot;some/endpoint&quot;)</span></span><br><span class="line"> <span class="function">Call&lt;ResponseBody&gt; <span class="title">getCarType</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params"> <span class="meta">@Header(&quot;Location&quot;)</span> String location)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用@Header注解，可以通过调用getCarType方法来动态的添加消息报头。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/henrymorgen/MoonRetrofit"><font size=6>github源码下载</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/network/10-retrofit2-annotations.html">http://liuwangshu.cn/application/network/10-retrofit2-annotations.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a><a class="post-meta__tags" href="/tags/Android%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">Android网络编程</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/life/csdn-million-pv.html"><img class="prev-cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">这只是个开始，写在CSDN博客访问量破百万</div></div></a></div><div class="next-post pull-right"><a href="/application/multithreading/asynctask-soucecode.html"><img class="next-cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">AsyncTask源码分析</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/network/1-http.html" title="Android网络编程（一）HTTP协议原理"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-03-28</div><div class="title">Android网络编程（一）HTTP协议原理</div></div></a></div><div><a href="/application/network/11-retrofit2-sourcecode.html" title="Android网络编程（十一）源码解析Retrofit"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-12-03</div><div class="title">Android网络编程（十一）源码解析Retrofit</div></div></a></div><div><a href="/application/network/12-okhttp4-sourcecode.html" title="Android网络编程（十二）源码解析Okhttp4.x"><img class="cover" src="https://pic.imgdb.cn/item/5e5ce13e98271cb2b8b89845.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-02</div><div class="title">Android网络编程（十二）源码解析Okhttp4.x</div></div></a></div><div><a href="/application/network/2-httpclienthttp-urlconnection.html" title="Android网络编程（二）HttpClient与HttpURLConnection"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-04-02</div><div class="title">Android网络编程（二）HttpClient与HttpURLConnection</div></div></a></div><div><a href="/application/network/3-volley.html" title="Android网络编程（三）Volley用法全解析"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-04-04</div><div class="title">Android网络编程（三）Volley用法全解析</div></div></a></div><div><a href="/application/network/5-okhttp2x.html" title="Android网络编程（五）OkHttp2.x用法全解析"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-04-18</div><div class="title">Android网络编程（五）OkHttp2.x用法全解析</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

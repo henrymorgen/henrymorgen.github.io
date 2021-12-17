@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>React Native组件（二）View组件解析 | BATcoder - 刘望舒</title><meta name="description" content="相关文章React Native探索系列React Native组件系列 前言了解了RN的组件的生命周期后，我们接着来学习RN的具体的组件。View组件是最基本的组件，也是首先要掌握的组件，这一篇我们来学习View组件。  1.概述View组件是RN中最基本的组件，绝大部分的组件都继承了View组件的属性，所以学习其他组件前，要首先掌握View组件。View组件是一个支持Flexbox布局、样式、"><meta name="keywords" content="React Native,React Native组件"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/rn/component/2-view.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="React Native组件（二）View组件解析"><meta property="og:url" content="http://liuwangshu.cn/rn/component/2-view.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="相关文章React Native探索系列React Native组件系列 前言了解了RN的组件的生命周期后，我们接着来学习RN的具体的组件。View组件是最基本的组件，也是首先要掌握的组件，这一篇我们来学习View组件。  1.概述View组件是RN中最基本的组件，绝大部分的组件都继承了View组件的属性，所以学习其他组件前，要首先掌握View组件。View组件是一个支持Flexbox布局、样式、"><meta property="og:image" content="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><meta property="article:published_time" content="2017-06-26T16:16:18.000Z"><meta property="article:modified_time" content="2019-05-31T20:43:51.514Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2019-06-01 04:43:51'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">1.概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-style%E5%B1%9E%E6%80%A7"><span class="toc-number">3.</span> <span class="toc-text">2.style属性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-Flexbox"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 Flexbox</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-shadow%E7%9B%B8%E5%85%B3-iOS"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 shadow相关 (iOS)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-elevation-Android"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 elevation (Android)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-border%E7%9B%B8%E5%85%B3"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 border相关</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-transform"><span class="toc-number">3.5.</span> <span class="toc-text">2.5 transform</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-6-overflow-iOS"><span class="toc-number">3.6.</span> <span class="toc-text">2.6 overflow (iOS)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-7-backgroundColor"><span class="toc-number">3.7.</span> <span class="toc-text">2.7 backgroundColor</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-8-opacity"><span class="toc-number">3.8.</span> <span class="toc-text">**2.8 opacity **</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%B1%9E%E6%80%A7"><span class="toc-number">4.</span> <span class="toc-text">3.属性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E8%A7%A6%E6%91%B8%E4%BA%8B%E4%BB%B6%E5%9B%9E%E8%B0%83%E5%87%BD%E6%95%B0"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 触摸事件回调函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-pointerEvents"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 pointerEvents</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-removeClippedSubviews"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 removeClippedSubviews</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-4-%E5%8A%A8%E7%94%BB%E7%9B%B8%E5%85%B3"><span class="toc-number">4.4.</span> <span class="toc-text">3.4 动画相关</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/17/MDe3eU.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">React Native组件（二）View组件解析</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-06-26T16:16:18.000Z" title="发表于 2017-06-27 00:16:18">2017-06-27</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2019-05-31T20:43:51.514Z" title="更新于 2019-06-01 04:43:51">2019-06-01</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/React-Native/">React Native</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p>相关文章<br><a href="http://liuwangshu.cn/tags/React-Native%E5%85%A5%E9%97%A8/">React Native探索系列</a><br><a href="http://liuwangshu.cn/tags/React-Native%E7%BB%84%E4%BB%B6/">React Native组件系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>了解了RN的组件的生命周期后，我们接着来学习RN的具体的组件。View组件是最基本的组件，也是首先要掌握的组件，这一篇我们来学习View组件。</p>
+<a id="more"></a>
+<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1.概述"></a><strong>1.概述</strong></h3><p>View组件是RN中最基本的组件，绝大部分的组件都继承了View组件的属性，所以学习其他组件前，要首先掌握View组件。<br>View组件是一个支持Flexbox布局、样式、一些触摸处理的容器，它可以放到其它的组件里，也可以有任意多个任意类型的子组件。View组件对应着多个平台的视图，比如Android的View以及iOS的UIView。<br>由于View组件的属性非常多，这里主要介绍一些常用的属性。</p>
+<h3 id="2-style属性"><a href="#2-style属性" class="headerlink" title="2.style属性"></a><strong>2.style属性</strong></h3><p>style属性作为组件属性中的一种，它包含了多种属性，这里对它们意义进行讲解。</p>
+<h4 id="2-1-Flexbox"><a href="#2-1-Flexbox" class="headerlink" title="2.1 Flexbox"></a><strong>2.1 Flexbox</strong></h4><p>View组件的Flexbox属性这里就不再介绍了，详细请看<a href="http://liuwangshu.cn/rn/primer/4-flexbox.html">React Native探索（四）Flexbox布局详解</a>这一篇文章。正是因为View组件提供了Flexbox属性，因此，继承了View组件的其他组件也都具有Flexbox属性。</p>
+<h4 id="2-2-shadow相关-iOS"><a href="#2-2-shadow相关-iOS" class="headerlink" title="2.2 shadow相关 (iOS)"></a><strong>2.2 shadow相关 (iOS)</strong></h4><p>View组件提供了四种阴影属性如下表：</p>
+<p>| 样式名|  取值|说明 |<br>| :——–:|: ——–:|<br>|shadowColor     |  color | 设置阴影颜色|<br>|shadowOffset |{width: number, height: number} | 设置阴影位移值|<br>|shadowOpacity | number  |设置阴影透明度  |<br>|shadowRadius | number   |设置阴影模糊半径 | </p>
+<p>设置View组件的阴影属性并没有什么意义，在View组件中定义这些样式是为了让继承它的组件去各自实现这些效果，比如Text组件。需要注意的是只有iOS平台能使用shadow属性。</p>
+<h4 id="2-3-elevation-Android"><a href="#2-3-elevation-Android" class="headerlink" title="2.3 elevation (Android)"></a><strong>2.3 elevation (Android)</strong></h4><p>elevation取值为number。Android平台没有shadow来设置阴影，但是，可以用elevation属性来间接的设置阴影。它使用Android原生的 elevation API来设置组件的高度，这样就会在界面上呈现出阴影的效果，此属性仅支持Android 5.0及以上版本。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123;Component&#125; <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;AppRegistry, StyleSheet, View&#125; <span class="keyword">from</span> <span class="string">&#x27;react-native&#x27;</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ViewApp</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">             &lt;View style=&#123;&#123;<span class="attr">flex</span>: <span class="number">1</span>, <span class="attr">justifyContent</span>: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">                   alignItems:<span class="string">&#x27;center&#x27;</span>,<span class="attr">backgroundColor</span>:<span class="string">&#x27;white&#x27;</span>&#125;&#125;&gt;</span><br><span class="line">                   &lt;View style=&#123;styles.shadow&#125;/&gt;</span><br><span class="line">             &lt;/View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> styles = StyleSheet.create(&#123;</span><br><span class="line">    shadow: &#123;</span><br><span class="line">        height: <span class="number">120</span>,</span><br><span class="line">        width: <span class="number">120</span>,</span><br><span class="line">        backgroundColor: <span class="string">&#x27;black&#x27;</span>,</span><br><span class="line">        elevation: <span class="number">20</span>,</span><br><span class="line">        shadowOffset: &#123;<span class="attr">width</span>: <span class="number">0</span>, <span class="attr">height</span>: <span class="number">0</span>&#125;,</span><br><span class="line">        shadowColor: <span class="string">&#x27;black&#x27;</span>,</span><br><span class="line">        shadowOpacity: <span class="number">1</span>,</span><br><span class="line">        shadowRadius: <span class="number">5</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">AppRegistry.registerComponent(<span class="string">&#x27;ViewSample&#x27;</span>, <span class="function">() =&gt;</span> ViewApp);</span><br></pre></td></tr></table></figure>
+<p>在iOS平台运行如上代码，效果为：<br><img src="https://s2.ax1x.com/2019/06/01/V1YbIH.png" alt="V1YbIH.png"></p>
+<p>在Android平台运行效果则为：<br><img src="https://s2.ax1x.com/2019/06/01/V1YbIH.png" alt="V1YbIH.png"></p>
+<p>很明显，elevation的效果远远不及shadow，这时我们可以采用第三方库<a target="_blank" rel="noopener" href="https://github.com/879479119/react-native-shadow">react-native-shadow</a>。</p>
+<h4 id="2-4-border相关"><a href="#2-4-border相关" class="headerlink" title="2.4 border相关"></a><strong>2.4 border相关</strong></h4><p>borderStyle的取值为 enum(‘solid’, ‘dotted’, ‘dashed’)，用来设置边框的风格，三个值分别对应着实线边框、点状边框和虚线边框，默认值为solid。<br>除了可以设置边框的风格，还可以用定义边框的颜色和边框的圆角。边框的颜色设置有borderColor、borderTopColor 、borderRightColor 、borderBottomColor 、borderLeftColor，取值都为string，通常情况下用borderColor就足够了。<br>边框的圆角设置有borderRadius 、borderTopLeftRadius 、borderTopRightRadius 、borderBottomLeftRadius 、borderBottomRightRadius，取值为number。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123;Component&#125; <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;AppRegistry, StyleSheet, View, Text&#125; <span class="keyword">from</span> <span class="string">&#x27;react-native&#x27;</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ViewApp</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View style=&#123;styles.viewStyle&#125;&gt;</span><br><span class="line">                &lt;View style=&#123;styles.viewTextStyle&#125;&gt;</span><br><span class="line">                    &lt;Text style=&#123;styles.textStyle&#125;&gt;border&lt;/Text&gt;</span><br><span class="line">                &lt;/View&gt;</span><br><span class="line">            &lt;/View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> styles = StyleSheet.create(&#123;</span><br><span class="line">    viewStyle: &#123;</span><br><span class="line">        flex: <span class="number">1</span>,</span><br><span class="line">        justifyContent: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        alignItems: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        backgroundColor: <span class="string">&#x27;white&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    viewTextStyle: &#123;</span><br><span class="line">        justifyContent: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        alignItems:<span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        width: <span class="number">80</span>,</span><br><span class="line">        height: <span class="number">50</span>,</span><br><span class="line">        borderWidth:<span class="number">1</span>,</span><br><span class="line">        borderStyle:<span class="string">&#x27;dashed&#x27;</span>,</span><br><span class="line">        borderRadius:<span class="number">10</span>,</span><br><span class="line">        borderColor:<span class="string">&#x27;red&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle: &#123;</span><br><span class="line">        fontSize: <span class="number">20</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">AppRegistry.registerComponent(<span class="string">&#x27;ViewSample&#x27;</span>, <span class="function">() =&gt;</span> ViewApp);</span><br></pre></td></tr></table></figure>
+<p>上面的例子用到了border相关的属性。需要注意的是，如果不设置borderRadius，borderStyle的dotted和dashed的取值会无效，效果如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1YbIH.png" alt="V1YbIH.png"></p>
+<h4 id="2-5-transform"><a href="#2-5-transform" class="headerlink" title="2.5 transform"></a><strong>2.5 transform</strong></h4><p>transform的取值为：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">[&#123;perspective: number&#125;, </span><br><span class="line">&#123;rotate: string&#125;,</span><br><span class="line">&#123;rotateX: string&#125;,</span><br><span class="line">&#123;rotateY: string&#125;,</span><br><span class="line">&#123;rotateZ: string&#125;,</span><br><span class="line">&#123;scale: number&#125;,</span><br><span class="line">&#123;scaleX: number&#125;, </span><br><span class="line">&#123;scaleY: number&#125;,</span><br><span class="line">&#123;translateX: number&#125;,</span><br><span class="line">&#123;translateY: number&#125;, </span><br><span class="line">&#123;skewX: string&#125;,</span><br><span class="line">&#123;skewY: string&#125;]</span><br></pre></td></tr></table></figure>
+<p>transform的取值总的来说，共分为四种类型：translate、scale、rotate和skew，分别用来设置View组件的平移、缩放、旋转和倾斜。<br>View组件用transform属性的效果不是很明显，绝大部分组件都继承了View组件的transform属性，比如Text。我们改写2.4小节中的例子，将textStyle改为如下代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line">textStyle: &#123;</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        transform: [&#123;<span class="attr">rotate</span>: <span class="string">&#x27;40deg&#x27;</span>&#125;, &#123;<span class="attr">scale</span>: <span class="number">0.9</span>&#125;, &#123;<span class="attr">translateY</span>: <span class="number">10</span>&#125;]</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>运行效果如下：<br><img src="https://s2.ax1x.com/2019/06/01/V1Y7ZD.jpg" alt="V1Y7ZD.jpg"><br>对于translate、scale、rotate的效果，Android开发者会非常熟悉，那么rotate和skew有什么区别呢？再来修改textStyle：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">textStyle: &#123;</span><br><span class="line">        fontSize: 20,</span><br><span class="line">        transform:[&#123;skewY:&#39;40deg&#39;&#125;]</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>运行效果如下：<br><img src="https://s2.ax1x.com/2019/06/01/V1YHde.jpg" alt="V1YHde.jpg"></p>
+<p>从两个图的效果可以看出，rotate和skew的区别就是：rotate在旋转的同时，不会改变Text组件的形态，而skew则随着倾斜角度的改变，Text组件的形态也会发生相应的变化。如果我们加大skew的倾斜角度，比如60deg，Text组件的形态则会变为下图的效果。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1YXRI.jpg" alt="V1YXRI.jpg"></p>
+<h4 id="2-6-overflow-iOS"><a href="#2-6-overflow-iOS" class="headerlink" title="2.6 overflow (iOS)"></a><strong>2.6 overflow (iOS)</strong></h4><p>overflow取值为enum(‘visible’, ‘hidden’)。它用来定义当View组件的子组件的宽高超过View组件宽高时的行为，默认值为hidden，即隐藏超出的部分。overflow只在iOS平台有效，在Android平台即使设置overflow为visible，呈现的还会是hidden的效果。</p>
+<h4 id="2-7-backgroundColor"><a href="#2-7-backgroundColor" class="headerlink" title="2.7 backgroundColor"></a><strong>2.7 backgroundColor</strong></h4><p>backgroundColor取值为string。它用来设定背景颜色，默认的颜色为非常浅的灰色，只有Text和TextInput组件继承了父组件的背景颜色，其他的组件都要设置自己的背影颜色。</p>
+<h4 id="2-8-opacity"><a href="#2-8-opacity" class="headerlink" title="**2.8 opacity **"></a>**2.8 opacity **</h4><p>opacity 的取值为0到1，当值为0时，表示组件完全透明，而值为1时，则表示组件完全不透明。</p>
+<h3 id="3-属性"><a href="#3-属性" class="headerlink" title="3.属性"></a><strong>3.属性</strong></h3><h4 id="3-1-触摸事件回调函数"><a href="#3-1-触摸事件回调函数" class="headerlink" title="3.1 触摸事件回调函数"></a><strong>3.1 触摸事件回调函数</strong></h4><p>触摸事件回调函数用来处理用户的触摸屏幕操作，一般情况下，触摸事件都是在其他组件中完成的。关于触摸事件是一个比较大的知识点，这里只介绍这些触摸事件回调函数的作用。</p>
+<ul>
+<li>onStartShouldSetResponder： 触摸事件为touchDown时，是否申请成为事件响应者，接收触摸事件。如果返回true，则表示组件需要成为事件响应者。</li>
+<li>onStartShouldSetResponderCapture：触摸事件为touchDown时，是否要拦截此事件，阻止子组件接收该事件，如果返回true，则表示要进行拦截。</li>
+<li>onMoveShouldSetResponder ： 触摸事件为TouchMove时，是否申请成为事件响应者，接收触摸事件。如果返回true，则表示组件需要成为事件响应者。</li>
+<li>onMoveShouldSetResponderCapture ：触摸事件为TouchMove时，是否要拦截此事件，阻止子组件接收该事件。</li>
+<li>onResponderGrant： 申请成为事件响应者成功，组件开始接收触摸事件 。</li>
+<li>onResponderReject： 申请成为事件响应者失败，其他组件正在进行事件处理 。</li>
+<li>onResponderMove：触摸手指移动的事件（TouchMove）。</li>
+<li>onResponderTerminationRequest：在组件成为事件响应者期间，其他组件申请成为响应者，返回为true，则表示同意释放响应者角色。</li>
+<li>onResponderTerminate：如果组件释放响应者角色，会回调该函数，通知组件事件响应处理被终止了。这个回调也会发生在系统直接终止组件的事件处理，例如用户在触摸操作过程中，突然来电话的情况。</li>
+<li>onResponderRelease：表示触摸完成（touchUp）的时候的回调，表示用户完成了本次的触摸交互。</li>
+</ul>
+<h4 id="3-2-pointerEvents"><a href="#3-2-pointerEvents" class="headerlink" title="3.2 pointerEvents"></a><strong>3.2 pointerEvents</strong></h4><p>pointerEvents的取值为enum(‘box-none’, ‘none’, ‘box-only’, ‘auto’) 。它用来控制当前视图是否可以作为触控事件的目标。<br>在开发中，很多组件是被布局到手机界面上的，其中一些组件会遮盖住它的位置下方的组件，有一些场景需要被遮盖住的组件来处理事件。比如一个地图组件上覆盖了一个图像组件用来显示信息，但是我们不想这个图像组件影响用户的手指拖动地图的操作，这时就可以使用图像组件从View组件继承得到的pointerEvents属性来解决这个问题。<br>pointerEvents的取值含义如下所示：</p>
+<ul>
+<li>none：组件自身不能作为触控事件的目标，交由父组件处理。</li>
+<li>box-none：组件自身不能作为触控事件的目标，但其子组件可以。</li>
+<li>box-only：组件自身可以作为触控事件的目标，但其子组件不能。</li>
+<li>auto：组件可以作为触控事件的目标。</li>
+</ul>
+<h4 id="3-3-removeClippedSubviews"><a href="#3-3-removeClippedSubviews" class="headerlink" title="3.3 removeClippedSubviews"></a><strong>3.3 removeClippedSubviews</strong></h4><p>removeClippedSubviews的取值为bool。它的一个特殊的与性能优化相关的属性，通常在ListView和ScrollView中使用，当组件有很多子组件不在屏幕显示范围时，可以将removeClippedSubviews设置为true，允许释放不在显示范围子组件，从而优化了性能。需要注意的是，要想让此属性生效，要确保overflow属性为默认的hidden。</p>
+<h4 id="3-4-动画相关"><a href="#3-4-动画相关" class="headerlink" title="3.4 动画相关"></a><strong>3.4 动画相关</strong></h4><p><strong>needsOffscreenAlphaCompositing (Android)</strong><br>needsOffscreenAlphaCompositing的取值为bool，是Android平台独有的属性。它用来决定视图是否要先离屏渲染再进行半透明度处理，来确保颜色和混合效果正确。为了正确的显示透明表现而进行离屏渲染会带来极大的开销，对于非原生开发者来说很难调试，因此，它的默认值为false。</p>
+<p><strong>renderToHardwareTextureAndroid (Android)</strong><br>renderToHardwareTextureAndroid的取值为bool，同样是是Android平台独有的属性。它用来决定视图是否要把它本身（以及所有的子视图）渲染到一个GPU上的硬件纹理中。<br>在Android平台上，这对于只修改透明度、旋转、位移和缩放的动画和交互是很有用的：视图不必每次都重新绘制，显示列表也不需要重新执行，纹理可以被重用于不同的参数。负面作用是这会大量消耗显存，所以当交互/动画结束后应该把此属性设置回false。</p>
+<p><strong>shouldRasterizeIOS (iOS)</strong><br>shouldRasterizeIOS的取值为bool，是iOS平台独有的属性。它决定视图是否需要在被混合之前绘制到一个位图上。<br>这对于动画和交互来说是有很有用的，它不会修改这个组件的尺寸和它的子组件。举例来说，当我们移动一个静态视图的位置的时候，栅格化允许渲染器重用静态视图的缓存位图，并快速合成。<br>栅格化会导致离屏的绘图传递，位图会消耗内存。所以使用此属性需要进行充分的测试和评估。</p>
+<p>还有一些View属性这里没有给出，比如RN为了方便失能人士使用手机而提供的相关属性等等，具体的属性请查看<a target="_blank" rel="noopener" href="http://facebook.github.io/react-native/docs/view.html">官方文档</a>。</p>
+<p>参考资料<br><a target="_blank" rel="noopener" href="http://facebook.github.io/react-native/docs/view.html">官方文档</a><br>《React Native跨平台移动应用开发》第二版<br><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/7da2d6393a9f">React Native 中如何给 Navigator 添加一条合格的阴影</a><br><a target="_blank" rel="noopener" href="https://race604.com/react-native-touch-event/?utm_source=tuicool&utm_medium=referral">React Native 触摸事件处理详解</a><br><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/70773038d850">React Native中pointerEvent属性</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/rn/component/2-view.html">http://liuwangshu.cn/rn/component/2-view.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/React-Native/">React Native</a><a class="post-meta__tags" href="/tags/React-Native%E7%BB%84%E4%BB%B6/">React Native组件</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/life/android-advanced-light.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android进阶三部曲 第一部《Android进阶之光》已出版</div></div></a></div><div class="next-post pull-right"><a href="/designpatterns/16-prototype.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">设计模式（十六）原型模式</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/rn/component/1-lifecycle.html" title="React Native组件（一）组件的生命周期"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-16</div><div class="title">React Native组件（一）组件的生命周期</div></div></a></div><div><a href="/rn/component/3-text.html" title="React Native组件（三）Text组件解析"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-07-17</div><div class="title">React Native组件（三）Text组件解析</div></div></a></div><div><a href="/rn/component/4-textinput.html" title="React Native组件（四）TextInput组件解析"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-08-21</div><div class="title">React Native组件（四）TextInput组件解析</div></div></a></div><div><a href="/rn/primer/1-helloworld.html" title="React Native探索（一）环境搭建与Hello World（Windows/Mac）"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-02</div><div class="title">React Native探索（一）环境搭建与Hello World（Windows/Mac）</div></div></a></div><div><a href="/rn/primer/2-atom-nuclide.html" title="React Native探索（二）Atom+Nuclide安装、配置和调试"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-08</div><div class="title">React Native探索（二）Atom+Nuclide安装、配置和调试</div></div></a></div><div><a href="/rn/primer/3-props-state.html" title="React Native探索（三）组件的Props(属性)和State(状态)"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-17</div><div class="title">React Native探索（三）组件的Props(属性)和State(状态)</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

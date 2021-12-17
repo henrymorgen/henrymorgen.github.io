@@ -1,0 +1,360 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>React Native组件（四）TextInput组件解析 | BATcoder - 刘望舒</title><meta name="description" content="相关文章React Native探索系列React Native组件系列 1 概述TextInput组件和Text组件类似，内部都没有使用FlexBox布局，不同的是TextInput组件支持文字的输入，因为支持文字输入， TextInput组件要比Text组件多了一些属性和方法。TextInput组件支持Text组件所有的Style属性，而TextInput组件本身是没有特有的Style属性的。"><meta name="keywords" content="React Native,React Native组件"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/rn/component/4-textinput.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="React Native组件（四）TextInput组件解析"><meta property="og:url" content="http://liuwangshu.cn/rn/component/4-textinput.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="相关文章React Native探索系列React Native组件系列 1 概述TextInput组件和Text组件类似，内部都没有使用FlexBox布局，不同的是TextInput组件支持文字的输入，因为支持文字输入， TextInput组件要比Text组件多了一些属性和方法。TextInput组件支持Text组件所有的Style属性，而TextInput组件本身是没有特有的Style属性的。"><meta property="og:image" content="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><meta property="article:published_time" content="2017-08-20T16:16:18.000Z"><meta property="article:modified_time" content="2019-05-31T20:54:29.771Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2019-06-01 04:54:29'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">1 概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%B1%9E%E6%80%A7"><span class="toc-number">2.</span> <span class="toc-text">2 属性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-onChangeText"><span class="toc-number">2.1.</span> <span class="toc-text">2.1 onChangeText</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-onChange"><span class="toc-number">2.2.</span> <span class="toc-text">2.2 onChange</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-keyboardType"><span class="toc-number">2.3.</span> <span class="toc-text">**2.3 keyboardType **</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-blurOnSubmit"><span class="toc-number">2.4.</span> <span class="toc-text">2.4 blurOnSubmit</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-onSubmitEditing"><span class="toc-number">2.5.</span> <span class="toc-text">2.5 onSubmitEditing</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-6-returnKeyType"><span class="toc-number">2.6.</span> <span class="toc-text">**2.6 returnKeyType **</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-7-%E5%85%B6%E4%BB%96%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%B1%9E%E6%80%A7"><span class="toc-number">2.7.</span> <span class="toc-text">**2.7 其他跨平台属性 **</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-8-Android%E5%B9%B3%E5%8F%B0%E7%8B%AC%E6%9C%89%E5%B1%9E%E6%80%A7"><span class="toc-number">2.8.</span> <span class="toc-text">**2.8 Android平台独有属性 **</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-9-iOS%E5%B9%B3%E5%8F%B0%E7%8B%AC%E6%9C%89%E5%B1%9E%E6%80%A7"><span class="toc-number">2.9.</span> <span class="toc-text">**2.9 iOS平台独有属性 **</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%96%B9%E6%B3%95"><span class="toc-number">3.</span> <span class="toc-text">3 方法</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#clear"><span class="toc-number">3.1.</span> <span class="toc-text">clear()</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#isFocused-boolean"><span class="toc-number">3.2.</span> <span class="toc-text">isFocused(): boolean</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/17/MDe3eU.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">React Native组件（四）TextInput组件解析</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-08-20T16:16:18.000Z" title="发表于 2017-08-21 00:16:18">2017-08-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2019-05-31T20:54:29.771Z" title="更新于 2019-06-01 04:54:29">2019-06-01</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/React-Native/">React Native</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p>相关文章<br><a href="http://liuwangshu.cn/tags/React-Native%E5%85%A5%E9%97%A8/">React Native探索系列</a><br><a href="http://liuwangshu.cn/tags/React-Native%E7%BB%84%E4%BB%B6/">React Native组件系列</a></p>
+<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1 概述"></a><strong>1 概述</strong></h3><p>TextInput组件和Text组件类似，内部都没有使用FlexBox布局，不同的是TextInput组件支持文字的输入，因为支持文字输入， TextInput组件要比Text组件多了一些属性和方法。TextInput组件支持Text组件所有的Style属性，而TextInput组件本身是没有特有的Style属性的。</p>
+<a id="more"></a>
+
+<h3 id="2-属性"><a href="#2-属性" class="headerlink" title="2 属性"></a><strong>2 属性</strong></h3><p>TextInput组件支持所有的View组件的属性，除此之外，它还有许多其他属性。</p>
+<h4 id="2-1-onChangeText"><a href="#2-1-onChangeText" class="headerlink" title="2.1 onChangeText"></a><strong>2.1 onChangeText</strong></h4><p>当输入框的内容发生变化时，就会调用onChangeText。<br><strong>index.android.js</strong></p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123;Component&#125; <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;AppRegistry, StyleSheet, View, TextInput, Button,Alert&#125; <span class="keyword">from</span> <span class="string">&#x27;react-native&#x27;</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TextApp</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">        <span class="built_in">super</span>(props);</span><br><span class="line">        <span class="built_in">this</span>.state = &#123;</span><br><span class="line">            searchText: <span class="string">&quot;&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View style=&#123;styles.container&#125;&gt;</span><br><span class="line">                &lt;View style=&#123;styles.searchBar&#125;&gt;</span><br><span class="line">                    &lt;TextInput style=&#123;styles.input&#125; placeholder=<span class="string">&#x27;请输入内容&#x27;</span></span><br><span class="line">                               onChangeText=&#123;<span class="function">(<span class="params">text</span>) =&gt;</span> &#123;</span><br><span class="line">                                   <span class="built_in">this</span>.setState(&#123;<span class="attr">searchText</span>: text&#125;);</span><br><span class="line">                               &#125;&#125;/&gt;</span><br><span class="line">                    &lt;Button style=&#123;styles.button&#125; title=<span class="string">&#x27;搜索&#x27;</span></span><br><span class="line">                            onPress=&#123; <span class="function">() =&gt;</span> &#123;</span><br><span class="line">                                Alert.alert(<span class="string">&#x27;输入的内容为:&#x27;</span> + <span class="built_in">this</span>.state.searchText);</span><br><span class="line">                            &#125;</span><br><span class="line">                            &#125;/&gt;</span><br><span class="line">                &lt;/View&gt;</span><br><span class="line">            &lt;/View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> styles = StyleSheet.create(&#123;</span><br><span class="line">    container: &#123;</span><br><span class="line">        flex: <span class="number">1</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    searchBar: &#123;</span><br><span class="line">        flexDirection: <span class="string">&#x27;row&#x27;</span>,</span><br><span class="line">        height: <span class="number">45</span>,</span><br><span class="line">        justifyContent: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        alignItems: <span class="string">&#x27;center&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    input: &#123;</span><br><span class="line">        flex: <span class="number">1</span>,</span><br><span class="line">        borderColor: <span class="string">&#x27;gray&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    button: &#123;</span><br><span class="line">        flex: <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">AppRegistry.registerComponent(<span class="string">&#x27;ViewSample&#x27;</span>, <span class="function">() =&gt;</span> TextApp);</span><br></pre></td></tr></table></figure>
+<p>上面的例子我们用到了TextInput组件的onChangeText属性，当我们在TextInput中输入内容时，这个内容就会通过onChangeText的参数text传递回来，在onChangeText中将text的内容保存到state中。当我们点击Button时，通过Alert将state中保存的内容展现出来。<br>运行程序效果如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1tPoQ.jpg" alt="V1tPoQ.jpg"></p>
+<p>在输入框中输入Android，点击搜索Button，可以看到输入的Android展示到了Alert中。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1tCdg.jpg" alt="V1tCdg.jpg"></p>
+<h4 id="2-2-onChange"><a href="#2-2-onChange" class="headerlink" title="2.2 onChange"></a><strong>2.2 onChange</strong></h4><p>当输入框的内容发生变化时，也会调用onChange，只不过它所返回的参数是一个event，我们来改写2.1的代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"> &lt;TextInput style=&#123;styles.input&#125; placeholder=<span class="string">&#x27;请输入内容&#x27;</span> keyboardType=<span class="string">&#x27;default&#x27;</span></span><br><span class="line">                               onChange=&#123;<span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">                                   <span class="built_in">this</span>.setState(&#123;<span class="attr">searchText</span>: event.nativeEvent.text&#125;);</span><br><span class="line">                               &#125;&#125;/&gt;</span><br><span class="line">...                               </span><br></pre></td></tr></table></figure>
+<p>通过event.nativeEvent.text可以得到用户输入的内容，如果只是想要得到用户输入的内容，还是用onChangeText比较合适。</p>
+<h4 id="2-3-keyboardType"><a href="#2-3-keyboardType" class="headerlink" title="**2.3 keyboardType **"></a>**2.3 keyboardType **</h4><p>keyboardType用于设置弹出软键盘的类型。它的取值为范围为： enum(‘default’, ‘email-address’, ‘numeric’, ‘phone-pad’, ‘ascii-capable’, ‘numbers-and-punctuation’, ‘url’, ‘number-pad’, ‘name-phone-pad’, ‘decimal-pad’, ‘twitter’, ‘web-search’) ，其中default、numeric、email-address和phone-pad是跨平台。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"> &lt;TextInput style=&#123;styles.input&#125; placeholder=<span class="string">&#x27;请输入内容&#x27;</span> keyboardType=<span class="string">&#x27;phone-pad&#x27;</span></span><br><span class="line">                               onChangeText=&#123;<span class="function">(<span class="params">text</span>) =&gt;</span> &#123;</span><br><span class="line">                                   <span class="built_in">this</span>.setState(&#123;<span class="attr">searchText</span>: text&#125;); </span><br><span class="line">                               &#125;&#125;/&gt;</span><br><span class="line">...   </span><br></pre></td></tr></table></figure>
+<p>将keyboardType的值设置为phone-pad，效果如下图所示。<br><img src="https://s2.ax1x.com/2019/06/01/V1tFij.jpg" alt="V1tFij.jpg"></p>
+<h4 id="2-4-blurOnSubmit"><a href="#2-4-blurOnSubmit" class="headerlink" title="2.4 blurOnSubmit"></a><strong>2.4 blurOnSubmit</strong></h4><p>如果blurOnSubmit值为true，文本框会在按下提交键时失去焦点。对于单行输入框，blurOnSubmit默认值为true，多行则为false。<br>在单行的情况下，点击键盘上的提交按钮时，TextInput的效果如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1tkJs.png" alt="V1tkJs.png"><br>将blurOnSubmit设置为false：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"> &lt;TextInput style=&#123;styles.input&#125; placeholder=<span class="string">&#x27;请输入内容&#x27;</span> blurOnSubmit=&#123;<span class="literal">false</span>&#125; </span><br><span class="line">                               onChangeText=&#123;<span class="function">(<span class="params">text</span>) =&gt;</span> &#123;</span><br><span class="line">                                   <span class="built_in">this</span>.setState(&#123;<span class="attr">searchText</span>: text&#125;);</span><br><span class="line">                               &#125;&#125;/&gt;</span><br><span class="line">...                               </span><br></pre></td></tr></table></figure>
+<p>点击键盘上的提交按钮时，TextInput的效果如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1t9eS.jpg" alt="V1t9eS.jpg"></p>
+<h4 id="2-5-onSubmitEditing"><a href="#2-5-onSubmitEditing" class="headerlink" title="2.5 onSubmitEditing"></a><strong>2.5 onSubmitEditing</strong></h4><p>当提交键被按下时会调用onSubmitEditing，如果multiline等于true，则此属性不可用。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"> &lt;TextInput style=&#123;styles.input&#125; placeholder=<span class="string">&#x27;请输入内容&#x27;</span> blurOnSubmit=&#123;<span class="literal">true</span>&#125; multiline=&#123;<span class="literal">false</span>&#125;</span><br><span class="line">                               onChangeText=&#123;<span class="function">(<span class="params">text</span>) =&gt;</span> &#123;</span><br><span class="line">                                   <span class="built_in">this</span>.setState(&#123;<span class="attr">searchText</span>: text&#125;);</span><br><span class="line">                               &#125;&#125;</span><br><span class="line">                               onSubmitEditing=&#123;<span class="function">(<span class="params">event</span>) =&gt;</span> &#123;</span><br><span class="line">                                   <span class="built_in">console</span>.log(event.nativeEvent.text);</span><br><span class="line">                               &#125;&#125;</span><br><span class="line">                    /&gt;</span><br><span class="line">...                    </span><br></pre></td></tr></table></figure>
+<p>运行程序并在App的开发菜单中选择Debug JS Remotely，这时我们输入Android并按下提交键，在Console控制台中就会输出结果。（笔者用的是WebStorm）<br><img src="https://s2.ax1x.com/2019/06/01/V1tAWn.jpg" alt="V1tAWn.jpg"></p>
+<h4 id="2-6-returnKeyType"><a href="#2-6-returnKeyType" class="headerlink" title="**2.6 returnKeyType **"></a>**2.6 returnKeyType **</h4><p>用于设置软键盘回车键的样式，Android平台可以使用returnKeyLabel来设置软键盘回车键的内容。<br>returnKeyType的取值为enum(‘done’, ‘go’, ‘next’, ‘search’, ‘send’, ‘none’, ‘previous’, ‘default’, ‘emergency-call’, ‘google’, ‘join’, ‘route’, ‘yahoo’)。<br>其中跨平台的取值有：done、next、search、send。<br>Android平台独有：none、previous。<br>iOS平台独有：default、emergency-call、google、join、route、yahoo。<br>如果我们将returnKeyType设置为go时，效果如下图所示。<br><img src="https://s2.ax1x.com/2019/06/01/V1tEzq.jpg" alt="V1tEzq.jpg"></p>
+<p>returnKeyType设置为send时，效果如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1tZQ0.jpg" alt="V1tZQ0.jpg"></p>
+<h4 id="2-7-其他跨平台属性"><a href="#2-7-其他跨平台属性" class="headerlink" title="**2.7 其他跨平台属性 **"></a>**2.7 其他跨平台属性 **</h4><table>
+<thead>
+<tr>
+<th align="center">属性名</th>
+<th align="center">取值</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">autoCapitalize</td>
+<td align="center">enum(‘none’, ‘sentences’, ‘words’, ‘characters’)</td>
+<td align="center">设置英文字母自动大写规则，取值分别表示：不自动大写、每句话首字母自动大写、每个单词首字母大写、全部字母自动大写</td>
+</tr>
+<tr>
+<td align="center">autoCorrect</td>
+<td align="center">bool</td>
+<td align="center">是否会自动检测用户输入的英语单词正确性，默认值为true</td>
+</tr>
+<tr>
+<td align="center">autoFocus</td>
+<td align="center">bool</td>
+<td align="center">如果为true，在componentDidMount后会获得焦点。默认值为false。</td>
+</tr>
+<tr>
+<td align="center">defaultValue</td>
+<td align="center">string</td>
+<td align="center">字符初始值，当用户开始输入时，该值将改变</td>
+</tr>
+<tr>
+<td align="center">placeholder</td>
+<td align="center">node</td>
+<td align="center">文本输入之前将呈现的字符串，多用于提示用户应该输入什么</td>
+</tr>
+<tr>
+<td align="center">placeholderTextColor</td>
+<td align="center">color</td>
+<td align="center">文本输入之前将呈现的字符串的颜色</td>
+</tr>
+<tr>
+<td align="center">editable</td>
+<td align="center">bool</td>
+<td align="center">是否允许修改字符，默认值为true</td>
+</tr>
+<tr>
+<td align="center">maxLength</td>
+<td align="center">number</td>
+<td align="center">最多允许用户输入多少字符</td>
+</tr>
+<tr>
+<td align="center">caretHidden</td>
+<td align="center">bool</td>
+<td align="center">如果为true，则隐藏光标</td>
+</tr>
+<tr>
+<td align="center">multiline</td>
+<td align="center">bool</td>
+<td align="center">如果为true，则文本输入可以是多行的，默认值为false</td>
+</tr>
+<tr>
+<td align="center">secureTextEntry</td>
+<td align="center">bool</td>
+<td align="center">文本框是否用于输入密码，默认值为false</td>
+</tr>
+<tr>
+<td align="center">selectTextOnFocus</td>
+<td align="center">bool</td>
+<td align="center">如果为true，则文本框获取焦点时，组件中的内容会被自动选中</td>
+</tr>
+<tr>
+<td align="center">onFocus</td>
+<td align="center">function</td>
+<td align="center">当文本框获得焦点的时候调用此回调函数</td>
+</tr>
+<tr>
+<td align="center">onEndEditing</td>
+<td align="center">function</td>
+<td align="center">当文本输入结束后调用此回调函数</td>
+</tr>
+<tr>
+<td align="center">onLayout</td>
+<td align="center">function</td>
+<td align="center">当组件挂载或者布局变化的时候调用，参数为{x, y, width, height}</td>
+</tr>
+<tr>
+<td align="center">onScroll</td>
+<td align="center">function</td>
+<td align="center">在内容滚动时持续调用，传回参数的格式形如{ nativeEvent: { contentOffset: { x, y } } }</td>
+</tr>
+<tr>
+<td align="center">onSelectionChange</td>
+<td align="center">function</td>
+<td align="center">长按选择文本时，选择范围变化时调用此函数，传回参数的格式形如 { nativeEvent: { selection: { start, end } } }</td>
+</tr>
+<tr>
+<td align="center">value</td>
+<td align="center">string</td>
+<td align="center">文本框中的文字内容</td>
+</tr>
+</tbody></table>
+<h4 id="2-8-Android平台独有属性"><a href="#2-8-Android平台独有属性" class="headerlink" title="**2.8 Android平台独有属性 **"></a>**2.8 Android平台独有属性 **</h4><table>
+<thead>
+<tr>
+<th align="center">属性名</th>
+<th align="center">取值</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">inlineImageLeft</td>
+<td align="center">string</td>
+<td align="center">指定一个图片放置在左侧</td>
+</tr>
+<tr>
+<td align="center">inlineImagePadding</td>
+<td align="center">number</td>
+<td align="center">左侧图片的Padding(如果有的话)，以及文本框本身的Padding</td>
+</tr>
+<tr>
+<td align="center">numberOfLines</td>
+<td align="center">number</td>
+<td align="center">TextInput的行数</td>
+</tr>
+<tr>
+<td align="center">underlineColorAndroid</td>
+<td align="center">string</td>
+<td align="center">TextInput的下划线颜色</td>
+</tr>
+<tr>
+<td align="center">returnKeyLabel</td>
+<td align="center">string</td>
+<td align="center">设置软键盘回车键的内容，优先级高于returnKeyType</td>
+</tr>
+<tr>
+<td align="center">disableFullscreenUI</td>
+<td align="center">bool</td>
+<td align="center">值为false时(默认值)，如果TextInput的输入空间小，系统可能会进入全屏文本输入模式</td>
+</tr>
+</tbody></table>
+<h4 id="2-9-iOS平台独有属性"><a href="#2-9-iOS平台独有属性" class="headerlink" title="**2.9 iOS平台独有属性 **"></a>**2.9 iOS平台独有属性 **</h4><table>
+<thead>
+<tr>
+<th align="center">属性名</th>
+<th align="center">取值</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">clearButtonMode</td>
+<td align="center">enum(‘never’, ‘while-editing’, ‘unless-editing’, ‘always’)</td>
+<td align="center">何时在文本框右侧显示清除按钮</td>
+</tr>
+<tr>
+<td align="center">clearTextOnFocus</td>
+<td align="center">bool</td>
+<td align="center">如果为true，每次开始输入的时候都会清除文本框的内容</td>
+</tr>
+<tr>
+<td align="center">keyboardAppearance</td>
+<td align="center">enum(‘default’, ‘light’, ‘dark’)</td>
+<td align="center">键盘的颜色</td>
+</tr>
+<tr>
+<td align="center">onKeyPress</td>
+<td align="center">function</td>
+<td align="center">一个键被按下的时候调用此回调，传递给回调函数的参数为{ nativeEvent: { key: keyValue } }</td>
+</tr>
+<tr>
+<td align="center">spellCheck</td>
+<td align="center">bool</td>
+<td align="center">如果为false，则禁用拼写检查的样式（比如红色下划线）</td>
+</tr>
+<tr>
+<td align="center">enablesReturnKeyAutomatically</td>
+<td align="center">bool</td>
+<td align="center">如果为true，键盘会在文本框内没有文字的时候禁用确认按钮 ，默认值为false</td>
+</tr>
+</tbody></table>
+<h3 id="3-方法"><a href="#3-方法" class="headerlink" title="3 方法"></a><strong>3 方法</strong></h3><h4 id="clear"><a href="#clear" class="headerlink" title="clear()"></a><strong>clear()</strong></h4><p>clear用于清空输入框的内容。<br>想要使用组件的方法则需要使用组件的引用，例子如下所示。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line">render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View style=&#123;styles.container&#125;&gt;</span><br><span class="line">                &lt;View style=&#123;styles.searchBar&#125;&gt;</span><br><span class="line">                    &lt;TextInput style=&#123;styles.input&#125; ref=<span class="string">&quot;textInputRefer&quot;</span> placeholder=<span class="string">&#x27;请输入内容&#x27;</span> blurOnSubmit=&#123;<span class="literal">true</span>&#125;</span><br><span class="line">                               returnKeyType=<span class="string">&#x27;send&#x27;</span></span><br><span class="line">                               onChangeText=&#123;<span class="function">(<span class="params">text</span>) =&gt;</span> &#123;</span><br><span class="line">                                   <span class="built_in">this</span>.setState(&#123;<span class="attr">searchText</span>: text&#125;);</span><br><span class="line">                               &#125;&#125;</span><br><span class="line">                    /&gt;</span><br><span class="line">                    &lt;Button style=&#123;styles.button&#125; title=<span class="string">&#x27;清除&#x27;</span></span><br><span class="line">                            onPress=&#123; <span class="function">() =&gt;</span> &#123;</span><br><span class="line">                                <span class="built_in">this</span>.refs.textInputRefer.clear();</span><br><span class="line">                            &#125;</span><br><span class="line">                            &#125;/&gt;</span><br><span class="line">                &lt;/View&gt;</span><br><span class="line">            &lt;/View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line"> ...   </span><br></pre></td></tr></table></figure>
+<p>在TextInput标签中定义引用的名称：<code>ref=&quot;textInputRefer&quot;</code>，这样我们通过 <code>this.refs.textInputRefer</code>就可以得到TextInput 组件的引用。在Button的onPress函数中，调用了TextInput的clear方法，这样当我们点击“清除”按钮时，文本框中的内容就会被清除。</p>
+<h4 id="isFocused-boolean"><a href="#isFocused-boolean" class="headerlink" title="isFocused(): boolean"></a><strong>isFocused(): boolean</strong></h4><p>返回值表明当前输入框是否获得了焦点。</p>
+<p>好了，到这里TextInput组件就介绍到这里，还有一些没有列出的属性请查看<a target="_blank" rel="noopener" href="http://facebook.github.io/react-native/docs/textinput.html">官方文档</a>。</p>
+<p>参考资料<br><a target="_blank" rel="noopener" href="http://facebook.github.io/react-native/docs/textinput.html">官方文档</a><br>《React Native跨平台移动应用开发》第二版<br>《React Native 移动开发实战》<br><a target="_blank" rel="noopener" href="http://www.jianshu.com/p/0b563614d099">React Native-组件的引用</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/rn/component/4-textinput.html">http://liuwangshu.cn/rn/component/4-textinput.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/React-Native/">React Native</a><a class="post-meta__tags" href="/tags/React-Native%E7%BB%84%E4%BB%B6/">React Native组件</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/ams/2-activitytask.html"><img class="prev-cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android解析ActivityManagerService（二）ActivityTask和Activity栈管理</div></div></a></div><div class="next-post pull-right"><a href="/application/performance/ram-5-mat.html"><img class="next-cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android内存优化（五）详解内存分析工具MAT</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/rn/component/1-lifecycle.html" title="React Native组件（一）组件的生命周期"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-16</div><div class="title">React Native组件（一）组件的生命周期</div></div></a></div><div><a href="/rn/component/2-view.html" title="React Native组件（二）View组件解析"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-27</div><div class="title">React Native组件（二）View组件解析</div></div></a></div><div><a href="/rn/component/3-text.html" title="React Native组件（三）Text组件解析"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-07-17</div><div class="title">React Native组件（三）Text组件解析</div></div></a></div><div><a href="/rn/primer/1-helloworld.html" title="React Native探索（一）环境搭建与Hello World（Windows/Mac）"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-02</div><div class="title">React Native探索（一）环境搭建与Hello World（Windows/Mac）</div></div></a></div><div><a href="/rn/primer/2-atom-nuclide.html" title="React Native探索（二）Atom+Nuclide安装、配置和调试"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-08</div><div class="title">React Native探索（二）Atom+Nuclide安装、配置和调试</div></div></a></div><div><a href="/rn/primer/3-props-state.html" title="React Native探索（三）组件的Props(属性)和State(状态)"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-17</div><div class="title">React Native探索（三）组件的Props(属性)和State(状态)</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

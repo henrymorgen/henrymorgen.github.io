@@ -1,0 +1,277 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BATcoder - 刘望舒 - Android进阶三部曲番外篇</title><meta name="description" content="Android进阶三部曲系列图书作者腾讯云最具价值专家TVP 公众号：「刘望舒」"><meta name="keywords" content="刘望舒, 刘望舒的博客，刘望舒学堂，BATcoder，刘望舒课堂，望舒学院，望舒课堂，Android进阶三部曲，Android进阶三部曲番外篇，liuwangshu, Android, Java, Android开发，Android进阶之光，设计模式，Android网络编程，Android源码分析，热修复，插件化，进阶之光，刘望舒，Android进阶，知识体系，性能优化，JNI，包管理机制，四大组件启动过程，AMS，PMS，WMS，Binder，进阶三部曲，Android进阶解密，Android进阶之光，Android进阶指北"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/page/2/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="website"><meta property="og:title" content="BATcoder - 刘望舒"><meta property="og:url" content="http://liuwangshu.cn/page/2/"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="Android进阶三部曲系列图书作者腾讯云最具价值专家TVP 公众号：「刘望舒」"><meta property="og:image" content="http://liuwangshu.cn/img/my.jpg"><meta property="article:published_time" content="2021-12-17T12:18:37.105Z"><meta property="article:modified_time" content="2021-12-17T12:18:37.105Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: false,
+  isHome: true,
+  isHighlightShrink: false,
+  isSidebar: false,
+  postUpdate: '2021-12-17 20:18:37'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(https://pic.imgdb.cn/item/5f5fa816160a154a67fe5c0d.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="site-info"><h1 id="site_title">BATcoder - 刘望舒</h1><div id="site_subtitle"><span id="subtitle"></span></div><div id="site_social_icons"><a class="social-icon" href="https://github.com/henrymorgen" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div><div id="scroll_down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout_page" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/binder/5-getservice.html" title="Android Binder原理（五）系统服务的获取过程">     <img class="post_bg" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Binder原理（五）系统服务的获取过程"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/binder/5-getservice.html" title="Android Binder原理（五）系统服务的获取过程">Android Binder原理（五）系统服务的获取过程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-11-15T16:18:00.000Z" title="发表于 2019-11-16 00:18:00">2019-11-16</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+
+前言在本系列的此前文章中，以MediaPlayerService为例，讲解了系统服务是如何注册的（addService），既然有注册那肯定也要有获取，本篇文章仍旧以MediaPlayerService为例，来讲解系统服务的获取过程（getService）。文章会分为两个部分进行讲解，分别是客户端MediaPlayerService请求获取服务和服务端ServiceManager处理请求，先来学习第一部分。
+1.客户端MediaPlayerService请求获取服务要想获取MediaPlayerService，需要先调用getMediaPlayerService函数，如下所示。frameworks/av/media/libmedia/IMediaDeathNotifier.cpp
+IMediaDeathNotifier::getMediaPlayerService()&#123;    ALOGV(&quot;getMediaPlayerService&quot;);    Mutex::Autolock _l(sServiceLock);  ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/framework/binder/4-servicemanager-start.html" title="Android Binder原理（四）ServiceManager的启动过程">     <img class="post_bg" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Binder原理（四）ServiceManager的启动过程"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/binder/4-servicemanager-start.html" title="Android Binder原理（四）ServiceManager的启动过程">Android Binder原理（四）ServiceManager的启动过程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-11-09T16:18:00.000Z" title="发表于 2019-11-10 00:18:00">2019-11-10</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+
+前言在上一篇文章中，我们以MediaPlayerService为例，讲解了系统服务是如何注册的（addService），既然有注册就势必要有获取，但是在了解获取服务前，我们最好先了解ServiceManager的启动过程，这样更有助于理解系统服务的注册和获取的过程。
+另外还有一点需要说明的是，要想了解ServiceManager的启动过程，需要查看Kernel Binder部分的源码，这部分代码在内核源码中，AOSP源码是不包括内核源码的，因此需要单独下载，见Android AOSP基础（二）AOSP源码和内核源码下载这篇文章。
+1.ServiceManager的入口函数ServiceManager是init进程负责启动的，具体是在解析init.rc配置文件时启动的，init进程是在系统启动时启动的，因此ServiceManager亦是如此，不理解init进程和init.rc的可以看Android系统启动流程（一）解析init进程启动过程这篇文章。rc文件内部由Android初始化语言编写（Android Init Language）编写的 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/binder/3-addservice.html" title="Android Binder原理（三）系统服务的注册过程">     <img class="post_bg" src="https://s2.ax1x.com/2019/10/25/Ka5Uds.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Binder原理（三）系统服务的注册过程"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/binder/3-addservice.html" title="Android Binder原理（三）系统服务的注册过程">Android Binder原理（三）系统服务的注册过程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-10-23T16:18:00.000Z" title="发表于 2019-10-24 00:18:00">2019-10-24</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+
+前言在上一篇文章中，我们学习了ServiceManager中的Binder机制，有一个问题由于篇幅问题没有讲完，那就是MediaPlayerService是如何注册的。通过了解MediaPlayerService是如何注册的，可以得知系统服务的注册过程。
+1.从调用链角度说明MediaPlayerService是如何注册的我们先来看MediaServer的入口函数，代码如下所示。frameworks/av/media/mediaserver/main_mediaserver.cpp
+int main(int argc __unused, char **argv __unused)&#123;    signal(SIGPIPE, SIG_IGN);    //获取ProcessState实例    sp&lt;ProcessState&gt; proc(ProcessState::self());    sp&lt;IServiceManager&gt; sm(defaultServiceManager());    ALOGI(&quot ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/framework/binder/2-servicemanager-binder.html" title="Android Binder原理（二）ServiceManager中的Binder机制">     <img class="post_bg" src="https://s2.ax1x.com/2019/10/09/u4pmfs.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Binder原理（二）ServiceManager中的Binder机制"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/binder/2-servicemanager-binder.html" title="Android Binder原理（二）ServiceManager中的Binder机制">Android Binder原理（二）ServiceManager中的Binder机制</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-10-07T16:18:00.000Z" title="发表于 2019-10-08 00:18:00">2019-10-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+前言在上一篇文章中，我们了解了学习Binder前必须要了解的知识点，其中有一点就是Binder机制的三个部分：Java Binder、Native Binder、Kernel Binder，其中Java Binder和Native Binder都是应用开发需要掌握的。Java Binder是需要借助Native Binder来工作的，因此需要先了解Native Binder，Native Binder架构的原型就是基于Binder通信的C/S架构，因此我们先从它开始入手。源码是基于Android 9.0。
+1.基于Binder通信的C/S架构在Android系统中，Binder进程间的通信的使用是很普遍的，在Android进阶三部曲第一部的最后一章，我讲解了MediaPlayer框架，这个框架基于C/S架构，并采用Binder来进行进程间通信，如下图所示。
+从图中可以看出，除了常规C/S架构的Client端和Server端，还包括了ServiceManager，它用于管理系统中的服务。首先Server进程会注册一些Service到Servic ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/binder/1-intro.html" title="Android Binder原理（一）学习Binder前必须要了解的知识点">     <img class="post_bg" src="https://s2.ax1x.com/2019/09/22/uSwYHU.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Binder原理（一）学习Binder前必须要了解的知识点"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/binder/1-intro.html" title="Android Binder原理（一）学习Binder前必须要了解的知识点">Android Binder原理（一）学习Binder前必须要了解的知识点</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-09-20T16:18:00.000Z" title="发表于 2019-09-21 00:18:00">2019-09-21</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+前言Binder原理是掌握系统底层原理的基石，也是进阶高级工程师的必备知识点，这篇文章不会过多介绍Binder原理，而是讲解学习Binder前需要的掌握的知识点。
+1.Linux和Android的IPC机制种类IPC全名为inter-Process Communication，含义为进程间通信，是指两个进程之间进行数据交换的过程。在Android和Linux中都有各自的IPC机制，这里分别来介绍下。
+1.1 Linux中的IPC机制种类Linux中提供了很多进程间通信机制，主要有管道（pipe）、信号（sinal）、信号量（semophore）、消息队列（Message）、共享内存（Share Memory)、套接字（Socket）等。
+管道管道是Linux由Unix那里继承过来的进程间的通信机制，它是Unix早期的一个重要通信机制。管道的主要思想是，在内存中创建一个共享文件，从而使通信双方利用这个共享文件来传递信息。这个共享文件比较特殊，它不属于文件系统并且只存在于内存中。另外还有一点，管道采用的是半双工通信方式的，数据只能在一个方向上流动 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/application/jetpack/6-viewmodel.html" title="Android Jetpack架构组件（六）一文带你了解ViewModel的使用和原理">     <img class="post_bg" src="https://s2.ax1x.com/2019/09/14/n6P5E4.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Jetpack架构组件（六）一文带你了解ViewModel的使用和原理"></a></div><div class="recent-post-info"><a class="article-title" href="/application/jetpack/6-viewmodel.html" title="Android Jetpack架构组件（六）一文带你了解ViewModel的使用和原理">Android Jetpack架构组件（六）一文带你了解ViewModel的使用和原理</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-09-12T16:18:00.000Z" title="发表于 2019-09-13 00:18:00">2019-09-13</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+前言在本系列的第4和第5篇文章中，介绍了LiveData的使用和原理，LiveData和ViewModel是一对好搭档，这篇文章我们一起来学习什么是ViewModel、ViewModel基本使用、ViewModel的原理。
+1.什么是ViewModel在说ViewModel前，我们需要解一下MVVM和DataBinding，在Android进阶三部曲第一部《Android进阶之光》中，我简单介绍了下MVVM和DataBinding。MVVM最早于2005年被微软的架构师John Gossman提出，在2015年Google I/O大会上发布了MVVM的支持库DataBinding，DataBinding遭到了一些开发者的诟病，主要是绑定数据时如果出现问题会很难排查，这样就没有一个合适的ViewModel规范来帮助开发者来实现MVVM。在2017年的Google I/O大会上，谷歌推出了ViewModel组件，来规范化ViewModel层。
+ViewModel顾名思义，是以感知生命周期的形式来存储和管理视图相关的数据。ViewModel主要有以 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/application/jetpack/5-livedata-theory.html" title="Android Jetpack架构组件（五）带你了解LiveData(原理篇）">     <img class="post_bg" src="https://s2.ax1x.com/2019/09/09/ntsWA1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Jetpack架构组件（五）带你了解LiveData(原理篇）"></a></div><div class="recent-post-info"><a class="article-title" href="/application/jetpack/5-livedata-theory.html" title="Android Jetpack架构组件（五）带你了解LiveData(原理篇）">Android Jetpack架构组件（五）带你了解LiveData(原理篇）</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-09-07T16:18:00.000Z" title="发表于 2019-09-08 00:18:00">2019-09-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+前言在上一篇文章中我们学习了LiveData的基本用法，我们知道LiveData是一个可观察的数据持有者，他是具有组件生命周期感知的，那么它是如何观察组件生命周期变化的呢？LiveData和RxJava的不同的是，LiveData并不是通知所有观察者，它只会通知处于Active状态的观察者，如果一个观察者处于DESTROYED状态，它将不会收到通知，这一点又是如何做到的？还有另外一点，Transformations的map方法其内部进行了什么操作？等等问题，会在这篇文章中给大家进行讲解。
+1.LiveData如何观察组件生命周期变化通过调用LiveData的observe方法来注册观察者，LiveData的observe方法如下所示。frameworks/support/lifecycle/livedata-core/src/main/java/androidx/lifecycle/LiveData.java
+@MainThread   public void observe(@NonNull LifecycleOwner owner, @No ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/application/jetpack/4-livedata-use.html" title="Android Jetpack架构组件（四）带你了解LiveData(使用篇）">     <img class="post_bg" src="https://s2.ax1x.com/2019/09/01/n9SZFJ.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Jetpack架构组件（四）带你了解LiveData(使用篇）"></a></div><div class="recent-post-info"><a class="article-title" href="/application/jetpack/4-livedata-use.html" title="Android Jetpack架构组件（四）带你了解LiveData(使用篇）">Android Jetpack架构组件（四）带你了解LiveData(使用篇）</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-08-30T16:18:00.000Z" title="发表于 2019-08-31 00:18:00">2019-08-31</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+
+前言在2017年前后，RxJava一直很火，我在Android进阶三部曲第一部《Android进阶之光》中就介绍了RxJava的使用和原理。谷歌推出的LiveData和RxJava类似，也是基于观察者，你可以认为LiveData是轻量级的RxJava。起初LiveData并不被看好，随着谷歌的大力推广，LiveData也慢慢的进入了大家的视野。一般来说，LiveData很少单独使用，它更多的和Android Jetpack的其他组件搭配使用，比如和ViewModel。这篇文章就来介绍LiveData的使用。
+1.什么是LiveDataLiveData如同它的名字一样，是一个可观察的数据持有者，和常规的observable不同，LiveData是具有生命周期感知的，这意味着它能够在Activity、Fragment、Service中正确的处理生命周期。LiveData的数据源一般是ViewModel，也可以是其它可以更新LiveData的组件。当数据更新后，LiveData 就会通知它的所有观察者，比如Activiy。与RxJava的方法不同 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/application/jetpack/3-lifecycle-theory.html" title="Android Jetpack架构组件（三）带你了解Lifecycle（原理篇）">     <img class="post_bg" src="https://s2.ax1x.com/2019/08/23/mBViY4.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Jetpack架构组件（三）带你了解Lifecycle（原理篇）"></a></div><div class="recent-post-info"><a class="article-title" href="/application/jetpack/3-lifecycle-theory.html" title="Android Jetpack架构组件（三）带你了解Lifecycle（原理篇）">Android Jetpack架构组件（三）带你了解Lifecycle（原理篇）</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-08-20T16:18:00.000Z" title="发表于 2019-08-21 00:18:00">2019-08-21</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+前言在上一篇文章中，我们学习了如何去使用Lifecycle，当然之会使用是不够的，还需要了解它的原理，这是成为优秀工程师必备的。这篇文章就来学习Lifecycle的基本原理。
+1.Lifecycle的生命周期状态事件和状态Lifecycle使用两个枚举来跟踪其关联组件的生命周期状态，这两个枚举分别是Event和State。State指的是Lifecycle的生命周期所处的状态。Event代表Lifecycle生命周期对应的事件，这些事件会映射到Activity和Fragment中的回调事件中。
+Android 9.0的Lifecycle的源码如下所示。frameworks/support/lifecycle/common/src/main/java/androidx/lifecycle/Lifecycle.java 
+public abstract class Lifecycle &#123;       @MainThread    public abstract void addObserver(@NonNull LifecycleObs ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/application/jetpack/2-lifecycle-use.html" title="Android Jetpack架构组件（二）带你了解Lifecycle（使用篇）">     <img class="post_bg" src="https://s2.ax1x.com/2019/08/11/eXvPTs.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Jetpack架构组件（二）带你了解Lifecycle（使用篇）"></a></div><div class="recent-post-info"><a class="article-title" href="/application/jetpack/2-lifecycle-use.html" title="Android Jetpack架构组件（二）带你了解Lifecycle（使用篇）">Android Jetpack架构组件（二）带你了解Lifecycle（使用篇）</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-08-09T16:18:00.000Z" title="发表于 2019-08-10 00:18:00">2019-08-10</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+前言在上一篇文章中，我们基本了解了什么是Android Jetpack，这一篇文章来介绍Android Jetpack架构组件的Lifecycle，Lifecycle用于帮助开发者管理Activity和Fragment 的生命周期，由于Lifecycle是LiveData和ViewModel的基础，所以需要先学习它。 
+1.为什么需要Lifecycle在应用开发中，处理Activity或者Fragment组件的生命周期相关代码是必不可免的，官方文档中举了一个例子，这里简化一下，在Activity中写一个监听，在Activity的不同生命周期方法中调用这个监听。
+public class MainActivity extends AppCompatActivity &#123;    private MyListener myListener;    @Override    protected void onCreate(Bundle savedInstanceState) &#123;        super.onCreate(savedI ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/application/jetpack/1-study-jetpack.html" title="Android Jetpack架构组件（一）带你了解Android Jetpack">     <img class="post_bg" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Jetpack架构组件（一）带你了解Android Jetpack"></a></div><div class="recent-post-info"><a class="article-title" href="/application/jetpack/1-study-jetpack.html" title="Android Jetpack架构组件（一）带你了解Android Jetpack">Android Jetpack架构组件（一）带你了解Android Jetpack</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-08-03T16:18:00.000Z" title="发表于 2019-08-04 00:18:00">2019-08-04</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+前言Android已经发展了11年，可以说是比较成熟的技术了，一开始时框架很少，也没有什么规范，所有的代码都是要自己写，比如网络请求，数据库请求，数据解析等等。后来出现了一些框架来帮助开发者快速进行开发，比如XUtils、Volley、OKHttp、EventBus等，随着框架越来越多，一个应用可以有多种技术选型，直接导致应用开发越来越不规范，导致做出来的应用质量参差不齐，这显然不是谷歌想看到的。谷歌随后推出了MVP和MVVM相关的官方例子，效果很一般，而且覆盖面只是在架构上，Goole I/O 2018大会上推出的Android Jetpack有望解决以上的问题。
+1.Android Jetpack简介Jetpack并不是一个框架或者组件，它是一套库、工具和指南的集合，可帮助开发者更轻松地编写优质应用。这些组件可帮助开发者遵循最佳做法、摆脱编写样板代码的工作并简化复杂任务，以便将精力集中放在所需的代码上。Android Jetpack中的很多组件并不都是新开发的，而是很早就有了，比如在Goole I/O 2017大会时推出了 Android ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/application/android-gradle/2-gradle-dependency.html" title="Android Gradle （二）签名配置和依赖管理">     <img class="post_bg" src="https://s2.ax1x.com/2019/07/27/euj4Qe.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Gradle （二）签名配置和依赖管理"></a></div><div class="recent-post-info"><a class="article-title" href="/application/android-gradle/2-gradle-dependency.html" title="Android Gradle （二）签名配置和依赖管理">Android Gradle （二）签名配置和依赖管理</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-07-25T16:18:00.000Z" title="发表于 2019-07-26 00:18:00">2019-07-26</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+相关文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解Gradle核心思想（六）自定义Gradle插件的三种方式Android Gradle （一）Gradle的Android插件入门
+前言本系列上一篇，我介绍了Gradle的Android插件的入门，这一篇来介绍一些Gradle进阶的内容，当然进阶内容非常多，这篇文章就总结一些相对重要的、常用的一些知识点，比如Gradle的签名配置和依赖管理。
+1.Android签名文件配置在一般公司中，当团队比较小的时候，App的签名信息都是放到项目中的，甚至会上传到github上，这样做很是方便。但随着团队人数的增多，这样做的风险会越来越大，因为签名信息是重要的资源，这样就不能将签名上传到github上，也就不应该在build.gradle中直接配置签名。主要有以下的几种解 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/flutter/primer/13-platform-channel.html" title="Flutter基础（十三）Flutter与Android的相互通信">     <img class="post_bg" src="https://s2.ax1x.com/2019/07/17/ZLHkF0.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（十三）Flutter与Android的相互通信"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/13-platform-channel.html" title="Flutter基础（十三）Flutter与Android的相互通信">Flutter基础（十三）Flutter与Android的相互通信</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-07-16T16:18:00.000Z" title="发表于 2019-07-17 00:18:00">2019-07-17</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+ReactNative入门系列React Native组件Flutter基础系列
+前言本来这篇文章应该讲一下Flutter的插件开发，但是在插件开发的基础是PlatformChannel，也就是Flutter与Android/iOS Native的通信，理解了这一个知识点，Flutter的插件开发也就不在话下。
+1.PlatformChannel概述Flutter不能完成所有Native的功能，因此需要Flutter与Native的通信，Flutter提供了一套Platform Channel的机制，来满足Flutter与Native通信的需求。下面是PlatformChannel架构。图中可以看到，Flutter是Client端，Native是Host，Client和host通信是通过PlatformChannel，Client通过PlatformChannel向Host发送消息，Host监听PlatformChannel并接收消息，然后将响应结果发送给Client。消息和响应以异步方式传递，以确保UI不阻塞。另外，PlatformChann ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/flutter/primer/12-route.html" title="Flutter基础（十二）路由（页面跳转）与数据传递">     <img class="post_bg" src="https://s2.ax1x.com/2019/07/10/ZcxBCt.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（十二）路由（页面跳转）与数据传递"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/12-route.html" title="Flutter基础（十二）路由（页面跳转）与数据传递">Flutter基础（十二）路由（页面跳转）与数据传递</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-07-08T16:18:00.000Z" title="发表于 2019-07-09 00:18:00">2019-07-09</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+ReactNative入门系列React Native组件Flutter基础系列
+前言在Android开发中我们使用Intent来进行页面跳转，也称之为原生路由，后来出现了一些路由框架，比如ARouter。在Flutter中进行界面跳转的就是路由，路由用Route类来进行表示，Navigator是对Route进行管理的Widget。这一篇文章我们来学习路由和数据传递。flutter路由的使用方式主要有两种，一种是新建路由，一种是注册路由。
+1.新建路由创建两个页面，第一个页面有一个按钮，点击这个按钮跳到第二个页面。先来实现第一个页面：
+class FirstPage extends StatelessWidget &#123;  @override  Widget build(BuildContext context) &#123;    return Scaffold(      appBar: AppBar(        title: Text(&quot;第一页&quot;),      ),      body: Center(    ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/flutter/primer/11-dio-json.html" title="Flutter基础（十一）网络请求（Dio）与JSON数据解析">     <img class="post_bg" src="https://s2.ax1x.com/2019/07/06/ZwbtMT.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（十一）网络请求（Dio）与JSON数据解析"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/11-dio-json.html" title="Flutter基础（十一）网络请求（Dio）与JSON数据解析">Flutter基础（十一）网络请求（Dio）与JSON数据解析</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-07-04T16:18:00.000Z" title="发表于 2019-07-05 00:18:00">2019-07-05</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+ReactNative入门系列React Native组件Flutter基础系列
+前言在Android开发中如果我们想要请求网络，可以使用HttpClent、HttpURLConnection，但在项目中一般都会使用OkHttp和Retrofit。在Flutter也是如此，系统提供了HttpClient，但在项目中一般会使用第三方库，比如http和Dio，如果你想找到更多的第三库，可以在pub.dartlang.org/ 上查找想要的库。本篇文章以Dio为例，另外还会介绍JSON数据解析方面的知识。
+1.Dio的使用入门Dio是一个强大的Dart Http请求库，支持拦截器，全局配置，FormData，请求取消，文件下载，超时等。
+添加依赖在pubspec.yaml中添加依赖。
+dependencies:  dio: 2.1.7  
+官网给出了一个简单的例子：
+import &#x27;package:dio/dio.dart&#x27;;void getHttp() async &#123;  try &#123;    Response r ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/flutter/primer/10-layout-widget.html" title="Flutter基础（十）布局Widget快速入门">     <img class="post_bg" src="https://s2.ax1x.com/2019/06/30/ZlBuuT.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（十）布局Widget快速入门"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/10-layout-widget.html" title="Flutter基础（十）布局Widget快速入门">Flutter基础（十）布局Widget快速入门</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-06-27T16:18:00.000Z" title="发表于 2019-06-28 00:18:00">2019-06-28</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+ReactNative入门系列React Native组件Flutter基础系列
+前言Flutter的布局在此前的文章多多少少用过，但是没有具体讲过，Flutter的布局实际上也由Widget来控制的，在Flutter官网上并没有对布局Widget进行分类，这里将布局Widget根据子元素排列方式分为以下几种：
+
+线性布局Widget
+流式布局Widget
+层式布局Widget
+弹性布局Widget
+
+下面分别介绍这几种布局Widget。
+1.线性布局Widget线性布局类似于Android中的LinearLayout，可以垂直也可以水平排列，Flutter的线性布局有两个：
+
+Row：水平方向的线性布局。
+Column：垂直方向的线性布局。
+
+Row和Column的使用方法类似，举个Row的例子，Column自然而然也就会了。
+import &#x27;package:flutter/material.dart&#x27;;void main() =&gt; runApp(RowWidget());class RowWidget extend ...</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/3/"><i class="fas fa-chevron-right fa-fw"></i></a></div></nav></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/my.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">刘望舒</div><div class="author-info__description">Android进阶三部曲系列图书作者<br>腾讯云最具价值专家TVP <br>公众号：「刘望舒」</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/henrymorgen" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div></div><div class="sticky_layout"><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">Android进阶三部曲第三部《Android进阶指北》已出版！</div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！"><img src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="进阶三部曲第一部《Android进阶之光》第2版出版！"/></a><div class="content"><a class="title" href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！">进阶三部曲第一部《Android进阶之光》第2版出版！</a><time datetime="2021-04-03T16:16:16.000Z" title="发表于 2021-04-04 00:16:16">2021-04-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"><img src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"/></a><div class="content"><a class="title" href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！">『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！</a><time datetime="2021-03-06T16:16:16.000Z" title="发表于 2021-03-07 00:16:16">2021-03-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！"><img src="https://pic.imgdb.cn/item/5e02594376085c3289aeb21b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候下载Android11系统源码和内核源码了！"/></a><div class="content"><a class="title" href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！">『BATcoder』 是时候下载Android11系统源码和内核源码了！</a><time datetime="2021-01-14T16:16:16.000Z" title="发表于 2021-01-15 00:16:16">2021-01-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"><img src="https://pic.imgdb.cn/item/5fdad1733ffa7d37b3289c28.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"/></a><div class="content"><a class="title" href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！">『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！</a><time datetime="2020-12-16T16:16:16.000Z" title="发表于 2020-12-17 00:16:16">2020-12-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"><img src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"/></a><div class="content"><a class="title" href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！">『BATcoder』一个视频帮你突破系统底层学习瓶颈！</a><time datetime="2020-12-03T16:16:16.000Z" title="发表于 2020-12-04 00:16:16">2020-12-04</time></div></div></div></div></div><div class="card-widget card-categories"><div class="card-content"><div class="item-headline"><i class="fas fa-folder-open"></i><span>分类</span></div><ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/"><span class="card-category-list-name">Android应用层</span><span class="card-category-list-count">67</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/"><span class="card-category-list-name">Android框架层</span><span class="card-category-list-count">49</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/BATcoder/"><span class="card-category-list-name">BATcoder</span><span class="card-category-list-count">5</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Flutter/"><span class="card-category-list-name">Flutter</span><span class="card-category-list-count">13</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Java/"><span class="card-category-list-name">Java</span><span class="card-category-list-count">11</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/React-Native/"><span class="card-category-list-name">React Native</span><span class="card-category-list-count">9</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Swift/"><span class="card-category-list-name">Swift</span><span class="card-category-list-count">5</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%9C%9B%E8%88%92%E6%9D%82%E8%B0%88/"><span class="card-category-list-name">望舒杂谈</span><span class="card-category-list-count">2</span></a></li>
+            <li class="card-category-list-item more is-center"><a class="card-category-list-link-more" href="/categories/">
+                <span>查看更多</span><i class="fas fa-angle-right"></i></a></li>
+            </ul></div></div><div class="card-widget card-archives"><div class="card-content"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/04/"><span class="card-archive-list-date">四月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/03/"><span class="card-archive-list-date">三月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/01/"><span class="card-archive-list-date">一月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/12/"><span class="card-archive-list-date">十二月 2020</span><span class="card-archive-list-count">2</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/11/"><span class="card-archive-list-date">十一月 2020</span><span class="card-archive-list-count">3</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/10/"><span class="card-archive-list-date">十月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/09/"><span class="card-archive-list-date">九月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/03/"><span class="card-archive-list-date">三月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item more is-center"><a class="card-archive-list-link-more" href="/archives/">
+              <span>查看更多</span><i class="fas fa-angle-right"  ></i></a></li></ul></div></div><div class="card-widget card-webinfo"><div class="card-content"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">197</div></div><div class="webinfo-item"><div class="item-name">已运行时间 :</div><div class="item-count" id="runtimeshow" data-publishDate="2017-04-12T16:00:00.000Z"></div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2021-12-17T12:18:36.212Z"></div></div></div></div></div></div></div></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function subtitleType () {
+  if (true) { 
+    var typed = new Typed("#subtitle", {
+      strings: "Android进阶三部曲番外篇".split(","),
+      startDelay: 300,
+      typeSpeed: 150,
+      loop: true,
+      backSpeed: 50
+    })
+  } else {
+    document.getElementById("subtitle").innerHTML = 'A'
+  }
+}
+
+if (true) {
+  if (typeof Typed === 'function') subtitleType()
+  else $.getScript('https://cdn.jsdelivr.net/npm/typed.js/lib/typed.min.js', subtitleType)
+} else {
+  subtitleType()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

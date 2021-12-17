@@ -1,0 +1,254 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Swift快速入门（二）基本数据类型 | BATcoder - 刘望舒</title><meta name="description" content="相关文章Swift快速入门系列 1.变量和常量声明常量和变量Swfit是强类型的语言，Swift要求所有的变量和常量必须先声明后使用。声明变量需要使用var，声明常量则需要使用let  var 变量名[:类型] &#x3D;初始值let 常量名[:类型] &#x3D;初始值 下面来进行举例： &#x2F;&#x2F; 声明变量时显式指定类型var age : Int&#x2F;&#x2F; 声明变量时指定初始值，编译器会根据初始值确定该变量的类型为Stri"><meta name="keywords" content="Swift"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/swift/2-constant-variable.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Swift快速入门（二）基本数据类型"><meta property="og:url" content="http://liuwangshu.cn/swift/2-constant-variable.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="相关文章Swift快速入门系列 1.变量和常量声明常量和变量Swfit是强类型的语言，Swift要求所有的变量和常量必须先声明后使用。声明变量需要使用var，声明常量则需要使用let  var 变量名[:类型] &#x3D;初始值let 常量名[:类型] &#x3D;初始值 下面来进行举例： &#x2F;&#x2F; 声明变量时显式指定类型var age : Int&#x2F;&#x2F; 声明变量时指定初始值，编译器会根据初始值确定该变量的类型为Stri"><meta property="og:image" content="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><meta property="article:published_time" content="2016-01-31T16:17:06.000Z"><meta property="article:modified_time" content="2017-06-10T13:36:52.772Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2017-06-10 21:36:52'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%8F%98%E9%87%8F%E5%92%8C%E5%B8%B8%E9%87%8F"><span class="toc-number">1.</span> <span class="toc-text">1.变量和常量</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A3%B0%E6%98%8E%E5%B8%B8%E9%87%8F%E5%92%8C%E5%8F%98%E9%87%8F"><span class="toc-number">1.1.</span> <span class="toc-text">声明常量和变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BE%93%E5%87%BA%E5%B8%B8%E9%87%8F%E5%92%8C%E5%8F%98%E9%87%8F"><span class="toc-number">1.2.</span> <span class="toc-text">输出常量和变量</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%95%B4%E5%9E%8B"><span class="toc-number">2.</span> <span class="toc-text">2.整型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B4%E5%9E%8B%E8%8C%83%E5%9B%B4"><span class="toc-number">2.1.</span> <span class="toc-text">整型范围</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Int%E5%9E%8B%E4%B8%8EUInt%E5%9E%8B"><span class="toc-number">2.2.</span> <span class="toc-text">Int型与UInt型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B4%E6%95%B0%E6%95%B0%E5%80%BC%E8%A1%A8%E7%8E%B0%E5%BD%A2%E5%BC%8F"><span class="toc-number">2.3.</span> <span class="toc-text">整数数值表现形式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E6%B5%AE%E7%82%B9%E5%9E%8B"><span class="toc-number">3.</span> <span class="toc-text">3.浮点型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B5%AE%E7%82%B9%E6%95%B0%E5%80%BC%E8%A1%A8%E7%8E%B0%E5%BD%A2%E5%BC%8F"><span class="toc-number">3.1.</span> <span class="toc-text">浮点数值表现形式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%95%B0%E5%80%BC%E5%9E%8B%E7%B1%BB%E5%9E%8B%E8%BD%AC%E6%8D%A2"><span class="toc-number">4.</span> <span class="toc-text">4.数值型类型转换</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B4%E5%9E%8B%E4%B9%8B%E9%97%B4%E7%9A%84%E8%BD%AC%E6%8D%A2"><span class="toc-number">4.1.</span> <span class="toc-text">整型之间的转换</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B4%E6%95%B0%E5%92%8C%E6%B5%AE%E7%82%B9%E6%95%B0%E8%BD%AC%E6%8D%A2"><span class="toc-number">4.2.</span> <span class="toc-text">整数和浮点数转换</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%B8%83%E5%B0%94%E5%9E%8B"><span class="toc-number">5.</span> <span class="toc-text">5.布尔型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%85%83%E7%BB%84%E7%B1%BB%E5%9E%8B"><span class="toc-number">6.</span> <span class="toc-text">6.元组类型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89%E5%85%83%E7%BB%84%E7%B1%BB%E5%9E%8B%E5%8F%98%E9%87%8F"><span class="toc-number">6.1.</span> <span class="toc-text">定义元组类型变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96%E5%85%83%E7%BB%84%E4%B8%AD%E7%9A%84%E5%85%83%E7%B4%A0%E5%80%BC"><span class="toc-number">6.2.</span> <span class="toc-text">获取元组中的元素值</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%B8%BA%E5%85%83%E7%BB%84%E4%B8%AD%E7%9A%84%E5%85%83%E7%B4%A0%E5%91%BD%E5%90%8D"><span class="toc-number">6.3.</span> <span class="toc-text">为元组中的元素命名</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E5%8F%AF%E9%80%89%E7%B1%BB%E5%9E%8B"><span class="toc-number">7.</span> <span class="toc-text">7.可选类型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E9%80%89%E7%B1%BB%E5%9E%8B%E4%B8%8E%E5%80%BC%E7%BC%BA%E5%A4%B1"><span class="toc-number">7.1.</span> <span class="toc-text">可选类型与值缺失</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BC%BA%E5%88%B6%E8%A7%A3%E6%9E%90"><span class="toc-number">7.2.</span> <span class="toc-text">强制解析</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%9A%90%E5%BC%8F%E5%8F%AF%E9%80%89%E7%B1%BB%E5%9E%8B"><span class="toc-number">7.3.</span> <span class="toc-text">隐式可选类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%AF%E9%80%89%E7%BB%91%E5%AE%9A"><span class="toc-number">7.4.</span> <span class="toc-text">可选绑定</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-%E5%AD%97%E7%AC%A6%E5%92%8C%E5%AD%97%E7%AC%A6%E4%B8%B2"><span class="toc-number">8.</span> <span class="toc-text">8.字符和字符串</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E7%B1%BB%E5%9E%8B"><span class="toc-number">8.1.</span> <span class="toc-text">字符类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B"><span class="toc-number">8.2.</span> <span class="toc-text">字符串类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8F%AF%E5%8F%98%E6%80%A7"><span class="toc-number">8.3.</span> <span class="toc-text">字符串可变性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%AF%94%E8%BE%83"><span class="toc-number">8.4.</span> <span class="toc-text">字符串比较</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-%E7%B1%BB%E5%9E%8B%E5%88%AB%E5%90%8D"><span class="toc-number">9.</span> <span class="toc-text">9.类型别名</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/17/MDe3eU.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Swift快速入门（二）基本数据类型</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2016-01-31T16:17:06.000Z" title="发表于 2016-02-01 00:17:06">2016-02-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2017-06-10T13:36:52.772Z" title="更新于 2017-06-10 21:36:52">2017-06-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Swift/">Swift</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p>相关文章<br><a href="http://liuwangshu.cn/tags/Swift/">Swift快速入门系列</a></p>
+<h3 id="1-变量和常量"><a href="#1-变量和常量" class="headerlink" title="1.变量和常量"></a><strong>1.变量和常量</strong></h3><h4 id="声明常量和变量"><a href="#声明常量和变量" class="headerlink" title="声明常量和变量"></a><strong>声明常量和变量</strong></h4><p>Swfit是强类型的语言，Swift要求所有的变量和常量必须先声明后使用。<br>声明变量需要使用var，声明常量则需要使用let</p>
+<a id="more"></a>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> 变量名[:类型] =初始值</span><br><span class="line"><span class="keyword">let</span> 常量名[:类型] =初始值</span><br></pre></td></tr></table></figure>
+<p>下面来进行举例：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 声明变量时显式指定类型</span></span><br><span class="line"><span class="keyword">var</span> age : <span class="type">Int</span></span><br><span class="line"><span class="comment">// 声明变量时指定初始值，编译器会根据初始值确定该变量的类型为String</span></span><br><span class="line"><span class="keyword">var</span> game= <span class="string">&quot;九阴真经&quot;</span></span><br><span class="line"><span class="comment">// 显式指定的类型与初始值的类型一致，声明变量正确</span></span><br><span class="line"><span class="keyword">var</span> age1: <span class="type">Int</span> = <span class="number">30</span>;</span><br><span class="line"><span class="comment">// 显式指定的类型与初始值的类型不一致，声明变量失败</span></span><br><span class="line"><span class="keyword">var</span> game1 : <span class="type">String</span> = <span class="number">500</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义常量，没有显式指定类型，编译器根据初始值确定常量的类型</span></span><br><span class="line"><span class="keyword">let</span> maxAge = <span class="number">120</span></span><br><span class="line"><span class="comment">// 定义常量时，既显式指定常量的类型，也指定常量的初始值</span></span><br><span class="line"><span class="keyword">let</span> game2: <span class="type">String</span> = <span class="string">&quot;九阴真经&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="输出常量和变量"><a href="#输出常量和变量" class="headerlink" title="输出常量和变量"></a><strong>输出常量和变量</strong></h4><p>可以用print函数来输出当前常量或变量的值:</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(game) <span class="comment">//九阴真经</span></span><br></pre></td></tr></table></figure>
+<p>Swift 用字符串插值（string interpolation）的方式把常量名或者变量名当做占位符加入到长字符串中，Swift 会用当前常量或变量的值替换这些占位符。将常量或变量名放入圆括号中，并在开括号前使用反斜杠将其转义：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;game的值为:\(game)&quot;</span>) <span class="comment">//game的值为:九阴真经</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="2-整型"><a href="#2-整型" class="headerlink" title="2.整型"></a><strong>2.整型</strong></h3><p>整数就是没有小数部分的数字，比如23和-23。整数可以是有符号（正、负、零）或者无符号（正、零）。<br>Swift 提供了8，16，32和64位的有符号和无符号整数类型。这些整数类型和 C 语言的命名方式很像，比如8位无符号整数类型是UInt8，32位有符号整数类型是Int32。就像 Swift 的其他类型一样，整数类型采用大写命名法。</p>
+<h4 id="整型范围"><a href="#整型范围" class="headerlink" title="整型范围"></a><strong>整型范围</strong></h4><p>你可以访问不同整数类型的min和max属性来获取对应类型的最大值和最小值：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> minValue = <span class="type">UInt8</span>.<span class="built_in">min</span> <span class="comment">// minValue为 0</span></span><br><span class="line"><span class="keyword">let</span> maxValue = <span class="type">UInt8</span>.<span class="built_in">max</span> <span class="comment">// maxValue为 255</span></span><br></pre></td></tr></table></figure>
+<h4 id="Int型与UInt型"><a href="#Int型与UInt型" class="headerlink" title="Int型与UInt型"></a><strong>Int型与UInt型</strong></h4><p>Int型占的内存和当前的平台原生字长相同：对于32位平台，Int型与Int32型的长度相同，对于64位平台，Int型与Int64型的长度相同。此外Swift还支持对无符号整数的支持。但是尽量不要使用UInt，除非你真的需要存储一个和当前平台原生字长相同的无符号整数。除了这种情况，最好使用Int，即使你要存储的值已知是非负的。统一使用Int可以提高代码的可复用性，避免不同类型数字之间的转换，并且匹配数字的类型推测。即使是在32位平台上，Int可以存储的整数范围也可以达到-2147483648~2147483647，大多数时候这已经足够大了。</p>
+<h4 id="整数数值表现形式"><a href="#整数数值表现形式" class="headerlink" title="整数数值表现形式"></a><strong>整数数值表现形式</strong></h4><p>Swift整数数值有4种表示方式：</p>
+<ul>
+<li>十进制：默认的就是十进制整数。</li>
+<li>二进制：以0b开头的整数。</li>
+<li>八进制：以0o开头的整数。</li>
+<li>十六进制： 以0x开头的整数。</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> decimalInteger = <span class="number">17</span></span><br><span class="line"><span class="keyword">let</span> binaryInteger = <span class="number">0b10001</span> <span class="comment">// 二进制的17</span></span><br><span class="line"><span class="keyword">let</span> octalInteger = <span class="number">0o21</span> <span class="comment">// 八进制的17</span></span><br><span class="line"><span class="keyword">let</span> hexadecimalInteger = <span class="number">0x11</span> <span class="comment">// 十六进制的17 </span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-浮点型"><a href="#3-浮点型" class="headerlink" title="3.浮点型"></a><strong>3.浮点型</strong></h3><p>浮点类型比整数类型表示的范围更大，可以存储比Int类型更大或者更小的数字。Swift 提供了两种有符号浮点数类型：<br>Double表示64位浮点数。当你需要存储很大或者很高精度的浮点数时请使用此类型。<br>Float表示32位浮点数。精度要求不高的话可以使用此类型。</p>
+<h4 id="浮点数值表现形式"><a href="#浮点数值表现形式" class="headerlink" title="浮点数值表现形式"></a><strong>浮点数值表现形式</strong></h4><p>Swift的浮点数有3中表现形式：</p>
+<ul>
+<li>十进制形式：这种形式就是平常简单的浮点数，例如 2.23，50.0。浮点数必须包含一个小数点，否则会被当作整数类型处理。</li>
+<li>科学计数形式：例如2.23e2(2.23×10²)，2.23E2(2.23×10²)。</li>
+<li>十六进制数形式：这种形式的浮点数必须以0x开头，且需要使用p来代表指数部分，例如0x2.a2p2(0x2.a2×10²)</li>
+</ul>
+<h3 id="4-数值型类型转换"><a href="#4-数值型类型转换" class="headerlink" title="4.数值型类型转换"></a><strong>4.数值型类型转换</strong></h3><h4 id="整型之间的转换"><a href="#整型之间的转换" class="headerlink" title="整型之间的转换"></a><strong>整型之间的转换</strong></h4><p>不同整数类型的变量和常量可以存储不同范围的数字。Int8类型的常量或者变量可以存储的数字范围是-128<del>127，而UInt8类型的常量或者变量能存储的数字范围是0</del>255。如果数字超出了常量或者变量可存储的范围，编译的时候会报错：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// UInt 类型不能存储负数，所以会报错</span></span><br><span class="line"><span class="keyword">let</span> age: <span class="type">UInt</span> = -<span class="number">1</span> </span><br><span class="line"><span class="comment">// Int8 类型不能存储超过最大值的数，所以会报错 </span></span><br><span class="line"><span class="keyword">let</span> big: <span class="type">Int8</span> = <span class="type">Int8</span>.<span class="built_in">max</span> + <span class="number">1</span> </span><br></pre></td></tr></table></figure>
+<p>要将一种数字类型转换成另一种，你要用当前值来初始化一个期望类型的新数字，这个数字的类型就是你的目标类型。在下面的例子中，常量two是UInt16类型，然而常量one是Uint8类型。它们不能直接相加，因为它们类型不同。所以要调用UInt16(one)来创建一个新的UInt16数字并用one的值来初始化，然后使用这个新数字来计算：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> two: <span class="type">UInt16</span> = <span class="number">2</span></span><br><span class="line"><span class="keyword">let</span> one: <span class="type">UInt8</span> = <span class="number">1</span></span><br><span class="line"><span class="keyword">let</span> third= two+ <span class="type">UInt16</span>(one) </span><br></pre></td></tr></table></figure>
+<h4 id="整数和浮点数转换"><a href="#整数和浮点数转换" class="headerlink" title="整数和浮点数转换"></a><strong>整数和浮点数转换</strong></h4><p>整数和浮点数的转换必须显式指定类型：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">let</span> three = <span class="number">3</span></span><br><span class="line"><span class="keyword">let</span> point = <span class="number">0.141596</span></span><br><span class="line"><span class="keyword">let</span> add= <span class="type">Double</span>(three) + point <span class="comment">// add等于3.14159，所以被推测为 Double 类型 </span></span><br></pre></td></tr></table></figure>
+
+<p>当进行类型转换时要尽量向表数范围大的数据类型转换，这样的程序更安全些，而反过来转换可能会导致运行时的错误。Swift各种数值型表数范围由小到大顺序：Int8—Int16—Int32—Int64—Float—Double</p>
+<h3 id="5-布尔型"><a href="#5-布尔型" class="headerlink" title="5.布尔型"></a><strong>5.布尔型</strong></h3><p>Swift有一个基本的布尔(Boolean)类型，叫做Bool，它的数值只能是true和false，不能用0或者是非0来代表。其他的数据类型也不能转换成Bool类型。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> isGame= <span class="literal">true</span></span><br><span class="line"><span class="keyword">var</span> isShow= <span class="literal">false</span> </span><br></pre></td></tr></table></figure>
+<p>字符串”true”和”false”不会直接转换成Bool类型，但Bool类型变量可以插值到字符串中：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str:<span class="type">String</span>=<span class="string">&quot;\(isGame)是真的&quot;</span></span><br><span class="line"><span class="built_in">print</span>(str)</span><br></pre></td></tr></table></figure>
+
+<h3 id="6-元组类型"><a href="#6-元组类型" class="headerlink" title="6.元组类型"></a><strong>6.元组类型</strong></h3><h4 id="定义元组类型变量"><a href="#定义元组类型变量" class="headerlink" title="定义元组类型变量"></a><strong>定义元组类型变量</strong></h4><p>元组（tuples）把多个值组合成一个复合值。元组内的值可以使任意类型，并不要求是相同类型。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 定义元组变量，并指定初始值，系统推断该元组类型为(Int, Int, String)</span></span><br><span class="line"><span class="keyword">var</span> game= (<span class="number">1</span>, <span class="number">2</span> , <span class="string">&quot;九阴真经&quot;</span>)</span><br><span class="line"><span class="comment">// 使用元组类型来定义元组变量</span></span><br><span class="line"><span class="keyword">var</span> score : (<span class="type">Int</span> , <span class="type">Int</span> , <span class="type">String</span> , <span class="type">Double</span>)</span><br><span class="line"><span class="comment">// 为元组变量赋值时必须为所有成员都指定值</span></span><br><span class="line">score = (<span class="number">98</span> , <span class="number">89</span> , <span class="string">&quot;及格&quot;</span> , <span class="number">20.4</span>)</span><br></pre></td></tr></table></figure>
+
+<p>元组类型的成员可以再次是元组：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> test : (<span class="type">Int</span> , (<span class="type">Int</span> , <span class="type">String</span>))</span><br><span class="line">test = (<span class="number">20</span> , (<span class="number">15</span> , <span class="string">&quot;大航海时代&quot;</span>))</span><br></pre></td></tr></table></figure>
+<p>输出元组：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;game元组的值为：\(game)&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;score元组的值为：\(score)&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test元组的值为：\(test)&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="获取元组中的元素值"><a href="#获取元组中的元素值" class="headerlink" title="获取元组中的元素值"></a><strong>获取元组中的元素值</strong></h4><p>Swift允许通过下表来访问元组的单个元素，元组的下标从0开始。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="built_in">print</span>(<span class="string">&quot;game元组的排名元素为：\(game.0)&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;game元组的名称元素为：\(game.2)&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;test元组的第2个元素的第2个元素为：\(test.1.2)&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="为元组中的元素命名"><a href="#为元组中的元素命名" class="headerlink" title="为元组中的元素命名"></a><strong>为元组中的元素命名</strong></h4><p>定义元组时也可以使用key:value的形式来定义元组，这种形式相当于为每个元素都指定了名字，并且指定名字有更好的可读性：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 使用元组类型来定义元组变量</span></span><br><span class="line"><span class="keyword">var</span> score : (java:<span class="type">Int</span> , swift:<span class="type">Int</span> , oc:<span class="type">String</span> , ruby:<span class="type">Double</span>)</span><br><span class="line"><span class="comment">// 简单为每个元素指定值，此时必须按顺序为每个元素指定值</span></span><br><span class="line">score = (<span class="number">99</span> , <span class="number">60</span> , <span class="string">&quot;及格&quot;</span> , <span class="number">20.1</span>) </span><br><span class="line"><span class="comment">// 通过key为元组的元素指定值，在这种方式下，元组内各元素的顺序可以调换</span></span><br><span class="line">score = (oc:<span class="string">&quot;及格&quot;</span> , swift:<span class="number">60</span> , java:<span class="number">99</span> , ruby:<span class="number">20.1</span>) </span><br></pre></td></tr></table></figure>
+
+<h3 id="7-可选类型"><a href="#7-可选类型" class="headerlink" title="7.可选类型"></a><strong>7.可选类型</strong></h3><h4 id="可选类型与值缺失"><a href="#可选类型与值缺失" class="headerlink" title="可选类型与值缺失"></a><strong>可选类型与值缺失</strong></h4><p>在任何已有类型的后面紧跟？就可以代表是可选类型，可选类型的变量用于处理“值缺失”。<br>我门先来看看如下代码：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str = <span class="string">&quot;九阴真经&quot;</span></span><br><span class="line"><span class="keyword">var</span> num :<span class="type">Int</span> = str.toInt()<span class="comment">//会报错</span></span><br><span class="line"><span class="keyword">var</span> num1: <span class="type">Int?</span> = str.toInt()<span class="comment">//正确的代码</span></span><br></pre></td></tr></table></figure>
+<p>第二行代码会报错，因为“九阴真经”这个String类型无法转换成Int类型，如果str等于数字型的字符串则会转换成功（如var str = “11”）。转换失败时，我们无法返回Int值，这就是”值缺失”的情况，因此在这里必须使用Int?类型的变量来储存转换结果，所以第三行代码是正确的。<br>Swfit用nil来代表”值缺失”,因此上面的num1变量的值为nil。<br>需要注意的是，只有可选类型的变量和常量才能接收nil，非可选类型的变量和常量不能接收nil。</p>
+<h4 id="强制解析"><a href="#强制解析" class="headerlink" title="强制解析"></a><strong>强制解析</strong></h4><p>Int?类型与Int类型不是相同的类型，程序不能把Int?类型的值当作Int类型的。为了获取可选类型的实际存储的值，我们可以在可选类型的值后面加上“！”号。这个叹号表明：已知该可选变量有值，请提取其中的值，这种添加叹号进行解析的方法称之为强制解析。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str : <span class="type">String?</span> = <span class="string">&quot;九阴真经&quot;</span></span><br><span class="line"><span class="comment">// str是String?类型的，不能赋值给String类型的s变量</span></span><br><span class="line"><span class="keyword">var</span> s : <span class="type">String</span> = str<span class="comment">//会报错</span></span><br></pre></td></tr></table></figure>
+<p>上面的例子会报错，如果我们这样写则不会有问题：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> s : <span class="type">String</span> = str!</span><br><span class="line"><span class="built_in">print</span>(s)</span><br></pre></td></tr></table></figure>
+<p>强制解析必须是可选类型的变量或者常量确实有值时才能够解析成功，否则会报错。为了去报强制解析不会导致运行是错误，Swift提供了if语句来判断可选类型是否有值，因此上面的语句改为如下的形式比较合适：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str : <span class="type">String?</span> = <span class="string">&quot;九阴真经&quot;</span></span><br><span class="line"><span class="keyword">if</span> str != <span class="literal">nil</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// 该值是String类型，因此可赋值给String类型的s变量</span></span><br><span class="line">	<span class="keyword">var</span> s : <span class="type">String</span> = str!</span><br><span class="line">	<span class="built_in">print</span>(s)</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">	<span class="built_in">print</span>(<span class="string">&quot;str为nil，不能强制解析&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="隐式可选类型"><a href="#隐式可选类型" class="headerlink" title="隐式可选类型"></a><strong>隐式可选类型</strong></h4><p>隐式可选就是在任意的已有类型后面添加“！”。拿Int类型举例，Int？和Int！的区别就是：当程序获取Int？类型的值时，程序必须在变量名后添加“！”后缀来进行强制解析，而Int！则不需要，Swift会自动的执行隐式解析：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> s1: <span class="type">String?</span> = <span class="string">&quot;九阴真经&quot;</span></span><br><span class="line"><span class="comment">// 对于String?可选类型，必须使用感叹号执行强制解析</span></span><br><span class="line"><span class="keyword">var</span> tmp : <span class="type">String</span> = s1!</span><br><span class="line"><span class="keyword">var</span> s2 : <span class="type">String!</span> = <span class="string">&quot;大航海时代&quot;</span></span><br><span class="line"><span class="comment">// 对于String!隐式可选类型，无需使用感叹号执行强制解析</span></span><br><span class="line"><span class="keyword">var</span> tmp2 : <span class="type">String</span> = s2</span><br></pre></td></tr></table></figure>
+<p>需要注意的是隐式可选类型的值如果没有值的情况下，如果程序尝试获取该值同样会导致运行时错误，和强制解析一样，我们用if语句来判断隐式可选类型是否有值：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str : <span class="type">String!</span> = <span class="string">&quot;大航海时代&quot;</span></span><br><span class="line"><span class="keyword">if</span> str != <span class="literal">nil</span> &#123;</span><br><span class="line"><span class="comment">// 对于String!隐式可选类型，无需使用感叹号执行强制解析</span></span><br><span class="line"><span class="keyword">var</span> s : <span class="type">String</span> = str</span><br><span class="line"><span class="built_in">print</span>(s)</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">   <span class="built_in">print</span>(<span class="string">&quot;s为nil，不能强制解析&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<h4 id="可选绑定"><a href="#可选绑定" class="headerlink" title="可选绑定"></a><strong>可选绑定</strong></h4><p>可选绑定用来判断可选是否包含值，如果包含就把值赋给一个临时常量或者变量。可选绑定一般用在 if 和 while 语句中，对可选的值进行判断并把值赋给一个常量或者变量。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str : <span class="type">String!</span> = <span class="string">&quot;九阴真经&quot;</span></span><br><span class="line"><span class="comment">// 如果可选变量str有值，将值赋值给tmp变量。</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">var</span> tmp = str</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">print</span>(<span class="string">&quot;str的值为：\(tmp)&quot;</span>)</span><br><span class="line">&#125;<span class="keyword">else</span>&#123;</span><br><span class="line">	<span class="built_in">print</span>(<span class="string">&quot;str的值为nil，不能解析！&quot;</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="8-字符和字符串"><a href="#8-字符和字符串" class="headerlink" title="8.字符和字符串"></a><strong>8.字符和字符串</strong></h3><p>Swift使用Character来代表字符，String来代表字符串，字符串表示一个有序的字符集合。</p>
+<h4 id="字符类型"><a href="#字符类型" class="headerlink" title="字符类型"></a><strong>字符类型</strong></h4><p>Swift采用Unicode字符集来存储字符，字符必须使用双引号来包起来。<br>定义字符型的值有三种表示形式：</p>
+<ul>
+<li>直接通过单个字符来指定字符常量，如“A”，”3”。</li>
+<li>通过转义字符表示特殊字符常量，如“\n”，”\r”。</li>
+<li>使用\u{n}的Unicode形式，其中n代表一个1~8的十六进制数。</li>
+</ul>
+<p>swift常用的转义字符：<br>\0  空字符<br>\   反斜杠<br>\ t   制表符<br>\n   换行符<br>\r    回车符<br>\”  双引号<br>\’  单引号</p>
+<h4 id="字符串类型"><a href="#字符串类型" class="headerlink" title="字符串类型"></a><strong>字符串类型</strong></h4><p>创建字符串：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str=<span class="string">&quot;九阴真经&quot;</span></span><br><span class="line"><span class="keyword">var</span> name:<span class="type">String</span>=<span class="string">&quot;九阴真经&quot;</span></span><br></pre></td></tr></table></figure>
+<p>字符串其实是一个结构体，因此我们可以调用结构体的构造器来创建字符串：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str=<span class="type">String</span>()<span class="comment">//创建空字符串</span></span><br><span class="line"><span class="keyword">var</span> str=<span class="type">String</span>(<span class="string">&quot;九阴真经&quot;</span>)</span><br></pre></td></tr></table></figure>
+<h4 id="字符串可变性"><a href="#字符串可变性" class="headerlink" title="字符串可变性"></a><strong>字符串可变性</strong></h4><p>在oc中有NSSting和NSMutableString来分别表示不可变和可变的字符串，Swift中只提供了String类型，Swift通过常量和变量来区分字符串是否可变：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> mutableStr=<span class="string">&quot;可变字符串&quot;</span></span><br><span class="line"><span class="keyword">let</span> immutableStr=<span class="string">&quot;不可变字符串&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="字符串比较"><a href="#字符串比较" class="headerlink" title="字符串比较"></a><strong>字符串比较</strong></h4><p>Swift提供了3种方式来比较字符串：</p>
+<ul>
+<li>字符串相等 ==</li>
+<li>前缀相等 hasPrefix()</li>
+<li>后缀相等 hasSuffix()</li>
+</ul>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> str=<span class="string">&quot;jiuyinzhenjing&quot;</span></span><br><span class="line"><span class="keyword">var</span> hasPrefix:<span class="type">Bool</span>=str.hasPrefix(<span class="string">&quot;jiu&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(hasPrefix)<span class="comment">//结果为true</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="9-类型别名"><a href="#9-类型别名" class="headerlink" title="9.类型别名"></a><strong>9.类型别名</strong></h3><p>Swift提供了类型别名为已有类型指定另一个名字，用typealias来定义类型别名：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typealias</span> <span class="type">UintMin</span>=<span class="type">Unit16</span></span><br><span class="line"><span class="keyword">var</span> <span class="built_in">max</span>=<span class="type">UintMin</span>.<span class="built_in">max</span><span class="comment">//相当于取Unit16类型的最大值</span></span><br><span class="line"><span class="built_in">print</span>(<span class="built_in">max</span>)<span class="comment">//结果为65535</span></span><br></pre></td></tr></table></figure>
+
+<p>在这里不建议用类型别名，会使程序可读性降低。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/swift/2-constant-variable.html">http://liuwangshu.cn/swift/2-constant-variable.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Swift/">Swift</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/swift/3-operator.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Swift快速入门（三）运算符</div></div></a></div><div class="next-post pull-right"><a href="/application/ipc/4-contentprovider.html"><img class="next-cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android IPC机制（四）用ContentProvider进行进程间通信</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/swift/1-helloworld.html" title="Swift快速入门（一）第一个Swift程序"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-01-23</div><div class="title">Swift快速入门（一）第一个Swift程序</div></div></a></div><div><a href="/swift/3-operator.html" title="Swift快速入门（三）运算符"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-02-06</div><div class="title">Swift快速入门（三）运算符</div></div></a></div><div><a href="/swift/4-process-control.html" title="Swift快速入门（四）流程控制"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-02-08</div><div class="title">Swift快速入门（四）流程控制</div></div></a></div><div><a href="/swift/5-set.html" title="Swift快速入门（五）集合"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-03-09</div><div class="title">Swift快速入门（五）集合</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

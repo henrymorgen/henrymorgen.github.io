@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title> Android IPC机制（三）在Android Studio中使用AIDL实现跨进程方法调用 | BATcoder - 刘望舒</title><meta name="description" content="接下来我们来使用AIDL来实现跨进程方法调用，此前我们都是用Eclipse来实现的，这次我们看看在Android Studio中使用AIDL有什么不同。"><meta name="keywords" content="Android应用层,Android进程间通信"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/ipc/3-aidl.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content=" Android IPC机制（三）在Android Studio中使用AIDL实现跨进程方法调用"><meta property="og:url" content="http://liuwangshu.cn/application/ipc/3-aidl.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="接下来我们来使用AIDL来实现跨进程方法调用，此前我们都是用Eclipse来实现的，这次我们看看在Android Studio中使用AIDL有什么不同。"><meta property="og:image" content="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><meta property="article:published_time" content="2016-01-09T08:51:00.000Z"><meta property="article:modified_time" content="2020-01-12T06:47:01.685Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 14:47:01'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%88%9B%E5%BB%BAAIDL%E6%96%87%E4%BB%B6"><span class="toc-number">1.</span> <span class="toc-text">1. 创建AIDL文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%88%9B%E5%BB%BA%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="toc-number">2.</span> <span class="toc-text">2. 创建服务端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8"><span class="toc-number">3.</span> <span class="toc-text">3. 客户端调用</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/08/05/ecRaRO.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle"> Android IPC机制（三）在Android Studio中使用AIDL实现跨进程方法调用</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2016-01-09T08:51:00.000Z" title="发表于 2016-01-09 16:51:00">2016-01-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T06:47:01.685Z" title="更新于 2020-01-12 14:47:01">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<a id="more"></a>
+
+
+<p>在上一篇文章<a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85/article/details/50448409">Android IPC机制（二）用Messenger进行进程间通信</a>中我们介绍了使用Messenger来进行进程间通信的方法，但是我们能发现Messenger是以串行的方式来处理客户端发来的信息，如果有大量的消息发到服务端，服务端仍然一个一个的处理再响应客户端显然是不合适的。另外，Messenger用来进程间进行数据传递但是却不能满足跨进程的方法调用，接下来我们来使用AIDL来实现跨进程方法调用，此前我们都是用Eclipse来实现的，这次我们看看在Android Studio中使用AIDL有什么不同。</p>
+<h3 id="1-创建AIDL文件"><a href="#1-创建AIDL文件" class="headerlink" title="1. 创建AIDL文件"></a><strong>1. 创建AIDL文件</strong></h3><p> 我们将项目的目录结构调为Android模式，在java同级目录创建aidl文件夹，在文件夹中创建一个包名和应用包名一致的包<br><img src="https://s2.ax1x.com/2019/05/29/VnQ41A.png" alt="VnQ41A.png"></p>
+<p>我们先创建一个IGameManager.aidl的文件，这里面有两个方法分别是addGame和getGameList。(IGameManager.aidl)</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.liuwangshu.moonaidl;</span><br><span class="line"><span class="keyword">import</span> com.example.liuwangshu.moonaidl.Game;</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">IGameManager</span> </span>&#123;</span><br><span class="line">  List&lt;Game&gt;getGameList();</span><br><span class="line">  <span class="function"><span class="keyword">void</span> <span class="title">addGame</span><span class="params">(in Game game)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在AIDL文件中支持的数据类型包括：</p>
+<ul>
+<li>基本数据类型</li>
+<li>String和CharSequence</li>
+<li>List:只支持ArrayList,里面的元素都必须被AIDL支持</li>
+<li>Map:只支持HashMap,里面的元素必须被AIDL 支持</li>
+<li>实现Parcelable接口的对象</li>
+<li>所有AIDL接口</li>
+</ul>
+<p>在IGameManager.aidl中我们用到了Game这个类，这个类实现了Parcelable,在AIDL 文件中我们要import 进来，来看看Game类。(Game.java)</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.liuwangshu.moonaidl;</span><br><span class="line"><span class="keyword">import</span> android.os.Parcel;</span><br><span class="line"><span class="keyword">import</span> android.os.Parcelable;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Game</span> <span class="keyword">implements</span> <span class="title">Parcelable</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> String gameName;</span><br><span class="line">    <span class="keyword">public</span> String gameDescribe;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Game</span><span class="params">(String gameName,String gameDescribe)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.gameName=gameName;</span><br><span class="line">        <span class="keyword">this</span>.gameDescribe=gameDescribe;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="title">Game</span><span class="params">(Parcel in)</span> </span>&#123;</span><br><span class="line">        gameName=in.readString();</span><br><span class="line">        gameDescribe=in.readString();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Creator&lt;Game&gt; CREATOR = <span class="keyword">new</span> Creator&lt;Game&gt;() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> Game <span class="title">createFromParcel</span><span class="params">(Parcel in)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> Game(in);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> Game[] newArray(<span class="keyword">int</span> size) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> Game[size];</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">describeContents</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">writeToParcel</span><span class="params">(Parcel dest, <span class="keyword">int</span> flags)</span> </span>&#123;</span><br><span class="line">        dest.writeString(gameName);</span><br><span class="line">        dest.writeString(gameDescribe);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>在这里不去讲怎么去实现Parcelable 接口，在上面的IGameManager.aidl文件中我们用到了Game这个类，所以我们也要创建Game.aidl，来申明Game实现了parcelable 接口。(Game.aidl)</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.liuwangshu.moonaidl;</span><br><span class="line">parcelable Game;</span><br></pre></td></tr></table></figure>
+<p>这个时候我们重新编译程序，工程就会自动生成IGameManager.aidl对应的接口文件，这个文件生成的位置和Eclipse的位置不同，我们将项目的目录结构调整为project模式，在app–&gt;build–&gt;generated–&gt;soure–&gt;aidl–&gt;debug目录下我们找到自己的包名文件，在文件中有一个接口文件IGameManager。<br><img src="https://s2.ax1x.com/2019/05/29/VnQIXt.png" alt="VnQIXt.png"></p>
+<p>IGameManager接口文件的代码这里就不说了，有兴趣的可以下载本项目的源码去了解下。</p>
+<h3 id="2-创建服务端"><a href="#2-创建服务端" class="headerlink" title="2. 创建服务端"></a><strong>2. 创建服务端</strong></h3><p>服务端我们在onCreate方法中创建了两个游戏的信息并创建Binder对象实现了AIDL的接口文件中的方法，并在onBind方法中将Binder对象返回。(AIDLService.java)</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.liuwangshu.moonaidl;</span><br><span class="line"><span class="keyword">import</span> android.app.Service;</span><br><span class="line"><span class="keyword">import</span> android.content.Intent;</span><br><span class="line"><span class="keyword">import</span> android.os.Binder;</span><br><span class="line"><span class="keyword">import</span> android.os.IBinder;</span><br><span class="line"><span class="keyword">import</span> android.os.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.CopyOnWriteArrayList;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AIDLService</span> <span class="keyword">extends</span> <span class="title">Service</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> CopyOnWriteArrayList&lt;Game&gt; mGameList=<span class="keyword">new</span> CopyOnWriteArrayList&lt;Game&gt;();</span><br><span class="line">    <span class="keyword">private</span> Binder mBinder= <span class="keyword">new</span> IGameManager.Stub() &#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> List&lt;Game&gt; <span class="title">getGameList</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">            <span class="keyword">return</span> mGameList;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addGame</span><span class="params">(Game game)</span> <span class="keyword">throws</span> RemoteException </span>&#123;</span><br><span class="line">            mGameList.add(game);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="keyword">super</span>.onCreate();</span><br><span class="line">        mGameList.add(<span class="keyword">new</span> Game(<span class="string">&quot;九阴真经ol&quot;</span>, <span class="string">&quot;最好玩的武侠网游&quot;</span>));</span><br><span class="line">        mGameList.add(<span class="keyword">new</span> Game(<span class="string">&quot;大航海时代ol&quot;</span>,<span class="string">&quot;最好玩的航海网游&quot;</span>));</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> IBinder <span class="title">onBind</span><span class="params">(Intent intent)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mBinder;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>当然我们不要忘了这个服务端应该运行在另一个进程,在AndroidManifest.xml文件中配置service:</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">service</span> <span class="attr">android:name</span>=<span class="string">&quot;.AIDLService&quot;</span> <span class="attr">android:process</span>=<span class="string">&quot;:remote&quot;</span>&gt;</span><span class="tag">&lt;/<span class="name">service</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-客户端调用"><a href="#3-客户端调用" class="headerlink" title="3. 客户端调用"></a><strong>3. 客户端调用</strong></h3><p> 最后我们在客户端onCreate方法中调用bindService方法绑定远程服务端，绑定成功后将返回的Binder对象转换为AIDL接口，这样我们就可以通过这个接口来调用远程服务端的方法了。(AIDLActivity.java)</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.liuwangshu.moonaidl;</span><br><span class="line"><span class="keyword">import</span> android.content.ComponentName;</span><br><span class="line"><span class="keyword">import</span> android.content.Context;</span><br><span class="line"><span class="keyword">import</span> android.content.Intent;</span><br><span class="line"><span class="keyword">import</span> android.content.ServiceConnection;</span><br><span class="line"><span class="keyword">import</span> android.os.IBinder;</span><br><span class="line"><span class="keyword">import</span> android.os.RemoteException;</span><br><span class="line"><span class="keyword">import</span> android.support.v7.app.AppCompatActivity;</span><br><span class="line"><span class="keyword">import</span> android.os.Bundle;</span><br><span class="line"><span class="keyword">import</span> android.util.Log;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AIDLActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> <span class="keyword">static</span> String TAG=<span class="string">&quot;AIDLActivity&quot;</span>;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_aidl);</span><br><span class="line">        Intent mIntent=<span class="keyword">new</span> Intent(AIDLActivity.<span class="keyword">this</span>,AIDLService.class);</span><br><span class="line">        bindService(mIntent,mServiceConnection, Context.BIND_AUTO_CREATE);</span><br><span class="line">    &#125;</span><br><span class="line">   <span class="keyword">private</span> ServiceConnection mServiceConnection=<span class="keyword">new</span> ServiceConnection() &#123;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceConnected</span><span class="params">(ComponentName name, IBinder service)</span> </span>&#123;</span><br><span class="line">           IGameManager iGameManager=IGameManager.Stub.asInterface(service);</span><br><span class="line">           Game game=<span class="keyword">new</span> Game(<span class="string">&quot;月影传说&quot;</span>,<span class="string">&quot;最好玩的武侠单机游戏&quot;</span>);</span><br><span class="line">           <span class="keyword">try</span> &#123;</span><br><span class="line">               iGameManager.addGame(game);</span><br><span class="line">               List&lt;Game&gt; mList=iGameManager.getGameList();</span><br><span class="line">               <span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;mList.size();i++)&#123;</span><br><span class="line">                   Game mGame=mList.get(i);</span><br><span class="line">                   Log.i(TAG,mGame.gameName+<span class="string">&quot;---&quot;</span>+mGame.gameDescribe);</span><br><span class="line">               &#125;</span><br><span class="line">           &#125; <span class="keyword">catch</span> (RemoteException e) &#123;</span><br><span class="line">               e.printStackTrace();</span><br><span class="line">           &#125;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="meta">@Override</span></span><br><span class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onServiceDisconnected</span><span class="params">(ComponentName name)</span> </span>&#123;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDestroy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy();</span><br><span class="line">        unbindService(mServiceConnection);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>绑定成功后我们创建了一个新的Game然后调用远程服务端的addGame方法将新游戏添加进去，然后调用循环将远端服务中的所有的游戏在打印出来，我们运行程序</p>
+<p><img src="https://s2.ax1x.com/2019/05/29/VnQ56I.png" alt="VnQ56I.png"></p>
+<p>打印出了远程服务端的所有的游戏，这样我们就成功的在客户端通过AIDL来调用远程服务端的方法了。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/henrymorgen/MoonAIDL2"><font size=5>github源码下载</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/ipc/3-aidl.html">http://liuwangshu.cn/application/ipc/3-aidl.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a><a class="post-meta__tags" href="/tags/Android%E8%BF%9B%E7%A8%8B%E9%97%B4%E9%80%9A%E4%BF%A1/">Android进程间通信</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/designpatterns/1-principle.html"><img class="prev-cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">设计模式（一）设计六大原则</div></div></a></div><div class="next-post pull-right"><a href="/application/ipc/2-messenger.html"><img class="next-cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info"> Android IPC机制（二）用Messenger进行进程间通信</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/ipc/1-process-start.html" title="Android IPC机制（一）开启多进程"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-01-02</div><div class="title">Android IPC机制（一）开启多进程</div></div></a></div><div><a href="/application/ipc/2-messenger.html" title=" Android IPC机制（二）用Messenger进行进程间通信"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-01-03</div><div class="title"> Android IPC机制（二）用Messenger进行进程间通信</div></div></a></div><div><a href="/application/ipc/4-contentprovider.html" title="Android IPC机制（四）用ContentProvider进行进程间通信"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-01-29</div><div class="title">Android IPC机制（四）用ContentProvider进行进程间通信</div></div></a></div><div><a href="/application/ipc/5-socket.html" title="Android IPC机制（五）用Socket实现跨进程聊天程序"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-02-20</div><div class="title">Android IPC机制（五）用Socket实现跨进程聊天程序</div></div></a></div><div><a href="/application/eventbus/1-eventbus.html" title="Android事件总线（一）EventBus3.0用法全解析"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-08-17</div><div class="title">Android事件总线（一）EventBus3.0用法全解析</div></div></a></div><div><a href="/application/eventbus/3-otto-sourcecode.html" title=" Android事件总线（三）otto用法全解析"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-12-16</div><div class="title"> Android事件总线（三）otto用法全解析</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

@@ -1,0 +1,219 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gradle核心思想（一）为什么现在要用Gradle？ | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  关联文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解 前言又要开启一个新系列了，这个系列我们来学习Gradle，它是一个基于"><meta name="keywords" content="Gradle核心思想"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/gradle/1-study-gradle.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Gradle核心思想（一）为什么现在要用Gradle？"><meta property="og:url" content="http://liuwangshu.cn/application/gradle/1-study-gradle.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  关联文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解 前言又要开启一个新系列了，这个系列我们来学习Gradle，它是一个基于"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZO95n.jpg"><meta property="article:published_time" content="2018-08-07T16:18:00.000Z"><meta property="article:modified_time" content="2020-09-16T13:05:17.787Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-16 21:05:17'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E9%A1%B9%E7%9B%AE%E8%87%AA%E5%8A%A8%E5%8C%96"><span class="toc-number">2.</span> <span class="toc-text">1.项目自动化</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%9E%84%E5%BB%BA%E5%B7%A5%E5%85%B7"><span class="toc-number">3.</span> <span class="toc-text">2.构建工具</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-APK%E7%9A%84%E6%9E%84%E5%BB%BA%E8%BF%87%E7%A8%8B"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 APK的构建过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-Apache-Ant"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 Apache Ant</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-Gant"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 Gant</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-Apache-Maven"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 Apache Maven</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Gradle%E7%9A%84%E7%89%B9%E6%80%A7"><span class="toc-number">4.</span> <span class="toc-text">3.Gradle的特性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E8%BD%BB%E6%9D%BE%E7%9A%84%E5%8F%AF%E6%8B%93%E5%B1%95%E6%80%A7"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 轻松的可拓展性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E9%87%87%E7%94%A8%E4%BA%86Groovy"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 采用了Groovy</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-%E5%BC%BA%E5%A4%A7%E7%9A%84%E4%BE%9D%E8%B5%96%E7%AE%A1%E7%90%86"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 强大的依赖管理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-4-%E7%81%B5%E6%B4%BB%E7%9A%84%E7%BA%A6%E5%AE%9A"><span class="toc-number">4.4.</span> <span class="toc-text">3.4 灵活的约定</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-5-Gradle-Wrapper"><span class="toc-number">4.5.</span> <span class="toc-text">3.5 Gradle Wrapper</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-6-%E5%8F%AF%E4%BB%A5%E5%92%8C%E5%85%B6%E4%BB%96%E6%9E%84%E5%BB%BA%E5%B7%A5%E5%85%B7%E9%9B%86%E6%88%90"><span class="toc-number">4.6.</span> <span class="toc-text">3.6 可以和其他构建工具集成</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-7-%E5%BA%95%E5%B1%82API"><span class="toc-number">4.7.</span> <span class="toc-text">3.7 底层API</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-8-%E7%A4%BE%E5%8C%BA%E7%9A%84%E6%94%AF%E6%8C%81%E5%92%8C%E6%8E%A8%E5%8A%A8"><span class="toc-number">4.8.</span> <span class="toc-text">3.8 社区的支持和推动</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">4.总结</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZO95n.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Gradle核心思想（一）为什么现在要用Gradle？</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-08-07T16:18:00.000Z" title="发表于 2018-08-08 00:18:00">2018-08-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-16T13:05:17.787Z" title="更新于 2020-09-16 21:05:17">2020-09-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>关联文章<br><a href="http://liuwangshu.cn/application/gradle/1-study-gradle.html">Gradle核心思想（一）为什么现在要用Gradle？</a><br><a href="http://liuwangshu.cn/application/gradle/2-primer.html">Gradle核心思想（二）Gradle入门前奏</a><br><a href="http://liuwangshu.cn/application/gradle/3-groovy.html">Gradle核心思想（三）Groovy快速入门指南</a><br><a href="http://liuwangshu.cn/application/gradle/4-wrapper.html">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</a><br><a href="http://liuwangshu.cn/application/gradle/5-plugins.html">Gradle核心思想（五）通俗易懂的Gradle插件讲解</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>又要开启一个新系列了，这个系列我们来学习Gradle，它是一个基于JVM的新一代构建工具，关于Gradle完全可以写一本书，这个系列会针对Android开发来对Gradle的知识进行精简讲解。Gradle目前已经应用于多个Android开发的技术体系中，比如构建系统、插件化、热修复和组件化等等，如果你不了解Gradle，那么你对于上述技术体系的了解会大打折扣。为了让大家能够更好的学习Gradle，这篇文章不会介绍Gradle具体的技术细节，而是先介绍为什么现在要用Gradle？</p>
+<a id="more"></a>
+
+<h3 id="1-项目自动化"><a href="#1-项目自动化" class="headerlink" title="1.项目自动化"></a><strong>1.项目自动化</strong></h3><p>Gradle是一个构建工具，那么为什么要用构建工具，这就需要先从项目自动化开始讲起。<br>在我们开发软件时，会面临相似的情况就是，我们需要去用IDE来进行编码，当完成一些功能时会进行编译、单元测试、打包等工作，这些工作都需要开发人员手动来实现。而一般的软件都是迭代式开发的，一个版本接着一本版本，每个版本又可能有很多的功能，如果开发每次实现功能时都需要手动的进行编译、单元测试和打包等工作，那显然会非常耗时而且也容易出现问题，因此项目自动化应运而生，它有以下优点：</p>
+<ol>
+<li>它可以尽量防止开发手动介入从而节省了开发的时间并减少错误的发生。</li>
+<li>自动化可以自定义有序的步骤来完成代码的编译、测试和打包等工作，让重复的步骤变得简单。</li>
+<li>IDE可能受到不同操作系统的限制，而自动化构建是不会依赖于特定的操作系统和IDE的，具有平台无关性。</li>
+</ol>
+<h3 id="2-构建工具"><a href="#2-构建工具" class="headerlink" title="2.构建工具"></a><strong>2.构建工具</strong></h3><p>构建工具用于实现项目自动化，是一种可编程的工具，你可以用代码来控制构建流程最终生成可交付的软件。构建工具可以帮助你创建一个重复的、可靠的、无需手动介入的、不依赖于特定操作系统和IDE的构建。这么说可能有些抽象，这里拿APK的构建过程来举例。</p>
+<h4 id="2-1-APK的构建过程"><a href="#2-1-APK的构建过程" class="headerlink" title="2.1 APK的构建过程"></a><strong>2.1 APK的构建过程</strong></h4><p>APK的构建过程可以根据官方提供的流程图如下图所示。<br><img src="https://s2.ax1x.com/2019/05/27/VZOPCq.png" alt="VZOPCq.png"></p>
+<p>这个APK构建的过程主要分为以下几步：</p>
+<ol>
+<li>通过AAPT(Android Asset Packaging Tool)打包res资源文件，比如AndroidManifest.xml、xml布局文件等，并将这些xml文件编译为二进制，其中assets和raw文件夹的文件不会被编译为二进制，最终会生成R.java和resources.arsc文件。</li>
+<li>AIDL工具会将所有的aidl接口转化为对应的Java接口。</li>
+<li>所有的Java代码，包括R.java和Java接口都会被Java编译器编译成.class文件。</li>
+<li>Dex工具会将上一步生成的.class文件、第三库和其他.class文件编译成.dex文件。</li>
+<li>上一步编译生成的.dex文件、编译过的资源、无需编译的资源（如图片等）会被ApkBuilder工具打包成APK文件。</li>
+<li>使用Debug Keystore或者Release Keystore对上一步生成的APK文件进行签名。</li>
+<li>如果是对APK正式签名，还需要使用zipalign工具对APK进行对齐操作，这样应用运行时会减少内存的开销。</li>
+</ol>
+<p>从以上步骤可以看出，APK的构建过程是比较繁琐的，而且这个构建过程又是时常重复的，如果没有构建工具，手动去完成构建工作，无疑对于开发人员是个折磨，也会产生诸多的问题，导致项目开发周期变长。<br>在Gradle出现之前，有三个基于Java的构建工具：Ant、Gant和Maven，它们被应用于Java或者Android开发中，我们来看看它们都有什么特点。</p>
+<h4 id="2-2-Apache-Ant"><a href="#2-2-Apache-Ant" class="headerlink" title="2.2 Apache Ant"></a><strong>2.2 Apache Ant</strong></h4><p><img src="https://s2.ax1x.com/2019/05/27/VZOpUs.png" alt="VZOpUs.png"></p>
+<p>Ant在这里不是蚂蚁的意思（虽然它的图标是蚂蚁），而是Another Neat Tool的意思。<br> 它是由 James Duncan Davidson 开发的（Tomcat 最初的开发者），最初是用来构建 Tomcat。在2000年，Ant成为一个独立的项目并被发布出来。Ant 是由 Java 编写的构建工具，它的核心代码是由Java编写的，因此具有平台无关性，构建脚本是XML格式的（默认为bulid.xml），如果你熟悉XML，那么Ant 就比较容易上手。</p>
+<p>Ant构建脚本的样式如下所示。<br><strong>bulid.xml</strong></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">name</span>=<span class="string">&quot;test&quot;</span> <span class="attr">default</span>=<span class="string">&quot;hello&quot;</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">echo</span> <span class="attr">message</span>=<span class="string">&quot;running build.xml which is equivalent to build.gant&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">file</span>=<span class="string">&quot;build.properties&quot;</span>/&gt;</span>    </span><br><span class="line">    <span class="tag">&lt;<span class="name">target</span> <span class="attr">name</span>=<span class="string">&quot;init&quot;</span>  <span class="attr">description</span>=<span class="string">&quot;init target&quot;</span> &gt;</span> </span><br><span class="line">        <span class="tag">&lt;<span class="name">echo</span> <span class="attr">message</span>=<span class="string">&quot;Executing init target&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">target</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">target</span> <span class="attr">name</span>=<span class="string">&quot;hello&quot;</span> <span class="attr">depends</span>=<span class="string">&quot;init&quot;</span> <span class="attr">description</span>=<span class="string">&quot;say hello target&quot;</span>&gt;</span> </span><br><span class="line">        <span class="tag">&lt;<span class="name">echo</span> <span class="attr">message</span>=<span class="string">&quot;$&#123;echo.msg&#125;&quot;</span>/&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>Ant的构建脚本由三个基本元素组成：一个project（工程）、多个target（目标）和可用的task（任务）。<br>Apache Ant有以下缺点：</p>
+<ol>
+<li>Ant无法获取运行时的信息。</li>
+<li>XML作为构建脚本的语言，如果构建逻辑复杂，那么构建脚本就会又长又难以维护。</li>
+<li>Ant需要配合Ivy(一种管理项目依赖工具)，否则Ant很难管理依赖。</li>
+<li>Ant在如何组织项目结构方面没有给出任何指导，这导致Ant虽然灵活性高，但这样的灵活导致每个构建脚本都是唯一的而且很难被理解。</li>
+</ol>
+<h4 id="2-3-Gant"><a href="#2-3-Gant" class="headerlink" title="2.3 Gant"></a><strong>2.3 Gant</strong></h4><p><img src="https://s2.ax1x.com/2019/05/27/VZOSEj.png" alt="VZOSEj.png"><br>Gant 是一个基于Ant 的构建工具，它在Ant的基础上用Groovy写的DSL（领域特定语言）。如果用Ant 实现构建，但是不喜欢用XML来编写构建脚本或者现有的XML构建脚本很难维护和管理，那么Gant 是一个不错的选择。<br>Gant构建文件的样式如下所示。<br><strong>build.gant</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Ant.echo(message : <span class="string">&#x27;running build.gant&#x27;</span>)</span><br><span class="line">Ant.property(file : <span class="string">&#x27;build.properties&#x27;</span>)</span><br><span class="line">def antProperty = Ant.project.properties</span><br><span class="line">target(init : <span class="string">&#x27;init target&#x27;</span>) &#123;</span><br><span class="line">    echo(message : <span class="string">&#x27;Executing init target&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line">target(hello : <span class="string">&#x27;say hello target&#x27;</span>) &#123;</span><br><span class="line">    depends(init)</span><br><span class="line">    echo(message : antProperty.<span class="string">&#x27;echo.msg&#x27;</span>)</span><br><span class="line">&#125;</span><br><span class="line">setDefaultTarget(hello)</span><br></pre></td></tr></table></figure>
+<p>这个build.gant等同于此前Ant的bulid.xml。</p>
+<h4 id="2-4-Apache-Maven"><a href="#2-4-Apache-Maven" class="headerlink" title="2.4 Apache Maven"></a><strong>2.4 Apache Maven</strong></h4><p><img src="https://s2.ax1x.com/2019/05/27/VZLxbQ.jpg" alt="VZLxbQ.jpg"><br>Maven于2004年发布，它的目标是改进开发人员在使用Ant时面临的一些问题。Maven最初是为了简化Jakarta Turbine项目的构建，它经历了Maven到Maven3的发展，Maven作为后来者， 继承了Ant的项目构建功能， 同样采用了XML作为构建脚本的格式。Maven具有依赖管理和项目管理的功能，提供了中央仓库，能帮助我们自动下载库文件。<br>Maven的构建脚本的样式如下所示。<br><strong>pom.xml</strong></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">project</span> <span class="attr">xmlns</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0&quot;</span> <span class="attr">xmlns:xsi</span>=<span class="string">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span></span></span><br><span class="line"><span class="tag">  <span class="attr">xsi:schemaLocation</span>=<span class="string">&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">modelVersion</span>&gt;</span>4.0.0<span class="tag">&lt;/<span class="name">modelVersion</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.mycompany.app<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>my-app<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">version</span>&gt;</span>1.0-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">packaging</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">packaging</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">name</span>&gt;</span>Maven Quick Start Archetype<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">url</span>&gt;</span>http://maven.apache.org<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>junit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">version</span>&gt;</span>4.11<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">scope</span>&gt;</span>test<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">project</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>Maven相比Ant的优点：</p>
+<ol>
+<li>Ant是过程式的，开发者需要显示的指定每个目标，以及完成该目标锁需要执行的任务。每一个项目，开发着都需要重新编写这一过程，这样会产生大量的重复。Maven是声明式的，项目的构建过程和过程中的各个阶段都由插件实现，开发者只需要声明项目的基本元素就可以了，这很大程度消除了重复。</li>
+<li>Ant本身是没有依赖管理，需要配合Ivy来管理依赖，而Maven本身就提供了依赖管理。</li>
+<li>Maven 使用约定而不是配置，它为工程提供了合理的默认行为，项目会知道去哪个目录寻找源代码以及构建运行时有那些任务去执行，如果你的项目遵从默认值，那么只需要写几行XML配置脚本就可以了。而Ant是使用配置且没有默认行为的。</li>
+</ol>
+<p>Maven的缺点：</p>
+<ol>
+<li>Maven的提供了默认的结构和生命周期，这些可能不适合你的项目需求。</li>
+<li>为Maven写定制的扩展过于累赘。</li>
+<li>Maven的中央仓库比较混乱，当无法从中央仓库中得到需要的类库时，我们可以手工下载复制到本地仓库中，也可以建立组织内部的仓库服务器。</li>
+<li>国内连接Maven的中央仓库比较慢，需要连接国内的Maven镜像仓库。</li>
+<li>Maven缺乏文档，不便于使用和理解。</li>
+</ol>
+<h3 id="3-Gradle的特性"><a href="#3-Gradle的特性" class="headerlink" title="3.Gradle的特性"></a><strong>3.Gradle的特性</strong></h3><p>Gradle是一款基于JVM的专注于灵活性和性能的开源构建工具。<br><img src="https://s2.ax1x.com/2019/05/27/VZLvDg.png" alt="VZLvDg.png"><br>从上图可以看出，Gradle结合Ant和Maven等构建工具的最佳特性。它有着约定优于配置的方法、强大的依赖管理，它的构建脚本使用Groovy或Kotlin 编写，是Android的官方构建工具。Gradle的构建脚本的样式如下所示。<br><strong>build.gradle</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply plugin:<span class="string">&#x27;java&#x27;</span></span><br><span class="line">group=<span class="string">&#x27;com.mycompany.app&#x27;</span></span><br><span class="line">archivesBaseName=<span class="string">&#x27;my-app&#x27;</span></span><br><span class="line">version=<span class="string">&#x27;1.0-SNAPSHOT&#x27;</span></span><br><span class="line"></span><br><span class="line">repositories&#123;</span><br><span class="line">   mavenCentral()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dependencies&#123;</span><br><span class="line">   testCompile <span class="string">&#x27;junit:4.11&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个build.gradlet等同于此前Maven的pom.xml。可以看出Groovy编写构建脚本代码量更少，可读性更强。<br>下面列出Gradle与竞争对手不同的特性。</p>
+<h4 id="3-1-轻松的可拓展性"><a href="#3-1-轻松的可拓展性" class="headerlink" title="3.1 轻松的可拓展性"></a><strong>3.1 轻松的可拓展性</strong></h4><p>Gradle 有非常良好的拓展性。如果你想要在多个构建或者项目中分享可重用代码，Gradle的插件会帮助你实现。将Gradle插件应用于你的项目中，它会在你的项目构建过程中提供很多帮助：为你的添加项目的依赖的第三方库、为你的项目添加有用的默认设置和约定（源代码位置、单元测试代码位置）。其中Android Gradle插件继承Java Gradle插件，在本系列后续的文章会介绍插件的内容。</p>
+<h4 id="3-2-采用了Groovy"><a href="#3-2-采用了Groovy" class="headerlink" title="3.2 采用了Groovy"></a><strong>3.2 采用了Groovy</strong></h4><p>Ant和Maven的构建脚本是由XML来编写的，如果XML逻辑复杂内容太多就不容易维护。Gradle可以使用Groovy来实现构建脚本，Groovy 是基于Jvm一种动态语言，它的语法和Java非常相似并兼容Java，因此你无需担心学习Groovy的成本。Groovy在Java的基础上增加了很多动态类型和灵活的特性，比起XML，Gradle更具有表达性和可读性。</p>
+<h4 id="3-3-强大的依赖管理"><a href="#3-3-强大的依赖管理" class="headerlink" title="3.3 强大的依赖管理"></a><strong>3.3 强大的依赖管理</strong></h4><p>Gradle提供了可配置的可靠的依赖管理方案。一旦依赖的库被下载并存储到本地缓存中，我们的项目就可以使用了。依赖管理很好的实现了在不同的平台和机器上产生相同的构建结果。</p>
+<h4 id="3-4-灵活的约定"><a href="#3-4-灵活的约定" class="headerlink" title="3.4 灵活的约定"></a><strong>3.4 灵活的约定</strong></h4><p>Gradle可以为构建你的项目提供引导和默认值，如果你使用这种约定，你的Gradle构建脚本不会有几行。比起Ant，Gradle不仅仅提供了约定，还可以让你轻松的打破约定。</p>
+<h4 id="3-5-Gradle-Wrapper"><a href="#3-5-Gradle-Wrapper" class="headerlink" title="3.5 Gradle Wrapper"></a><strong>3.5 Gradle Wrapper</strong></h4><p>Gradle Wrapper是对Gradle 的包装，它的作用是简化Gradle本身的下载、安装和构建，比如它会在我们没有安装Gradle的情况下，去下载指定版本的Gradle并进行构建。Gradle的版本很多，所以有可能出现版本兼容的问题，这时就需要Gradle Wrapper去统一Gradle的版本，避免开发团队因为Gradle版本不一致而产生问题。</p>
+<h4 id="3-6-可以和其他构建工具集成"><a href="#3-6-可以和其他构建工具集成" class="headerlink" title="3.6 可以和其他构建工具集成"></a><strong>3.6 可以和其他构建工具集成</strong></h4><p>Gradle可以和Ant、Maven和Ivy进行集成，比如我们可以把Ant的构建脚本导入到Gradle的构建中。</p>
+<h4 id="3-7-底层API"><a href="#3-7-底层API" class="headerlink" title="3.7 底层API"></a><strong>3.7 底层API</strong></h4><p>Gradle显然无法满足所有企业级构建的所有要求，但是可以通过Hook Gradle的生命周期，来监控和配置构建脚本。</p>
+<h4 id="3-8-社区的支持和推动"><a href="#3-8-社区的支持和推动" class="headerlink" title="3.8 社区的支持和推动"></a><strong>3.8 社区的支持和推动</strong></h4><p>Gradle是一个开源的项目，它遵循了Apache License 2.0协议。Gradle的优良特性吸引了很多开发者并形成了Gradle社区，很多开源软件开发者为Gradle的核心代码做出了共享。</p>
+<h3 id="4-总结"><a href="#4-总结" class="headerlink" title="4.总结"></a><strong>4.总结</strong></h3><p>本篇文章从项目自动化开始讲起，介绍了常用的构建工具：Ant、Gant和Maven，最后介绍了Gradle的特性，这些特性和其他竞争的构建工具相比有着很大的优势和吸引力，这也是为什么我们现在要用Gradle的原因。</p>
+<p><strong>感谢</strong><br>《实战Gradle》<br>《Android Gradle权威指南》<br><a target="_blank" rel="noopener" href="https://technologyconversations.com/2014/06/18/build-tools/">https://technologyconversations.com/2014/06/18/build-tools/</a><br><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/gradle/6qo51htq.html">https://www.w3cschool.cn/gradle/6qo51htq.html</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/singwhatiwanna/article/details/76084580">https://blog.csdn.net/singwhatiwanna/article/details/76084580</a><br><a target="_blank" rel="noopener" href="https://www.w3cschool.cn/ant/">https://www.w3cschool.cn/ant/</a><br><a target="_blank" rel="noopener" href="http://wiki.jikexueyuan.com/project/maven/overview.html">http://wiki.jikexueyuan.com/project/maven/overview.html</a><br><a target="_blank" rel="noopener" href="http://www.raychase.net/863">http://www.raychase.net/863</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/coloriy/article/details/79443752">https://blog.csdn.net/coloriy/article/details/79443752</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/gradle/1-study-gradle.html">http://liuwangshu.cn/application/gradle/1-study-gradle.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Gradle%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3/">Gradle核心思想</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZO95n.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/gradle/2-primer.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZvkxP.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Gradle核心思想（二）Gradle入门前奏</div></div></a></div><div class="next-post pull-right"><a href="/framework/pms/4-pms-start.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VeCIQs.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android包管理机制（四）PMS的创建过程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/gradle/2-primer.html" title="Gradle核心思想（二）Gradle入门前奏"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZvkxP.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-27</div><div class="title">Gradle核心思想（二）Gradle入门前奏</div></div></a></div><div><a href="/application/gradle/3-groovy.html" title="Gradle核心思想（三）Groovy快速入门指南"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZvBxx.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-04</div><div class="title">Gradle核心思想（三）Groovy快速入门指南</div></div></a></div><div><a href="/application/gradle/4-wrapper.html" title="Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZvIQP.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-01-20</div><div class="title">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</div></div></a></div><div><a href="/application/gradle/5-plugins.html" title="Gradle核心思想（五）通俗易懂的Gradle插件讲解"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZxypn.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-02-14</div><div class="title">Gradle核心思想（五）通俗易懂的Gradle插件讲解</div></div></a></div><div><a href="/application/gradle/6-custonplugin.html" title="Gradle核心思想（六）自定义Gradle插件的三种方式"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZzVAg.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-02-24</div><div class="title">Gradle核心思想（六）自定义Gradle插件的三种方式</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

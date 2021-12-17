@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>『BATcoder』寒冬已至！视频聊聊四面楚歌的Android工程师该何去何从？ | BATcoder - 刘望舒</title><meta name="description" content="大家好，我是刘望舒，I’m back！最近分享了一些视频，都属于望舒杂谈，望舒杂谈会分享一些经验，什么都会聊。除了望舒杂谈还有另一个视频分支叫做BATcoder，什么是BATcoder呢？它是Android进阶三部曲的番外篇，会对Android进阶三部曲的内容进行拓展和升级，会以视频的形式分享给大家。至于为啥叫BATcoder，这是因为我希望大家看了我的技术视频能进入自己中意的大厂。这篇是BATc"><meta name="keywords" content="BATcoder"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/batcoder/android_future.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="『BATcoder』寒冬已至！视频聊聊四面楚歌的Android工程师该何去何从？"><meta property="og:url" content="http://liuwangshu.cn/batcoder/android_future.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="大家好，我是刘望舒，I’m back！最近分享了一些视频，都属于望舒杂谈，望舒杂谈会分享一些经验，什么都会聊。除了望舒杂谈还有另一个视频分支叫做BATcoder，什么是BATcoder呢？它是Android进阶三部曲的番外篇，会对Android进阶三部曲的内容进行拓展和升级，会以视频的形式分享给大家。至于为啥叫BATcoder，这是因为我希望大家看了我的技术视频能进入自己中意的大厂。这篇是BATc"><meta property="og:image" content="https://pic1.imgdb.cn/item/5fc4287fd590d4788afbc2f8.jpg"><meta property="article:published_time" content="2020-11-29T16:16:16.000Z"><meta property="article:modified_time" content="2020-12-16T11:22:41.667Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-12-16 19:22:41'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%A7%86%E9%A2%91%E7%89%88%E6%9C%AC"><span class="toc-number">1.</span> <span class="toc-text">视频版本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%A7%A3%E9%99%A4%E5%AF%B9Android%E7%9A%84%E8%AF%AF%E8%A7%A3"><span class="toc-number">2.</span> <span class="toc-text">1. 解除对Android的误解</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-Android%E7%B3%BB%E7%BB%9F%E7%9A%84%E6%9C%AA%E6%9D%A5"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 Android系统的未来</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-Android%E7%9A%84%E6%9C%AA%E6%9D%A5%E5%B0%B1%E4%B8%9A%E8%B6%8B%E5%8A%BF"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 Android的未来就业趋势</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-3-Android%E5%BC%80%E5%8F%91%E7%9A%84%E5%A4%A9%E8%8A%B1%E6%9D%BF"><span class="toc-number">2.3.</span> <span class="toc-text">1.3 Android开发的天花板</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%98%AF%E5%90%A6%E8%A6%81%E8%BD%AC%E8%A1%8C"><span class="toc-number">3.</span> <span class="toc-text">2.是否要转行</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-%E8%BD%AC%E4%BB%80%E4%B9%88%E6%9C%80%E5%A5%BD"><span class="toc-number">3.1.</span> <span class="toc-text">2.1  转什么最好</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E4%B8%8D%E8%A6%81%E8%BD%BB%E6%98%93%E8%BD%AC%E8%A1%8C%EF%BC%8C%E8%A6%81%E8%BD%AC%E5%B0%B1%E5%B0%BD%E6%97%A9%E8%BD%AC"><span class="toc-number">3.2.</span> <span class="toc-text">2.2  不要轻易转行，要转就尽早转</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-%E8%BD%AC%E8%A1%8C%E5%A4%A7%E9%83%A8%E5%88%86%E9%83%BD%E4%B8%8D%E6%98%AF%E8%B4%A8%E5%8F%98"><span class="toc-number">3.3.</span> <span class="toc-text">2.3  转行大部分都不是质变</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%A6%82%E4%BD%95%E6%8F%90%E5%8D%87%E7%AB%9E%E4%BA%89%E5%8A%9B"><span class="toc-number">4.</span> <span class="toc-text">3. 如何提升竞争力</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E9%80%89%E6%8B%A9%E4%B8%80%E4%B8%AA%E7%BB%86%E5%88%86%E9%A2%86%E5%9F%9F"><span class="toc-number">4.1.</span> <span class="toc-text">3.1  选择一个细分领域</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E5%B0%BD%E9%87%8F%E5%AD%A6%E4%B9%A0%E5%8D%8A%E8%A1%B0%E6%9C%9F%E9%95%BF%E7%9A%84%E7%9F%A5%E8%AF%86"><span class="toc-number">4.2.</span> <span class="toc-text">3.2  尽量学习半衰期长的知识</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-%E5%81%9A%E5%87%8F%E6%B3%95%EF%BC%8C%E5%B0%BD%E9%87%8F%E4%B8%93%E7%B2%BE%E4%B8%80%E9%97%A8%E6%8A%80%E6%9C%AF"><span class="toc-number">4.3.</span> <span class="toc-text">3.3  做减法，尽量专精一门技术</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-5-%E5%88%B0%E5%BA%95%E8%A6%81%E6%B7%B1%E5%85%A5%E5%AD%A6%E4%BB%80%E4%B9%88%EF%BC%9F"><span class="toc-number">5.</span> <span class="toc-text">3.5 到底要深入学什么？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%B8%A6%E9%A2%86%E5%A4%A7%E5%AE%B6%E4%B8%80%E8%B5%B7%E5%AD%A6%E4%B9%A0"><span class="toc-number">6.</span> <span class="toc-text">4. 带领大家一起学习</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://pic1.imgdb.cn/item/5fc4287fd590d4788afbc2f8.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">『BATcoder』寒冬已至！视频聊聊四面楚歌的Android工程师该何去何从？</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2020-11-29T16:16:16.000Z" title="发表于 2020-11-30 00:16:16">2020-11-30</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-12-16T11:22:41.667Z" title="更新于 2020-12-16 19:22:41">2020-12-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/BATcoder/">BATcoder</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p>大家好，我是刘望舒，I’m back！最近分享了一些视频，都属于望舒杂谈，望舒杂谈会分享一些经验，什么都会聊。除了望舒杂谈还有另一个视频分支叫做BATcoder，什么是BATcoder呢？它是Android进阶三部曲的番外篇，会对Android进阶三部曲的内容进行拓展和升级，会以视频的形式分享给大家。至于为啥叫BATcoder，这是因为我希望大家看了我的技术视频能进入自己中意的大厂。这篇是BATcoder的第一个视频，不过这次不会分享技术，而是和大家聊聊Android工程师该何去何从。</p>
+<h3 id="视频版本"><a href="#视频版本" class="headerlink" title="视频版本"></a>视频版本</h3><iframe class="bilibili" src="//player.bilibili.com/player.html?aid=970398774&bvid=BV1bp4y1r7iL&cid=260099036&page=1" width='800' height='480' scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+
+<p>也可以扫描下方二维码去B站观看，欢迎大家三连。<br><img src="https://pic1.imgdb.cn/item/5fc4265fd590d4788afb466f.png"></p>
+<p>今年的行情相对去年整体要差一些，很多同学发现很多公司招人，兴冲冲去面试了，结果面了几家都是等通知，实际上就是招聘的职位有限，面试的人很多。<br>寒冬真的来了吗？我觉得未必，只是移动开发不热门了而已，竞争更激烈的而已，需求还是有的，移动端程序员和PC时代的程序员还是不同的，目前还没有出现能够替代手机的这种高频使用的物品。<br>作为曾经炙手可热的Android工程师，现在面临着以下的问题：</p>
+<ol>
+<li>互联网整体环境不乐观</li>
+<li>Android开发人员众多但岗位减少，导致要求越来越苛刻</li>
+<li>大前端趋势、跨平台方案频出、小程序肆虐，Android不再是应用开发唯一的方案</li>
+<li>人工智能、大数据等技术炒的火热，培训机构倾巢出动，学校学生疯狂学习，而大学学Android出来找工作很一般。</li>
+</ol>
+<p>从上面几点来看，说Android工程师是四面楚歌真的不为过，我会从以下几个方面来进行分析，请轻拍。</p>
+<ol>
+<li>解除对Android的误解</li>
+<li>是否要转行</li>
+<li>如何提升竞争力</li>
+</ol>
+<h3 id="1-解除对Android的误解"><a href="#1-解除对Android的误解" class="headerlink" title="1. 解除对Android的误解"></a><strong>1. 解除对Android的误解</strong></h3><p>无论是Android同行还是其他技术领域，明显都对Android有些误解。作为Android开发来说，如果对Android有误解可能会影响到后续的发展和决定，我有必要来消除这个误解。</p>
+<h4 id="1-1-Android系统的未来"><a href="#1-1-Android系统的未来" class="headerlink" title="1.1 Android系统的未来"></a><strong>1.1 Android系统的未来</strong></h4><p>Android系统是根，没了它，Android工程师也不存在了。在我的记忆中，早在2011年就有言论说Android系统要完蛋，时过9年后，Android系统仍旧坚挺。目前对它唯一有威胁的是谷歌的Fuchsia，谷歌的真正用意可能是做个备选而不是替代，因为替代的难度太大了，现在Android已经广泛的应用在手机、平板、车联网、物联网、智能电视等等领域，是名副其实的终端霸主。我们不说手机，就说智能电视和智能投影机，这些早已普遍应用于各个家庭，新弄一个系统，就想让开发人员重新开发这些定制系统和应用吗？真的很难卖账，更别说手机了，忽悠人家学Fuchsia，你当安卓开发都是傻子喜欢重蹈覆辙？Android不是塞班，岂是想替代就能替代的，这难度好比重新开发个PC操作系统替代windows一般。所以Android系统还会存活很长的时间，具体多久不好预测，应该比大多数程序员的职业生涯要长。<br>最近鸿蒙也出来了，很多同学问我鸿蒙对安卓有威胁嘛，别的角度不说，单纯从打工人的角度，鸿蒙的出现实际上会有利于安卓开发，因为其他技术分支做的话学习成本很高，安卓开发可以无缝切入鸿蒙进行鸿蒙开发，目前已经有安卓工程师同时进行安卓和鸿蒙的开发了，开一份工资做两份工作，你说你老板开不开心？</p>
+<h4 id="1-2-Android的未来就业趋势"><a href="#1-2-Android的未来就业趋势" class="headerlink" title="1.2 Android的未来就业趋势"></a><strong>1.2 Android的未来就业趋势</strong></h4><p>虽然现在Android的就业形势不大好，但是其他技术领域的就业趋势也不乐观，这是因为现在高校和培训机构大量的培养人员涌入。我05年上大学时，软件工程专业不是很火爆，学一些常规的技术，比如算法与数据结构、c++程序设计、面向对象方法及程序设计等等，毕业了也就是搞搞C++，做做Java Web和.NET等等。而放眼现在，IT相关的专业简直就是火爆，大家都觉得这行有发展赚钱多，因此越来越多的学生报考了相关专业，很多大学都有移动互联应用技术专业，还有人工智能学院，每年都有大量的大学毕业生和培训机构出来的涌入市场，而中国的互联网企业显然不需要这么多的人才，最终的结果可想而知还是狼多肉少。<br>我们大概可以预测到未来Android开发的人数会增长缓慢，考虑到企业未来的职位，Android未来的就业趋势仍旧是平稳的，但其他的技术领域就不好说了，毕竟什么领域也抗不住涌入的人巨多啊。<br>最近又听说很多人转行安卓了？what?49年入国军？还真不是，因为现在很多技术分支人数太多了，物极必反，转安卓也没啥大惊小怪的。<br><img src="https://s2.ax1x.com/2019/06/01/V1Yhxx.png" alt="V1Yhxx.png"></p>
+<h4 id="1-3-Android开发的天花板"><a href="#1-3-Android开发的天花板" class="headerlink" title="1.3 Android开发的天花板"></a><strong>1.3 Android开发的天花板</strong></h4><p>很多人会觉得Android技术深度不深，技术栈不庞大，Android职业发展有限，这个真是大大的误解。<br>先说技术上，Android的技术栈随着时间的推移变得越来越庞大，细分领域也越来越多，主要有Android应用开发、逆向安全、音视频、车联网、物联网、手机开发和SDK开发等等，每个细分领域都有很多技术栈组成，深度都足够精深，就拿所有细分领域通用的Android系统底层源码来说，就会叫你学起来生不如死。</p>
+<p>再说职业上，确实Android应用开发很难升任CTO和技术总监，一般的CTO和技术总监主要是后端，这主要是两个原因：</p>
+<ol>
+<li>后端的技术栈很早就成熟了，我10年前转做Android开发时，那帮30多岁的Java开发就已经很厉害了，随着时间的推移，后端技术大牛远比Android大牛的人数要多，也更厉害，他们做技术经理时，我们都还在搬砖。</li>
+<li>后端确实可以统筹全局，在公司业务上属于重要地位。</li>
+</ol>
+<p>不过我们忽略了最重要的一点，如果我们是做后端的，一定能做到CTO和技术总监吗？我想也是很难的，所以不要眼睛只盯着高处，先想想自己能达到什么程度，<strong>站在半山腰就说山下面的风景不开阔本身也不合理啊</strong>。</p>
+<h3 id="2-是否要转行"><a href="#2-是否要转行" class="headerlink" title="2.是否要转行"></a><strong>2.是否要转行</strong></h3><p>Android不热门了，很多Android开发已经转行了，有的正走在转行的路上，还有的迟疑不决，到底要不要转呢？我们来分析下。</p>
+<h4 id="2-1-转什么最好"><a href="#2-1-转什么最好" class="headerlink" title="2.1  转什么最好"></a><strong>2.1  转什么最好</strong></h4><p>每个人的自身情况不同，转的方向也会有所区别，转人工智能相关开发貌似是最好的，不过最近人工智能风头没有去年高了，而且人工智能相关对学历和算法要求很高，最起码得是个硕士吧，而且这只是低配。那么大多数Android开发可以转的方向主要有前端、后端和python等等。我大概说一下：<br>1.转前端，这个是我认为最好转的一个方向，前端的理念很多都和Android类似，也可以作为Android的延伸，向大前端发展，如果对界面感兴趣的可以转前端试试。<br>2.转后端，后端这个就是完全的转行了，看似Java大家都会，但是后端的技术栈可不是只有Java，各种框架绝对叫你头大，很多人强调后端技术深，各种处理高并发看似十分有技术含量，不过这只是为数不多的公司在做。如果想要稳定的可以转后端试试。<br>3.转python，python貌似是很火，因为他跟人工智能发生了关联，其实大部分学python的没有搞什么人工智能相关，基本都是在搞爬虫。追求浪潮的可以转python试试。</p>
+<h4 id="2-2-不要轻易转行，要转就尽早转"><a href="#2-2-不要轻易转行，要转就尽早转" class="headerlink" title="2.2  不要轻易转行，要转就尽早转"></a><strong>2.2  不要轻易转行，要转就尽早转</strong></h4><p>转行有两种我认为是正常的，一种是行业消失或者没落了，个人无法施展才华。另一种是兴趣不在本行，因此转一个自己感兴趣的。而现在大部分转行纯属是为了跟风，为了那点钱，而忽略了长期的发展。我们来看看下面的图。<br><img src="https://pic1.imgdb.cn/item/5fbfc53915e7719084273180.jpg"></p>
+<p>这个图不完全准确，只是为了更好的说明一些问题。从图中可以看出，大部分人在35岁前是在加速期，35岁后是上升或者衰落期。以Android开发转前端来说，假设一个Android高级A同学转行前端会变为前端初级或者中级，这时从事前端的人都在加速提高，A同学要想赶超前面的拥有同样加速度的人是很难办到的，这就导致他在转行前期极为被动，A同学还要保证在35岁前成为前端专家或者Leader才有可能在35岁后不进入衰落期，当然这时A同学的Android如果不经过实践和学习基本也就荒废了，很难成为专家。如果还想要在技术领域走的更远，就不要轻易的进行转行，如果想要转越早越好，越快越好，因为其他的竞争者都在加速提高，没人会停下等你的。</p>
+<h4 id="2-3-转行大部分都不是质变"><a href="#2-3-转行大部分都不是质变" class="headerlink" title="2.3  转行大部分都不是质变"></a><strong>2.3  转行大部分都不是质变</strong></h4><p>一个开发的质变可以理解为在一个领域的大幅提升，或者是不相关领域的跨界，举个例子：可以在Android领域由高级质变为了专家，或者是由一个高级开发升到了Leader，再或者跨界开始做了一些技术相关的培训、演讲、出书等等而被人所熟知，再或者是创业、搞副业等等拓宽了赚钱的渠道。<br><strong>凡是能帮助35岁后不进入衰退期的都可以看做是一次质变</strong>，而转行很少是质变，更多的是倒退回到原点重新出发，形象点来说，就是换了个不同的砖头接着搬砖而已（高技术含量的除外）。因此我们更应该去追求质变，而不是平行或者倒退，一次倒退可以承受，多次倒退就很难在35岁后进入上升期。</p>
+<h3 id="3-如何提升竞争力"><a href="#3-如何提升竞争力" class="headerlink" title="3. 如何提升竞争力"></a><strong>3. 如何提升竞争力</strong></h3><p>看到这里，如果你还是想转行的话就不要看下去了，我们来说下Android如何提升竞争力。</p>
+<h4 id="3-1-选择一个细分领域"><a href="#3-1-选择一个细分领域" class="headerlink" title="3.1  选择一个细分领域"></a><strong>3.1  选择一个细分领域</strong></h4><p>Android现在细分的领域非常多，前面说到的有应用开发、逆向安全、音视频、车联网、物联网、手机开发、SDK开发和智能电视盒子开发等等，在这些领域中选择一个并不断深入。比如音视频，在10年前我刚入门Android时，音视频就是闷声发大财了（PC端），工资高的令人乍舌，现在在移动端，音视频更是青出于蓝，是一个非常好的选择，如果想要入门可以看看何俊林《Android音视频开发》。</p>
+<h4 id="3-2-尽量学习半衰期长的知识"><a href="#3-2-尽量学习半衰期长的知识" class="headerlink" title="3.2  尽量学习半衰期长的知识"></a><strong>3.2  尽量学习半衰期长的知识</strong></h4><p>知识半衰期指的是：随着知识更新周期变短，知识裂变速度加快，一个知识落伍的周期。知识半衰期长的职业都是越老越值钱的，比如英语老师和外科医生，知识更新慢并且几乎不会落伍。这一点我们程序员是绝对比不了的，我们的大部分知识半衰期是比较短的，一个框架短短几年可能就会被淘汰，这也导致程序员需要不断的学习新知识，而我们每个人的时间和精力是有限的，那么根据知识半衰期，有策略的进行学习就变得尤为重要。<br><img src="https://s2.ax1x.com/2019/06/01/V1YWGR.png" alt="V1YWGR.png"></p>
+<p>上面的半衰期图不完全准确，但是却值得参考，如果你是其他的技术领域也可以参考这个半衰期图。这个图不是告诉我们不要去学RN和小程序，而是结合自身工作尽量学习半衰期长的知识。</p>
+<h4 id="3-3-做减法，尽量专精一门技术"><a href="#3-3-做减法，尽量专精一门技术" class="headerlink" title="3.3  做减法，尽量专精一门技术"></a><strong>3.3  做减法，尽量专精一门技术</strong></h4><p>现在的社会，技术分工越来越细，越细就意味着大部分企业（小作坊除外）需要专精的人才（最好是精通一门通多门）。你会发现身边脱颖而出的技术人大多都是靠一门技术，却很少看到会一堆技术却都不精通的冒出来。好比在武侠的世界，高手对决都在同一个时间段拿出看家武学，如果看家武学都不精，分分钟被虐，省下的武学也无需拿出来献丑了。联想到现实版本就是去大公司面试Android，结果Android技术了解不深，被各种虐，剩下的前端技术、后端技术、python什么的，面试官也没兴趣了解了。<br>所以并不是你会的技术越多越好，一定要做好减法，先专精一门，然后再去学别的技术。</p>
+<h3 id="3-5-到底要深入学什么？"><a href="#3-5-到底要深入学什么？" class="headerlink" title="3.5 到底要深入学什么？"></a><strong>3.5 到底要深入学什么？</strong></h3><p>根据知识的半衰期，作为Android应用开发最应该学习的就是Java基础、App开发相关技术、Android系统底层源码、数据结构、设计模式、网络相关等等。我也是遵循这个想法，在2017年出版了《Android进阶之光》，里面介绍了设计模式、网络相关、Java、App开发相关技术。这显然还不够，因为还有一个最重要的知识没有讲，那就是Android系统底层源码，这是知识半衰期长并且通用的知识，不论你从事Android哪个细分领域，Android系统底层源码都是你需要掌握的，并且它会让你拥有较强的竞争力，这是因为较长的时间学习也只能掌握皮毛。<br>为此，我在2018年出版了Android进阶三部曲第二部《Android进阶解密》，今年又出版了第三部《Android进阶指北》，三本书形成了Android进阶三部曲知识体系，希望能帮助到大家进阶。</p>
+<h3 id="4-带领大家一起学习"><a href="#4-带领大家一起学习" class="headerlink" title="4. 带领大家一起学习"></a><strong>4. 带领大家一起学习</strong></h3><p>现在我回归公号和博客了，会以视频+文字的形式来带领大家一起学习，分为两个部分，一个是望舒杂谈，什么都聊，分享经验。一个是Android进阶三部曲 番外篇，对Android进阶三部曲的内容进行拓展和升级，代号<strong>BATcoder</strong>。这篇是BATcoder的首篇分享，下一篇我会聊一聊如何高效的学习的系统底层原理。</p>
+<p>也欢迎大家关注我的公号：后厂技术官<br><img src="https://pic1.imgdb.cn/item/5fc42244d590d4788afa55f7.jpg"></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/batcoder/android_future.html">http://liuwangshu.cn/batcoder/android_future.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/BATcoder/">BATcoder</a></div><div class="post_share"><div class="social-share" data-image="https://pic1.imgdb.cn/item/5fc4287fd590d4788afbc2f8.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/batcoder/android-framework.html"><img class="prev-cover" src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">『BATcoder』一个视频帮你突破系统底层学习瓶颈！</div></div></a></div><div class="next-post pull-right"><a href="/show/book-money.html"><img class="next-cover" src="https://pic.imgdb.cn/item/5fb79243b18d627113fa1369.png" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">写一本技术书到底有多赚？实话告诉你200万轻轻松松！</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"><img class="cover" src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-04</div><div class="title">『BATcoder』一个视频帮你突破系统底层学习瓶颈！</div></div></a></div><div><a href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"><img class="cover" src="https://pic.imgdb.cn/item/5fdad1733ffa7d37b3289c28.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-12-17</div><div class="title">『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！</div></div></a></div><div><a href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！"><img class="cover" src="https://pic.imgdb.cn/item/5e02594376085c3289aeb21b.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-01-15</div><div class="title">『BATcoder』 是时候下载Android11系统源码和内核源码了！</div></div></a></div><div><a href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2021-03-07</div><div class="title">『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

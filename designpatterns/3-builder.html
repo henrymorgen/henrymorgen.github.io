@@ -1,0 +1,193 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>设计模式（三）建造者模式 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  相关文章设计模式系列 1.建造者模式简介定义建造者模式（builder），将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。  简介建造者模式（builder）是创建一个复杂对象的创建型模式，将构建复杂对象的过程和它的部件解耦，使得构建过程和部件的表示分离开来。例如我们要DIY一个台式机电脑，我们找到DIY商家，我们可以要求这台电脑的"><meta name="keywords" content="设计模式,创建型设计模式"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/designpatterns/3-builder.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="设计模式（三）建造者模式"><meta property="og:url" content="http://liuwangshu.cn/designpatterns/3-builder.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  相关文章设计模式系列 1.建造者模式简介定义建造者模式（builder），将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。  简介建造者模式（builder）是创建一个复杂对象的创建型模式，将构建复杂对象的过程和它的部件解耦，使得构建过程和部件的表示分离开来。例如我们要DIY一个台式机电脑，我们找到DIY商家，我们可以要求这台电脑的"><meta property="og:image" content="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><meta property="article:published_time" content="2016-02-11T05:43:00.000Z"><meta property="article:modified_time" content="2020-10-13T17:53:06.271Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-10-14 01:53:06'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F%E7%AE%80%E4%BB%8B"><span class="toc-number">1.</span> <span class="toc-text">1.建造者模式简介</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E4%B9%89"><span class="toc-number">1.1.</span> <span class="toc-text">定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AE%80%E4%BB%8B"><span class="toc-number">1.2.</span> <span class="toc-text">简介</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F%E7%BB%93%E6%9E%84%E5%9B%BE"><span class="toc-number">1.3.</span> <span class="toc-text">建造者模式结构图</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0"><span class="toc-number">2.</span> <span class="toc-text">2.建造者模式简单实现</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E4%BA%A7%E5%93%81%E7%B1%BB"><span class="toc-number">2.1.</span> <span class="toc-text">创建产品类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BABuilder%E7%B1%BB%E8%A7%84%E8%8C%83%E4%BA%A7%E5%93%81%E7%9A%84%E7%BB%84%E5%BB%BA"><span class="toc-number">2.2.</span> <span class="toc-text">创建Builder类规范产品的组建</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%A8Dirextor%E6%8C%87%E6%8C%A5%E8%80%85%E7%B1%BB%E6%9D%A5%E7%BB%9F%E4%B8%80%E7%BB%84%E8%A3%85%E8%BF%87%E7%A8%8B"><span class="toc-number">2.3.</span> <span class="toc-text">用Dirextor指挥者类来统一组装过程</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8%E6%8C%87%E6%8C%A5%E8%80%85%E7%B1%BB"><span class="toc-number">2.4.</span> <span class="toc-text">客户端调用指挥者类</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BD%BF%E7%94%A8%E5%BB%BA%E9%80%A0%E8%80%85%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%9C%BA%E6%99%AF%E5%92%8C%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">3.</span> <span class="toc-text">3.使用建造者模式的场景和优缺点</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">3.1.</span> <span class="toc-text">使用场景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">3.2.</span> <span class="toc-text">优缺点</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E4%BC%98%E7%82%B9%EF%BC%9A"><span class="toc-number">3.2.1.</span> <span class="toc-text">优点：</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E7%BC%BA%E7%82%B9%EF%BC%9A"><span class="toc-number">3.2.2.</span> <span class="toc-text">缺点：</span></a></li></ol></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/17/MDe3eU.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">设计模式（三）建造者模式</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2016-02-11T05:43:00.000Z" title="发表于 2016-02-11 13:43:00">2016-02-11</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-10-13T17:53:06.271Z" title="更新于 2020-10-14 01:53:06">2020-10-14</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>相关文章<br><a href="http://liuwangshu.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式系列</a></p>
+<h3 id="1-建造者模式简介"><a href="#1-建造者模式简介" class="headerlink" title="1.建造者模式简介"></a><strong>1.建造者模式简介</strong></h3><h4 id="定义"><a href="#定义" class="headerlink" title="定义"></a><strong>定义</strong></h4><p>建造者模式（builder），将一个复杂对象的构建与它的表示分离，使得同样的构建过程可以创建不同的表示。</p>
+<a id="more"></a>
+<h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a><strong>简介</strong></h4><p>建造者模式（builder）是创建一个复杂对象的创建型模式，将构建复杂对象的过程和它的部件解耦，使得构建过程和部件的表示分离开来。<br>例如我们要DIY一个台式机电脑，我们找到DIY商家，我们可以要求这台电脑的cpu或者主板或者其他的部件都是什么牌子的什么配置的，这些部件是我们可以根据我们的需求来变化的，但是这些部件组装成电脑的过程是一样的，我们不需要知道这些部件是怎样组装成电脑的，我们只需要提供部件的牌子和配置就可以了。对于这种情况我们就可以采用建造者模式，将部件和组装过程分离，使得构建过程和部件都可以自由拓展，两者之间的耦合也降到最低。</p>
+<h4 id="建造者模式结构图"><a href="#建造者模式结构图" class="headerlink" title="建造者模式结构图"></a><strong>建造者模式结构图</strong></h4><p><img src="https://pic.imgdb.cn/item/5f85d2391cd1bbb86be7dfea.png"></p>
+<ul>
+<li>Dirextor: 指挥者类，用于统一组装流程</li>
+<li>Builder：抽象Builder类，规范产品的组建，一般是由子类实现。</li>
+<li>ConcreteBulider: 抽象Builder类的实现类，实现抽象Builder类定义的所有方法，并且返回一个组建好的对象</li>
+<li>Product: 产品类</li>
+</ul>
+<h3 id="2-建造者模式简单实现"><a href="#2-建造者模式简单实现" class="headerlink" title="2.建造者模式简单实现"></a><strong>2.建造者模式简单实现</strong></h3><p>这里我们就用DIY组装电脑的例子来实现一下建造者模式。</p>
+<h4 id="创建产品类"><a href="#创建产品类" class="headerlink" title="创建产品类"></a><strong>创建产品类</strong></h4><p>我要组装一台电脑，电脑被抽象为Computer类，它有三个部件:CPU 、主板和内存。并在里面提供了三个方法分别用来设置CPU 、主板和内存：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Computer</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String mCpu;</span><br><span class="line">    <span class="keyword">private</span> String mMainboard;</span><br><span class="line">    <span class="keyword">private</span> String mRam;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setmCpu</span><span class="params">(String mCpu)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mCpu = mCpu;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setmMainboard</span><span class="params">(String mMainboard)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mMainboard = mMainboard;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setmRam</span><span class="params">(String mRam)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mRam = mRam;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建Builder类规范产品的组建"><a href="#创建Builder类规范产品的组建" class="headerlink" title="创建Builder类规范产品的组建"></a><strong>创建Builder类规范产品的组建</strong></h4><p>商家组装电脑有一套组装方法的模版，就是一个抽象的Builder类,里面提供了安装CPU、主板和内存的方法，以及组装成电脑的create方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Builder</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">buildCpu</span><span class="params">(String cpu)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">buildMainboard</span><span class="params">(String mainboard)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">buildRam</span><span class="params">(String ram)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> Computer <span class="title">create</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>商家实现了抽象的Builder类，MoonComputerBuilder类用于组装电脑：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MoonComputerBuilder</span> <span class="keyword">extends</span> <span class="title">Builder</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Computer mComputer = <span class="keyword">new</span> Computer();</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">buildCpu</span><span class="params">(String cpu)</span> </span>&#123;</span><br><span class="line">        mComputer.setmCpu(cpu);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">buildMainboard</span><span class="params">(String mainboard)</span> </span>&#123;</span><br><span class="line">        mComputer.setmMainboard(mainboard);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">buildRam</span><span class="params">(String ram)</span> </span>&#123;</span><br><span class="line">        mComputer.setmRam(ram);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Computer <span class="title">create</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> mComputer;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="用Dirextor指挥者类来统一组装过程"><a href="#用Dirextor指挥者类来统一组装过程" class="headerlink" title="用Dirextor指挥者类来统一组装过程"></a><strong>用Dirextor指挥者类来统一组装过程</strong></h4><p>商家的指挥者类用来规范组装电脑的流程规范，先安装主板，再安装CPU，最后安装内存并组装成电脑：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Direcror</span> </span>&#123;</span><br><span class="line">    Builder mBuild=<span class="keyword">null</span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Direcror</span><span class="params">(Builder build)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mBuild=build;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> Computer <span class="title">CreateComputer</span><span class="params">(String cpu,String mainboard,String ram)</span></span>&#123;</span><br><span class="line">        <span class="comment">//规范建造流程</span></span><br><span class="line">       <span class="keyword">this</span>.mBuild.buildMainboard(mainboard);</span><br><span class="line">       <span class="keyword">this</span>.mBuild.buildCpu(cpu);</span><br><span class="line">       <span class="keyword">this</span>.mBuild.buildRam(ram);</span><br><span class="line">       <span class="keyword">return</span> mBuild.create();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="客户端调用指挥者类"><a href="#客户端调用指挥者类" class="headerlink" title="客户端调用指挥者类"></a><strong>客户端调用指挥者类</strong></h4><p>最后商家用指挥者类组装电脑。我们只需要提供我们想要的CPU，主板和内存就可以了，至于商家怎样组装的电脑我们无需知道。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CreatComputer</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[]args)</span></span>&#123;</span><br><span class="line">        Builder mBuilder=<span class="keyword">new</span> MoonComputerBuilder();</span><br><span class="line">        Direcror mDirecror=<span class="keyword">new</span> Direcror(mBuilder);</span><br><span class="line">        <span class="comment">//组装电脑</span></span><br><span class="line">        mDirecror.CreateComputer(<span class="string">&quot;i7-6700&quot;</span>,<span class="string">&quot;华擎玩家至尊&quot;</span>,<span class="string">&quot;三星DDR4&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-使用建造者模式的场景和优缺点"><a href="#3-使用建造者模式的场景和优缺点" class="headerlink" title="3.使用建造者模式的场景和优缺点"></a><strong>3.使用建造者模式的场景和优缺点</strong></h3><h4 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a><strong>使用场景</strong></h4><ul>
+<li>当创建复杂对象的算法应该独立于该对象的组成部分以及它们的装配方式时。</li>
+<li>相同的方法，不同的执行顺序，产生不同的事件结果时。</li>
+<li>多个部件或零件,都可以装配到一个对象中，但是产生的运行结果又不相同时。</li>
+<li>产品类非常复杂，或者产品类中的调用顺序不同产生了不同的效能。</li>
+<li>创建一些复杂的对象时，这些对象的内部组成构件间的建造顺序是稳定的，但是对象的内部组成构件面临着复杂的变化。</li>
+</ul>
+<h4 id="优缺点"><a href="#优缺点" class="headerlink" title="优缺点"></a><strong>优缺点</strong></h4><h5 id="优点："><a href="#优点：" class="headerlink" title="优点："></a>优点：</h5><ul>
+<li>使用建造者模式可以使客户端不必知道产品内部组成的细节。</li>
+<li>具体的建造者类之间是相互独立的，容易扩展。</li>
+<li>由于具体的建造者是独立的，因此可以对建造过程逐步细化，而不对其他的模块产生任何影响。</li>
+</ul>
+<h5 id="缺点："><a href="#缺点：" class="headerlink" title="缺点："></a>缺点：</h5><ul>
+<li>产生多余的Build对象以及Dirextor类。</li>
+</ul>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/designpatterns/3-builder.html">http://liuwangshu.cn/designpatterns/3-builder.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a><a class="post-meta__tags" href="/tags/%E5%88%9B%E5%BB%BA%E5%9E%8B%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">创建型设计模式</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/designpatterns/4-simplefactory.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">设计模式（四）简单工厂模式</div></div></a></div><div class="next-post pull-right"><a href="/swift/4-process-control.html"><img class="next-cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Swift快速入门（四）流程控制</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/designpatterns/1-principle.html" title="设计模式（一）设计六大原则"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-01-10</div><div class="title">设计模式（一）设计六大原则</div></div></a></div><div><a href="/designpatterns/10-factorymethod.html" title="设计模式（十）工厂方法模式"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-08-27</div><div class="title">设计模式（十）工厂方法模式</div></div></a></div><div><a href="/designpatterns/13-abstractfactory.html" title="设计模式（十三）抽象工厂模式"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-02-06</div><div class="title">设计模式（十三）抽象工厂模式</div></div></a></div><div><a href="/designpatterns/16-prototype.html" title="设计模式（十六）原型模式"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-26</div><div class="title">设计模式（十六）原型模式</div></div></a></div><div><a href="/designpatterns/2-singleton.html" title="设计模式（二）单例模式的七种写法"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-01-17</div><div class="title">设计模式（二）单例模式的七种写法</div></div></a></div><div><a href="/designpatterns/4-simplefactory.html" title="设计模式（四）简单工厂模式"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-02-12</div><div class="title">设计模式（四）简单工厂模式</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

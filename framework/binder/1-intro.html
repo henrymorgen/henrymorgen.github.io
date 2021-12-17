@@ -1,0 +1,206 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android Binder原理（一）学习Binder前必须要了解的知识点 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」    前言Binder原理是掌握系统底层原理的基石，也是进阶高级工程师的必备知识点，这篇文章不会过多介绍Binder原理，而是讲解学习Binder前需要的掌握的知识点。 1.Linux和Android的IPC机制种类IPC全名为inter-Process Communication，含义为进程间通信，是指两个进程之间进行数据交换的过程。在Android和Lin"><meta name="keywords" content="Binder原理"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/framework/binder/1-intro.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android Binder原理（一）学习Binder前必须要了解的知识点"><meta property="og:url" content="http://liuwangshu.cn/framework/binder/1-intro.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」    前言Binder原理是掌握系统底层原理的基石，也是进阶高级工程师的必备知识点，这篇文章不会过多介绍Binder原理，而是讲解学习Binder前需要的掌握的知识点。 1.Linux和Android的IPC机制种类IPC全名为inter-Process Communication，含义为进程间通信，是指两个进程之间进行数据交换的过程。在Android和Lin"><meta property="og:image" content="https://s2.ax1x.com/2019/09/22/uSwYHU.jpg"><meta property="article:published_time" content="2019-09-20T16:18:00.000Z"><meta property="article:modified_time" content="2020-09-16T13:37:54.024Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-16 21:37:54'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Linux%E5%92%8CAndroid%E7%9A%84IPC%E6%9C%BA%E5%88%B6%E7%A7%8D%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">1.Linux和Android的IPC机制种类</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-Linux%E4%B8%AD%E7%9A%84IPC%E6%9C%BA%E5%88%B6%E7%A7%8D%E7%B1%BB"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 Linux中的IPC机制种类</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-Android%E4%B8%AD%E7%9A%84IPC%E6%9C%BA%E5%88%B6"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 Android中的IPC机制</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Linux%E5%92%8CBinder%E7%9A%84IPC%E9%80%9A%E4%BF%A1%E5%8E%9F%E7%90%86"><span class="toc-number">3.</span> <span class="toc-text">2.Linux和Binder的IPC通信原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-Linux%E7%9A%84IPC%E9%80%9A%E4%BF%A1%E5%8E%9F%E7%90%86"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 Linux的IPC通信原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-Binder%E7%9A%84%E9%80%9A%E4%BF%A1%E5%8E%9F%E7%90%86"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 Binder的通信原理</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E4%BD%BF%E7%94%A8Binder"><span class="toc-number">4.</span> <span class="toc-text">3.为什么要使用Binder</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E4%B8%BA%E4%BB%80%E4%B9%88%E8%A6%81%E5%AD%A6%E4%B9%A0Binder"><span class="toc-number">5.</span> <span class="toc-text">4.为什么要学习Binder?</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/09/22/uSwYHU.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android Binder原理（一）学习Binder前必须要了解的知识点</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-09-20T16:18:00.000Z" title="发表于 2019-09-21 00:18:00">2019-09-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-16T13:37:54.024Z" title="更新于 2020-09-16 21:37:54">2020-09-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<a id="more"></a>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>Binder原理是掌握系统底层原理的基石，也是进阶高级工程师的必备知识点，这篇文章不会过多介绍Binder原理，而是讲解学习Binder前需要的掌握的知识点。</p>
+<h3 id="1-Linux和Android的IPC机制种类"><a href="#1-Linux和Android的IPC机制种类" class="headerlink" title="1.Linux和Android的IPC机制种类"></a><strong>1.Linux和Android的IPC机制种类</strong></h3><p>IPC全名为inter-Process Communication，含义为进程间通信，是指两个进程之间进行数据交换的过程。在Android和Linux中都有各自的IPC机制，这里分别来介绍下。</p>
+<h4 id="1-1-Linux中的IPC机制种类"><a href="#1-1-Linux中的IPC机制种类" class="headerlink" title="1.1 Linux中的IPC机制种类"></a><strong>1.1 Linux中的IPC机制种类</strong></h4><p>Linux中提供了很多进程间通信机制，主要有管道（pipe）、信号（sinal）、信号量（semophore）、消息队列（Message）、共享内存（Share Memory)、套接字（Socket）等。</p>
+<p><strong>管道</strong><br>管道是Linux由Unix那里继承过来的进程间的通信机制，它是Unix早期的一个重要通信机制。管道的主要思想是，在内存中创建一个共享文件，从而使通信双方利用这个共享文件来传递信息。这个共享文件比较特殊，它不属于文件系统并且只存在于内存中。另外还有一点，管道采用的是半双工通信方式的，数据只能在一个方向上流动。<br>简单的模型如下所示。<br><img src="https://s2.ax1x.com/2019/09/19/nbXJ2T.png" alt="nbXJ2T.png"></p>
+<p><strong>信号</strong><br>信号是软件层次上对中断机制的一种模拟，是一种异步通信方式，进程不必通过任何操作来等待信号的到达。信号可以在用户空间进程和内核之间直接交互，内核可以利用信号来通知用户空间的进程发生了哪些系统事件。信号不适用于信息交换，比较适用于进程中断控制。<br><strong>信号量</strong><br>信号量是一个计数器，用来控制多个进程对共享资源的访问。它常作为一种锁机制，防止某进程正在访问共享资源时，其他进程也访问该资源。主要作为进程间以及同一进程内不同线程之间的同步手段。<br><strong>消息队列</strong><br>消息队列是消息的链表，具有特定的格式，存放在内存中并由消息队列标识符标识，并且允许一个或多个进程向它写入与读取消息。信息会复制两次，因此对于频繁或者信息量大的通信不宜使用消息队列。</p>
+<p><strong>共享内存</strong><br>多个进程可以直接读写的一块内存空间，是针对其他通信机制运行效率较低而设计的。<br>为了在多个进程间交换信息，内核专门留出了一块内存区，可以由需要访问的进程将其映射到自己的私有地址空间。进程就可以直接读写这一块内存而不需要进行数据的拷贝，从而大大的提高效率。</p>
+<p><strong>套接字</strong><br>套接字是更为基础的进程间通信机制，与其他方式不同的是，套接字可用于不同机器之间的进程间通信。</p>
+<h4 id="1-2-Android中的IPC机制"><a href="#1-2-Android中的IPC机制" class="headerlink" title="1.2 Android中的IPC机制"></a><strong>1.2 Android中的IPC机制</strong></h4><p>Android系统是基于Linux内核的，在Linux内核基础上，又拓展出了一些IPC机制。Android系统除了支持套接字，还支持序列化、Messenger、AIDL、Bundle、文件共享、ContentProvider、Binder等。Binder会在后面介绍，先来了解前面的IPC机制。<br><strong>序列化</strong><br>序列化指的是Serializable/Parcelable，Serializable是Java提供的一个序列化接口，是一个空接口，为对象提供标准的序列化和反序列化操作。Parcelable接口是Android中的序列化方式，更适合在Android平台上使用，用起来比较麻烦，效率很高。<br><strong>Messenger</strong><br>Messenger在Android应用开发中的使用频率不高，可以在不同进程中传递Message对象，在Message中加入我们想要传的数据就可以在进程间的进行数据传递了。Messenger是一种轻量级的IPC方案并对AIDL进行了封装。</p>
+<p><strong>AIDL</strong><br>AIDL全名为Android interface definition Language，即Android接口定义语言。Messenger是以串行的方式来处理客户端发来的信息，如果有大量的消息发到服务端，服务端仍然一个一个的处理再响应客户端显然是不合适的。另外还有一点，Messenger用来进程间进行数据传递但是却不能满足跨进程的方法调用，这个时候就需要使用AIDL了。</p>
+<p><strong>Bundle</strong><br>Bundle实现了Parcelable接口，所以它可以方便的在不同的进程间传输。Acitivity、Service、Receiver都是在Intent中通过Bundle来进行数据传递。</p>
+<p><strong>文件共享</strong><br>两个进程通过读写同一个文件来进行数据共享，共享的文件可以是文本、XML、JOSN。文件共享适用于对数据同步要求不高的进程间通信。</p>
+<p><strong>ContentProvider</strong><br>ContentProvider为存储和获取数据了提供统一的接口，它可以在不同的应用程序之间共享数据，本身就是适合进程间通信的。ContentProvider底层实现也是Binder，但是使用起来比AIDL要容易许多。系统中很多操作都采用了ContentProvider，例如通讯录，音视频等，这些操作本身就是跨进程进行通信。</p>
+<h3 id="2-Linux和Binder的IPC通信原理"><a href="#2-Linux和Binder的IPC通信原理" class="headerlink" title="2.Linux和Binder的IPC通信原理"></a><strong>2.Linux和Binder的IPC通信原理</strong></h3><p>在讲到Linux的进程通信原理之前，我们需要先了解Liunx中的几个概念。</p>
+<p><img src="https://s2.ax1x.com/2019/09/20/njr0qU.png" alt="njr0qU.png"></p>
+<p><strong>内核空间和用户空间</strong><br>当我们接触到Liunx时，免不了听到两个词，User space（用户空间）和 Kernel space（内核空间），那么它们的含义是什么呢？<br>为了保护用户进程不能直接操作内核，保证内核的安全，操作系统从逻辑上将虚拟空间划分为用户空间和内核空间。Linux 操作系统将最高的1GB字节供内核使用，称为内核空间，较低的3GB 字节供各进程使用，称为用户空间。</p>
+<p>内核空间是Linux内核的运行空间，用户空间是用户程序的运行空间。为了安全，它们是隔离的，即使用户的程序崩溃了，内核也不会受到影响。内核空间的数据是可以进程间共享的，而用户空间则不可以。比如在上图进程A的用户空间是不能和进程B的用户空间共享的。</p>
+<p><strong>进程隔离</strong><br>进程隔离指的是，一个进程不能直接操作或者访问另一个进程。也就是进程A不可以直接访问进程B的数据。</p>
+<p><strong>系统调用</strong><br>用户空间需要访问内核空间，就需要借助系统调用来实现。系统调用是用户空间访问内核空间的唯一方式，保证了所有的资源访问都是在内核的控制下进行的，避免了用户程序对系统资源的越权访问，提升了系统安全性和稳定性。</p>
+<p>进程A和进程B的用户空间可以通过如下系统函数和内核空间进行交互。</p>
+<ul>
+<li>copy_from_user：将用户空间的数据拷贝到内核空间。</li>
+<li>copy_to_user：将内核空间的数据拷贝到用户空间。</li>
+</ul>
+<p><strong>内存映射</strong><br>由于应用程序不能直接操作设备硬件地址，所以操作系统提供了一种机制：内存映射，把设备地址映射到进程虚拟内存区。<br>举个例子，如果用户空间需要读取磁盘的文件，如果不采用内存映射，那么就需要在内核空间建立一个页缓存，页缓存去拷贝磁盘上的文件，然后用户空间拷贝页缓存的文件，这就需要两次拷贝。<br>采用内存映射，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/09/21/nzlnaV.png" alt="nzlnaV.png"><br>由于新建了虚拟内存区域，那么磁盘文件和虚拟内存区域就可以直接映射，少了一次拷贝。</p>
+<p>内存映射全名为Memory Map，在Linux中通过系统调用函数mmap来实现内存映射。将用户空间的一块内存区域映射到内核空间。映射关系建立后，用户对这块内存区域的修改可以直接反应到内核空间，反之亦然。内存映射能减少数据拷贝次数，实现用户空间和内核空间的高效互动。</p>
+<h4 id="2-1-Linux的IPC通信原理"><a href="#2-1-Linux的IPC通信原理" class="headerlink" title="2.1 Linux的IPC通信原理"></a><strong>2.1 Linux的IPC通信原理</strong></h4><p>了解Liunx中的几个概念后，就可以学习Linux的IPC通信原理了，如下图所示。<br><img src="https://s2.ax1x.com/2019/09/21/nzaypq.png" alt="nzaypq.png"><br>内核程序在内核空间分配内存并开辟一块内核缓存区，发送进程通过copy_from_user函数将数据拷贝到到内核空间的缓冲区中。同样的，接收进程在接收数据时在自己的用户空间开辟一块内存缓存区，然后内核程序调用 copy_to_user() 函数将数据从内核缓存区拷贝到接收进程。这样数据发送进程和数据接收进程完成了一次数据传输，也就是一次进程间通信。</p>
+<p>Linux的IPC通信原理有两个问题：</p>
+<ol>
+<li>一次数据传递需要经历：用户空间 –&gt; 内核缓存区 –&gt; 用户空间，需要2次数据拷贝，这样效率不高。</li>
+<li>接收数据的缓存区由数据接收进程提供，但是接收进程并不知道需要多大的空间来存放将要传递过来的数据，因此只能开辟尽可能大的内存空间或者先调用API接收消息头来获取消息体的大小，浪费了空间或者时间。</li>
+</ol>
+<h4 id="2-2-Binder的通信原理"><a href="#2-2-Binder的通信原理" class="headerlink" title="2.2 Binder的通信原理"></a><strong>2.2 Binder的通信原理</strong></h4><p>Binder是基于开源的OpenBinder实现的，OpenBinder最早并不是由Google公司开发的，而是Be Inc公司开发的，接着由Palm, Inc.公司负责开发。后来OpenBinder的作者Dianne Hackborn加入了Google公司，并负责Android平台的开发工作，顺便把这项技术也带进了Android。</p>
+<p>Binder是基于内存映射来实现的，在前面我们知道内存映射通常是用在有物理介质的文件系统上的，Binder没有物理介质，它使用内存映射是为了跨进程传递数据。<br><img src="https://s2.ax1x.com/2019/09/21/nzNJUA.png" alt="nzNJUA.png"></p>
+<p> Binder通信的步骤如下所示。<br>1.Binder驱动在内核空间创建一个数据接收缓存区。<br>2.在内核空间开辟一块内核缓存区，建立内核缓存区和数据接收缓存区之间的映射关系，以及数据接收缓存区和接收进程用户空间地址的映射关系。<br>3.发送方进程通过copy_from_user()函数将数据拷贝 到内核中的内核缓存区，由于内核缓存区和接收进程的用户空间存在内存映射，因此也就相当于把数据发送到了接收进程的用户空间，这样便完成了一次进程间的通信。</p>
+<p>整个过程只使用了1次拷贝，不会因为不知道数据的大小而浪费空间或者时间，效率更高。 </p>
+<h3 id="3-为什么要使用Binder"><a href="#3-为什么要使用Binder" class="headerlink" title="3.为什么要使用Binder"></a><strong>3.为什么要使用Binder</strong></h3><p>Android是基于Linux内核的 ，Linux提供了很多IPC机制，而Android却自己设计了Binder来进行通信，主要是因为以下几点。<br><strong>性能方面</strong><br>性能方面主要影响的因素是拷贝次数，管道、消息队列、Socket的拷贝次书都是两次，性能不是很好，共享内存不需要拷贝，性能最好，Binder的拷贝次书为1次，性能仅次于内存拷贝。<br><strong>稳定性方面</strong><br>Binder是基于C/S架构的，这个架构通常采用两层结构，在技术上已经很成熟了，稳定性是没有问题的。共享内存没有分层，难以控制，并发同步访问临界资源时，可能还会产生死锁。从稳定性的角度讲，Binder是优于共享内存的。<br><strong>安全方面</strong><br>Android是一个开源的系统，并且拥有开放性的平台，市场上应用来源很广，因此安全性对于Android 平台而言极其重要。<br>传统的IPC接收方无法获得对方可靠的进程用户ID/进程ID（UID/PID），无法鉴别对方身份。Android 为每个安装好的APP分配了自己的UID，通过进程的UID来鉴别进程身份。另外，Android系统中的Server端会判断UID/PID是否满足访问权限，而对外只暴露Client端，加强了系统的安全性。<br><strong>语言方面</strong><br>Linux是基于C语言，C语言是面向过程的，Android应用层和Java Framework是基于Java语言，Java语言是面向对象的。Binder本身符合面向对象的思想，因此作为Android的通信机制更合适不过。</p>
+<p>从这四方面来看，Linux提供的大部分IPC机制根本无法和Binder相比较，而共享内存只在性能方面优于Binder，其他方面都劣于Binder，这些就是为什么Android要使用Binder来进行进程间通信，当然系统中并不是所有的进程通信都是采用了Binder，而是根据场景选择最合适的，比如Zygote进程与AMS通信使用的是Socket，Kill Process采用的是信号。</p>
+<h3 id="4-为什么要学习Binder"><a href="#4-为什么要学习Binder" class="headerlink" title="4.为什么要学习Binder?"></a><strong>4.为什么要学习Binder?</strong></h3><p>Binder机制在Android中的地位举足轻重，我们需要掌握的很多原理都和Binder有关：</p>
+<ol>
+<li>系统中的各个进程是如何通信的？</li>
+<li>Android系统启动过程</li>
+<li>AMS、PMS的原理</li>
+<li>四大组件的原理，比如Activity是如何启动的？</li>
+<li>插件化原理</li>
+<li>系统服务的Client端和Server端是如何通信的？（比如MediaPlayer和MeidaPlayerService)</li>
+</ol>
+<p>上面只是列了一小部分，简单来说说，比如系统在启动时，SystemServer进程启动后会创建Binder线程池，目的是通过Binder，使得在SystemServer进程中的服务可以和其他进程进行通信了。再比如我们常说的AMS、PMS都是基于Binder来实现的，拿PMS来说，PMS运行在SystemServer进程，如果它想要和DefaultContainerService通信（是用于检查和复制可移动文件的系统服务），就需要通过Binder，因为DefaultContainerService运行在com.android.defcontainer进程。<br>还有一个比较常见的C/S架构间通信的问题，Client端的MediaPlayer和Server端的MeidaPlayerService不是运行在一个进程中的，同样需要Binder来实现通信。</p>
+<p>可以说Binder机制是掌握系统底层原理的基石。根据Android系统的分层，Binder机制主要分为以下几个部分。</p>
+<p><img src="https://s2.ax1x.com/2019/09/17/n5i5PP.png" alt="n5i5PP.png"></p>
+<p>上图并没有给出Binder机制的具体的细节，而是先给出了一个概念，根据系统的Android系统的分层，我将Binder机制分为了Java Binder、Native Binder、Kernel Binder，实际上Binder的内容非常多，完全可以写一本来介绍，但是对于应用开发来说，并不需要掌握那么多的知识点，因此本系列主要会讲解Java Binder和Native Binder。</p>
+<p><strong>感谢</strong><br><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/NBm5lh8_ZLfodOXT8Ph5iA">https://mp.weixin.qq.com/s/NBm5lh8_ZLfodOXT8Ph5iA</a><br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/39440766/answer/89210950">https://www.zhihu.com/question/39440766/answer/89210950</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/carson_ho/article/details/73560642">https://blog.csdn.net/carson_ho/article/details/73560642</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/framework/binder/1-intro.html">http://liuwangshu.cn/framework/binder/1-intro.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Binder%E5%8E%9F%E7%90%86/">Binder原理</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/09/22/uSwYHU.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/binder/2-servicemanager-binder.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/10/09/u4pmfs.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android Binder原理（二）ServiceManager中的Binder机制</div></div></a></div><div class="next-post pull-right"><a href="/application/jetpack/6-viewmodel.html"><img class="next-cover" src="https://s2.ax1x.com/2019/09/14/n6P5E4.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android Jetpack架构组件（六）一文带你了解ViewModel的使用和原理</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/framework/binder/3-addservice.html" title="Android Binder原理（三）系统服务的注册过程"><img class="cover" src="https://s2.ax1x.com/2019/10/25/Ka5Uds.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-10-24</div><div class="title">Android Binder原理（三）系统服务的注册过程</div></div></a></div><div><a href="/framework/binder/5-getservice.html" title="Android Binder原理（五）系统服务的获取过程"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-11-16</div><div class="title">Android Binder原理（五）系统服务的获取过程</div></div></a></div><div><a href="/framework/binder/6-java-binder-initialize.html" title=" Android Binder原理（六）Java Binder的初始化"><img class="cover" src="https://s2.ax1x.com/2019/11/23/MbATrq.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-11-22</div><div class="title"> Android Binder原理（六）Java Binder的初始化</div></div></a></div><div><a href="/framework/binder/7-javabinder-addservice.html" title=" Android Binder原理（七）Java Binder中系统服务的注册过程"><img class="cover" src="https://pic.superbed.cn/item/5e02594376085c3289aeb21b.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-12-03</div><div class="title"> Android Binder原理（七）Java Binder中系统服务的注册过程</div></div></a></div><div><a href="/framework/binder/2-servicemanager-binder.html" title="Android Binder原理（二）ServiceManager中的Binder机制"><img class="cover" src="https://s2.ax1x.com/2019/10/09/u4pmfs.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-10-08</div><div class="title">Android Binder原理（二）ServiceManager中的Binder机制</div></div></a></div><div><a href="/framework/binder/4-servicemanager-start.html" title="Android Binder原理（四）ServiceManager的启动过程"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-11-10</div><div class="title">Android Binder原理（四）ServiceManager的启动过程</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

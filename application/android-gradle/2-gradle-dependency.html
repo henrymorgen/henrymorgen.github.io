@@ -1,0 +1,220 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android Gradle （二）签名配置和依赖管理 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」    相关文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解Gradle核心思想（六）自定义Gradle插件的三种方式Andro"><meta name="keywords" content="Android Gradle"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/android-gradle/2-gradle-dependency.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android Gradle （二）签名配置和依赖管理"><meta property="og:url" content="http://liuwangshu.cn/application/android-gradle/2-gradle-dependency.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」    相关文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解Gradle核心思想（六）自定义Gradle插件的三种方式Andro"><meta property="og:image" content="https://s2.ax1x.com/2019/07/27/euj4Qe.jpg"><meta property="article:published_time" content="2019-07-25T16:18:00.000Z"><meta property="article:modified_time" content="2020-09-16T13:02:04.475Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-16 21:02:04'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Android%E7%AD%BE%E5%90%8D%E6%96%87%E4%BB%B6%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">1.Android签名文件配置</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-%E8%87%AA%E5%AE%9A%E4%B9%89%E7%AD%BE%E5%90%8D%E4%BF%A1%E6%81%AF%E6%96%87%E4%BB%B6"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 自定义签名信息文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-%E6%9C%AC%E5%9C%B0%E6%B7%BB%E5%8A%A0%E7%AD%BE%E5%90%8D%E4%BF%A1%E6%81%AF%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 本地添加签名信息文件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Gradle%E7%9A%84%E5%BA%93%E4%BE%9D%E8%B5%96"><span class="toc-number">3.</span> <span class="toc-text">2.Gradle的库依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Gradle%E7%9A%84%E5%BA%93%E4%BE%9D%E8%B5%96%E7%AE%A1%E7%90%86"><span class="toc-number">4.</span> <span class="toc-text">3.Gradle的库依赖管理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-Gradle%E7%9A%84%E4%BE%9D%E8%B5%96%E4%BC%A0%E9%80%92"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 Gradle的依赖传递</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-Gradle%E7%9A%84%E4%BE%9D%E8%B5%96%E6%A3%80%E6%9F%A5"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 Gradle的依赖检查</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-Gradle%E7%9A%84%E4%BE%9D%E8%B5%96%E5%86%B2%E7%AA%81"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 Gradle的依赖冲突</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-1-force"><span class="toc-number">4.3.1.</span> <span class="toc-text">3.3.1 force</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#3-3-2-exclude"><span class="toc-number">4.3.2.</span> <span class="toc-text">3.3.2 exclude</span></a></li></ol></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/07/27/euj4Qe.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android Gradle （二）签名配置和依赖管理</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-07-25T16:18:00.000Z" title="发表于 2019-07-26 00:18:00">2019-07-26</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-16T13:02:04.475Z" title="更新于 2020-09-16 21:02:04">2020-09-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<a id="more"></a>
+
+<p>相关文章<br><a href="http://liuwangshu.cn/application/gradle/1-study-gradle.html">Gradle核心思想（一）为什么现在要用Gradle？</a><br><a href="http://liuwangshu.cn/application/gradle/2-primer.html">Gradle核心思想（二）Gradle入门前奏</a><br><a href="http://liuwangshu.cn/application/gradle/3-groovy.html">Gradle核心思想（三）Groovy快速入门指南</a><br><a href="http://liuwangshu.cn/application/gradle/4-wrapper.html">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</a><br><a href="http://liuwangshu.cn/application/gradle/5-plugins.html">Gradle核心思想（五）通俗易懂的Gradle插件讲解</a><br><a href="http://liuwangshu.cn/application/gradle/6-custonplugin.html">Gradle核心思想（六）自定义Gradle插件的三种方式</a><br><a href="http://liuwangshu.cn/application/android-gradle/1-gradle-plug-in.html">Android Gradle （一）Gradle的Android插件入门</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>本系列上一篇，我介绍了Gradle的Android插件的入门，这一篇来介绍一些Gradle进阶的内容，当然进阶内容非常多，这篇文章就总结一些相对重要的、常用的一些知识点，比如Gradle的签名配置和依赖管理。</p>
+<h3 id="1-Android签名文件配置"><a href="#1-Android签名文件配置" class="headerlink" title="1.Android签名文件配置"></a><strong>1.Android签名文件配置</strong></h3><p>在一般公司中，当团队比较小的时候，App的签名信息都是放到项目中的，甚至会上传到github上，这样做很是方便。但随着团队人数的增多，这样做的风险会越来越大，因为签名信息是重要的资源，这样就不能将签名上传到github上，也就不应该在build.gradle中直接配置签名。<br>主要有以下的几种解决方法：<br>1.自定义一个签名配置文件<br>2.本地~/.gradle/gradle.properties文件中配置签名信息</p>
+<h4 id="1-1-自定义签名信息文件"><a href="#1-1-自定义签名信息文件" class="headerlink" title="1.1 自定义签名信息文件"></a><strong>1.1 自定义签名信息文件</strong></h4><p>首先，在工程的目录下新建一个文件夹，内部存储签名文件和签名信息文件。签名文件为gradledemo.jks，签名信息文件为keystore.properties。keystore.properties中的配置如下所示。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">STORE_FILE&#x3D;..&#x2F;signfiles&#x2F;gradledemo.jks</span><br><span class="line">KEY_ALIAS&#x3D;gradle</span><br><span class="line">STORE_PASSWORD&#x3D;jinjiesanbuqu</span><br><span class="line">KEY_PASSWORD&#x3D;jinjiesanbuqu</span><br></pre></td></tr></table></figure>
+<p>当然不要忘了在.gitignore中将gradledemo.jks和keystore.properties忽略掉。接着在模块build.gradle中进行配置，如果还不清楚什么是模块build.gradle和项目build.gradle，看<a href="http://liuwangshu.cn/application/android-gradle/1-gradle-plug-in.html">Android Gradle （一）Gradle的Android插件入门</a>这篇文章。<br>在模块build.gradle中加入如下代码。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply plugin: <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line">android &#123;</span><br><span class="line"> ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="function">def <span class="title">setSigningProperties</span><span class="params">()</span></span>&#123;</span><br><span class="line">    def propFile = file(<span class="string">&#x27;../signfiles/keystore.properties&#x27;</span>)</span><br><span class="line">    <span class="keyword">if</span> (propFile.canRead())&#123;</span><br><span class="line">        def Properties props = <span class="keyword">new</span> Properties()</span><br><span class="line">        props.load(<span class="keyword">new</span> FileInputStream(propFile))</span><br><span class="line">        <span class="keyword">if</span> (props!=<span class="keyword">null</span> &amp;&amp; props.containsKey(<span class="string">&#x27;STORE_FILE&#x27;</span>) &amp;&amp; props.containsKey(<span class="string">&#x27;STORE_PASSWORD&#x27;</span>) &amp;&amp;props.containsKey(<span class="string">&#x27;KEY_ALIAS&#x27;</span>) &amp;&amp; props.containsKey(<span class="string">&#x27;KEY_PASSWORD&#x27;</span>)) &#123;</span><br><span class="line">            android.signingConfigs.release.storeFile = file(props[<span class="string">&#x27;STORE_FILE&#x27;</span>])</span><br><span class="line">            android.signingConfigs.release.storePassword = props[<span class="string">&#x27;STORE_PASSWORD&#x27;</span>]</span><br><span class="line">            android.signingConfigs.release.keyAlias = props[<span class="string">&#x27;KEY_ALIAS&#x27;</span>]</span><br><span class="line">            android.signingConfigs.release.keyPassword = props[<span class="string">&#x27;KEY_PASSWORD&#x27;</span>]</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> Exception(<span class="string">&quot;some key missing&quot;</span>)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> Exception(<span class="string">&quot;keystore.properties not found:&quot;</span> + propFile.absolutePath)</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>setSigningProperties方法用于读取keystore.properties文件中的签名文件的信息。<br>最后在模块build.gradle中的signingconfigs块中调用setSigningProperties方法就可以了。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply plugin: <span class="string">&#x27;com.android.application&#x27;</span></span><br><span class="line"></span><br><span class="line">android &#123;</span><br><span class="line"> ...</span><br><span class="line">    signingConfigs &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            setSigningProperties()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="1-2-本地添加签名信息文件"><a href="#1-2-本地添加签名信息文件" class="headerlink" title="1.2 本地添加签名信息文件"></a><strong>1.2 本地添加签名信息文件</strong></h4><p>还可以将签名文件和签名信息文件放到本地中。比如签名文件放到<del>/.gradle/gradledemo.jks，签名信息文件放到</del>/.gradle/keystore.properties。这样签名文件和签名信息文件都不会提交到github上。<br>keystore.properties的内容如下。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GRADLEDOME_RELEASE_STORE_FILE&#x3D;~&#x2F;.gradle&#x2F;release-key.keystore</span><br><span class="line">GRADLEDOM_RELEASE_KEY_ALIAS&#x3D;key-alias</span><br><span class="line">GRADLEDOM_RELEASE_STORE_PASSWORD&#x3D;pass</span><br><span class="line">GRADLEDOM_RELEASE_KEY_PASSWORD&#x3D;pass</span><br></pre></td></tr></table></figure>
+
+<p>在模块build.gradle中的signingconfigs块中配置签名，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">signingConfigs &#123;</span><br><span class="line">        release &#123;</span><br><span class="line">            <span class="function">storeFile <span class="title">file</span><span class="params">(GRADLEDOME_RELEASE_STORE_FILE)</span></span></span><br><span class="line"><span class="function">            storePassword GRADLEDOME_RELEASE_STORE_PASSWORD</span></span><br><span class="line"><span class="function">            keyAlias GRADLEDOME_RELEASE_KEY_ALIAS</span></span><br><span class="line"><span class="function">            keyPassword GRADLEDOME_RELEASE_KEY_PASSWORD</span></span><br><span class="line"><span class="function">        &#125;</span></span><br><span class="line"><span class="function">    &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>除了这两点，还可以将签名文件和签名信息文件放在专门打包的服务器上，在打包的时候读取即可。这个涉及的内容就多了，就不在本文进行说明了。</p>
+<h3 id="2-Gradle的库依赖"><a href="#2-Gradle的库依赖" class="headerlink" title="2.Gradle的库依赖"></a><strong>2.Gradle的库依赖</strong></h3><p>现在一个Android项目都是需要去引入其他的库，比如jar、aar、Module等等，现在我们分别来介绍下。下面例子的代码如果不特意说明均是写在模块build.gradle中的。<br> <strong>Gradle的本地库依赖</strong><br>关于jar依赖可以按照如下这么写，可以指定一个也可以指定多个jar。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">//依赖引入libs下所有的jar</span></span><br><span class="line"><span class="function">implementation <span class="title">fileTree</span><span class="params">(dir:<span class="string">&#x27;libs&#x27;</span>,include:[<span class="string">&#x27;*.jar&#x27;</span>])</span></span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function"><span class="comment">//指定依赖某一个或几个jar</span></span></span><br><span class="line"><span class="function">implementation <span class="title">files</span><span class="params">(<span class="string">&#x27;libs/XXX.jar&#x27;</span>,<span class="string">&#x27;libs/XXX.jar&#x27;</span>)</span></span></span><br></pre></td></tr></table></figure>
+<p>aar依赖需要额外增加一些语句，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">android &#123;</span><br><span class="line">    ...</span><br><span class="line">    repositories &#123; </span><br><span class="line">        flatDir &#123;</span><br><span class="line">            dirs <span class="string">&quot;libs&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;    </span><br><span class="line">dependencies &#123;</span><br><span class="line"><span class="function">implementation <span class="title">fileTree</span><span class="params">(dir:<span class="string">&#x27;libs&#x27;</span>,include:[<span class="string">&#x27;*.aar&#x27;</span>])</span></span></span><br><span class="line"><span class="function"><span class="title">implementation</span><span class="params">(name:<span class="string">&#x27;XXX&#x27;</span>,ext:<span class="string">&#x27;aar&#x27;</span>)</span></span></span><br><span class="line"><span class="function">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Gradle的本地Module依赖</strong><br>当项目中有多个Module时，我们需要在settings.gradle中引入，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">include <span class="string">&#x27;:app&#x27;</span></span><br><span class="line">include <span class="string">&#x27;:library1&#x27;</span>, <span class="string">&#x27;:library2&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>接着在模块build.gradle引入。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function">implementation <span class="title">project</span><span class="params">(<span class="string">&#x27;:library1&#x27;</span>)</span></span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Gradle的远程库依赖</strong><br>当在Android Studio中新建一个项目时，会在项目build.gradle有如下代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath <span class="string">&#x27;com.android.tools.build:gradle:3.4.0&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">allprojects &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        google()</span><br><span class="line">        jcenter()</span><br><span class="line">        </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这些代码都是默认的，在buildscript和allprojects块中，通过repositories来引入谷歌的Maven库和JCenter库。首先会从谷歌的Maven库去寻找相应的库，如果找不到会从JCenter库中去寻找。<br>然后在模块build.gradle加入如下的代码，就可以引入远程库。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">implementation group:<span class="string">&#x27;com.android.support&#x27;</span>,name:<span class="string">&#x27;appcompat-v7&#x27;</span>,version:<span class="string">&#x27;28.0.0&#x27;</span></span><br><span class="line"><span class="comment">//简写</span></span><br><span class="line">implementation <span class="string">&#x27;com.android.support:appcompat-v7:28.0.0&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Gradle的库依赖管理"><a href="#3-Gradle的库依赖管理" class="headerlink" title="3.Gradle的库依赖管理"></a><strong>3.Gradle的库依赖管理</strong></h3><p>随着Gradle依赖的库越来越多，那么必然会产生一些问题，比如依赖冲突的问题，为了解决依赖冲突，我们需要先了解Gradle的库依赖管理的几个技术点。</p>
+<h4 id="3-1-Gradle的依赖传递"><a href="#3-1-Gradle的依赖传递" class="headerlink" title="3.1 Gradle的依赖传递"></a><strong>3.1 Gradle的依赖传递</strong></h4><p>Gradle默认是支持依赖传递的，所以当用到Gradle依赖时一定会涉及到它，是必须要知道的一个知识点。<br>那什么是依赖传递呢？举一个最简单的例子。<br>projectC依赖projectB，projectB依赖projectA，那么projectC就依赖了projectA。<br>依赖传递会产生一些问题，比如重复依赖、依赖错误等问题，那么我们可以通过transitive来禁止依赖传递。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">implementation(<span class="string">&#x27;com.xxx.xxx:xxx:3.6.3&#x27;</span>) &#123;</span><br><span class="line">     transitive <span class="keyword">false</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>上面禁止了com.xxx.xxx:xxx:3.6.3库的依赖传递，还可以使用如下语句来关闭当前模块的所有库的依赖传递：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">configurations.all &#123;</span><br><span class="line">   transitive = <span class="keyword">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>只不过这样就需要手动添加当前模块的每个库的依赖项，一般不会这么做。</p>
+<h4 id="3-2-Gradle的依赖检查"><a href="#3-2-Gradle的依赖检查" class="headerlink" title="3.2 Gradle的依赖检查"></a><strong>3.2 Gradle的依赖检查</strong></h4><p>有了依赖检查，我们可以解决依赖产生的问题。依赖检查有很多种方式，分别来介绍下。</p>
+<p><strong>使用Gradle的命令行</strong><br>可以直接使用Gradle的命令行来进行依赖检查，拿Windows平台来说，使用cmd进入项目的根目录，执行gradle :app:dependencies即可，其中app是我们新建工程时默认的模块的名称。日志输出很多，下面截取一部分：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+--- com.android.support:appcompat-v7:28.0.0</span><br><span class="line">|    +--- com.android.support:support-annotations:28.0.0 &#x2F;&#x2F;1</span><br><span class="line">|    +--- com.android.support:support-compat:28.0.0 &#x2F;&#x2F;2</span><br><span class="line">|    |    +--- com.android.support:support-annotations:28.0.0</span><br><span class="line">|    |    +--- com.android.support:collections:28.0.0</span><br><span class="line">|    |    |    \--- com.android.support:support-annotations:28.0.0</span><br><span class="line">|    |    +--- android.arch.lifecycle:runtime:1.1.1</span><br><span class="line">|    |    |    +--- android.arch.lifecycle:common:1.1.1</span><br><span class="line">|    |    |    |    \--- com.android.support:support-annotations:26.1.0 -&gt; 28.0.0 &#x2F;&#x2F;3</span><br><span class="line">|    |    |    +--- android.arch.core:common:1.1.1</span><br><span class="line">|    |    |    |    \--- com.android.support:support-annotations:26.1.0 -&gt; 28.0.0</span><br><span class="line">|    |    |    \--- com.android.support:support-annotations:26.1.0 -&gt; 28.0.0</span><br><span class="line">|    |    \--- com.android.support:versionedparcelable:28.0.0</span><br><span class="line">|    |         +--- com.android.support:support-annotations:28.0.0</span><br><span class="line">|    |         \--- com.android.support:collections:28.0.0 (*)</span><br></pre></td></tr></table></figure>
+<p>上面是appcompat-v7:28.0.0库的依赖树的一小部分，appcompat-v7:28.0.0依赖了注释1处和注释2的库，注释2处的库又依赖了com.android.support:support-annotations:28.0.0和com.android.support:collections:28.0.0，因此当我们引入appcompat-v7:28.0.0时，会自动下载所有它依赖传递的库。注释3处说明，Gradle在依赖传递时，会自动提升依赖传递的库的版本，默认使用最高版本的库。</p>
+<p><strong>使用Gradle面板</strong><br>除了命令行，还可以使用Android Studio中的右侧的Gradle面板，找到app模块，展开后找到help目录中的dependencies，如下图所示。<br><img src="https://s2.ax1x.com/2019/07/27/eujYaq.png" alt="eujYaq.png"><br>双击或者右键选择第一个选项即可执行命令，日志就会在AS中Run窗口中打印出来。<br>现在再举个例子，拿我们熟悉的retrofit举例，在模块build.gradle中引入retrofit：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;com.squareup.retrofit2:retrofit:2.6.0&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>执行依赖检查命令，打印的关于retrofit的日志如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+--- com.squareup.retrofit2:retrofit:2.6.0</span><br><span class="line">|    \--- com.squareup.okhttp3:okhttp:3.12.0</span><br><span class="line">|         \--- com.squareup.okio:okio:1.15.0</span><br></pre></td></tr></table></figure>
+<p>可以很清楚看到retrofit:2.6.0依赖okhttp:3.12.0，而okhttp:3.12.0依赖okio:1.15.0。<br>这时我们使用3.1小节的transitive试试，修改build.gradle：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">implementation (<span class="string">&#x27;com.squareup.retrofit2:retrofit:2.6.0&#x27;</span>) &#123;</span><br><span class="line">      transitive <span class="keyword">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>执行依赖检查命令，打印的关于retrofit的日志如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+--- com.squareup.retrofit2:retrofit:2.6.0</span><br></pre></td></tr></table></figure>
+
+<p><strong>使用Gradle View插件</strong><br>如果你觉得前两种方式查看不方便、不直观，还可以使用Android Studio的Gradle View插件。<br>在AS中选择File–&gt;Settings–&gt;Plugins中搜索gradle view，找到Gradle View插件安装并重启AS，如下图所示。<br><img src="https://s2.ax1x.com/2019/07/27/eujUiV.png" alt="eujUiV.png"></p>
+<p>接下来选择View-–&gt;Tools Windows–Gradle View，这时就可以在AS的底部发现Gradle View窗口，里面会显示当前项目的所有依赖树，如下图所示。<br><img src="https://s2.ax1x.com/2019/07/27/eujtI0.png" alt="eujtI0.png"></p>
+<h4 id="3-3-Gradle的依赖冲突"><a href="#3-3-Gradle的依赖冲突" class="headerlink" title="3.3 Gradle的依赖冲突"></a><strong>3.3 Gradle的依赖冲突</strong></h4><p>依赖冲突产生的原因多是库的版本问题，举个例子，如果在build.gradle中这么写：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">implementation <span class="string">&#x27;com.squareup.retrofit2:retrofit:2.6.0&#x27;</span></span><br><span class="line">implementation <span class="string">&#x27;com.squareup.okio:okio:1.14.0&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>在3.2小节中，我们知道retrofit:2.6.0依赖的okio的版本是1.15.0，而这里引入的okio的版本为1.14.0，引入的版本不同就会产生依赖冲突。依赖冲突的解决的关键有两点，一个是Gradle的依赖检查，这个在3.2小节已经讲过了，另一个是利用Gradle的关键字，合理利用它们是解决依赖冲突的关键，在3.1小节已经介绍了 transitive，现在介绍其余的。</p>
+<h5 id="3-3-1-force"><a href="#3-3-1-force" class="headerlink" title="3.3.1 force"></a><strong>3.3.1 force</strong></h5><p>有时候我们不是想要排除某个库，而是需要强制使用统一的库的版本，force可以强制设置模块的库的版本，在模块build.gradle中加入如下代码。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">configurations.all &#123;</span><br><span class="line">    resolutionStrategy &#123;</span><br><span class="line">        force <span class="string">&#x27;com.squareup.okio:okio:2.1.0&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">dependencies &#123;</span><br><span class="line">...</span><br><span class="line">｝</span><br></pre></td></tr></table></figure>
+<p>强制当前模块的okio的版本为2.1.0，使用依赖检查来查看下retrofit的依赖：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+--- com.squareup.retrofit2:retrofit:2.6.0</span><br><span class="line">|    \--- com.squareup.okhttp3:okhttp:3.12.0</span><br><span class="line">|         \--- com.squareup.okio:okio:1.15.0 -&gt; 2.1.0</span><br><span class="line">\--- com.squareup.okio:okio:1.14.0 -&gt; 2.1.0</span><br></pre></td></tr></table></figure>
+<p>可以看到okio的版本都被强制升级到了2.1.0，这样就可以解决一些依赖冲突的问题。</p>
+<h5 id="3-3-2-exclude"><a href="#3-3-2-exclude" class="headerlink" title="3.3.2 exclude"></a><strong>3.3.2 exclude</strong></h5><p>有些时候需要排除库依赖传递中涉及的库，此时不能靠关闭依赖传递来解决问题，这时可以使用exclude。<br>我们知道com.android.support:appcompat-v7:28.0.0依赖于com.android.support:support-annotations:28.0.0、com.android.support:support-compat:28.0.0、com.android.support:cursoradapter:28.0.0等库，这时我们不想再依赖support-annotations库，可以这么写。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">configurations &#123;</span><br><span class="line">    all*.exclude group: <span class="string">&#x27;com.android.support&#x27;</span>, <span class="keyword">module</span>: <span class="string">&#x27;support-annotations&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line">dependencies &#123;</span><br><span class="line">...</span><br><span class="line">｝</span><br></pre></td></tr></table></figure>
+<p>使用依赖检查来查看com.android.support:appcompat-v7:28.0.0的依赖：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">+--- com.android.support:appcompat-v7:28.0.0</span><br><span class="line">|    +--- com.android.support:support-compat:28.0.0</span><br><span class="line">|    |    +--- com.android.support:collections:28.0.0</span><br><span class="line">|    |    +--- android.arch.lifecycle:runtime:1.1.1</span><br><span class="line">|    |    |    +--- android.arch.lifecycle:common:1.1.1</span><br><span class="line">|    |    |    \--- android.arch.core:common:1.1.1</span><br><span class="line">|    |    \--- com.android.support:versionedparcelable:28.0.0</span><br><span class="line">|    |         \--- com.android.support:collections:28.0.0</span><br><span class="line">|    +--- com.android.support:collections:28.0.0</span><br><span class="line">|    +--- com.android.support:cursoradapter:28.0.0</span><br></pre></td></tr></table></figure>
+<p>和3.2节的日志对比下，可以发现com.android.support:appcompat-v7:28.0.0不再依赖com.android.support:support-annotations:28.0，目的达到了。</p>
+<p><strong>感谢</strong><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/c602e6c493ce">https://www.jianshu.com/p/c602e6c493ce</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/ouyang_peng/article/details/82590820">https://blog.csdn.net/ouyang_peng/article/details/82590820</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/82de510b40b9">https://www.jianshu.com/p/82de510b40b9</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/zjpp2580369/article/details/82707581">https://blog.csdn.net/zjpp2580369/article/details/82707581</a><br><a target="_blank" rel="noopener" href="http://blog.fidroid.com/post/gradle/zai-gradlezhong-yin-cang-qian-ming-zheng-shu-xiang-guan-xin-xi">http://blog.fidroid.com/post/gradle/zai-gradlezhong-yin-cang-qian-ming-zheng-shu-xiang-guan-xin-xi</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/android-gradle/2-gradle-dependency.html">http://liuwangshu.cn/application/android-gradle/2-gradle-dependency.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android-Gradle/">Android Gradle</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/07/27/euj4Qe.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/jetpack/1-study-jetpack.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android Jetpack架构组件（一）带你了解Android Jetpack</div></div></a></div><div class="next-post pull-right"><a href="/flutter/primer/13-platform-channel.html"><img class="next-cover" src="https://s2.ax1x.com/2019/07/17/ZLHkF0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Flutter基础（十三）Flutter与Android的相互通信</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/android-gradle/1-gradle-plug-in.html" title="Android Gradle （一）Gradle的Android插件入门"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VepHcn.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-03-26</div><div class="title">Android Gradle （一）Gradle的Android插件入门</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

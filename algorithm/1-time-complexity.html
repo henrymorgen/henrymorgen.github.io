@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>算法（一）时间复杂度 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  前言算法很重要，但是一般情况下做移动开发并不经常用到，所以很多同学早就将算法打了个大礼包送还给了老师了，况且很多同学并没有学习过算法。这个系列就让对算法头疼的同学能快速的掌握基本的算法。过年放假阶段玩了会游戏NBA2K17的生涯模式，没有比赛的日子也都是训练，而且这些训练都是自发的，没有人逼你，从早上练到晚上，属性也不涨，但是如果日积月累，不训练和训练的人的"><meta name="keywords" content="算法"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/algorithm/1-time-complexity.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="算法（一）时间复杂度"><meta property="og:url" content="http://liuwangshu.cn/algorithm/1-time-complexity.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  前言算法很重要，但是一般情况下做移动开发并不经常用到，所以很多同学早就将算法打了个大礼包送还给了老师了，况且很多同学并没有学习过算法。这个系列就让对算法头疼的同学能快速的掌握基本的算法。过年放假阶段玩了会游戏NBA2K17的生涯模式，没有比赛的日子也都是训练，而且这些训练都是自发的，没有人逼你，从早上练到晚上，属性也不涨，但是如果日积月累，不训练和训练的人的"><meta property="og:image" content="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><meta property="article:published_time" content="2017-02-08T16:00:00.000Z"><meta property="article:modified_time" content="2020-01-12T06:43:48.856Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 14:43:48'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E7%AE%97%E6%B3%95%E7%9A%84%E6%95%88%E7%8E%87"><span class="toc-number">2.</span> <span class="toc-text">1.算法的效率</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E6%97%B6%E9%97%B4%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-number">3.</span> <span class="toc-text">2.时间复杂度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%A4%A7O%E8%A1%A8%E7%A4%BA%E6%B3%95"><span class="toc-number">4.</span> <span class="toc-text">3.大O表示法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%A4%8D%E6%9D%82%E5%BA%A6%E7%9A%84%E6%AF%94%E8%BE%83"><span class="toc-number">5.</span> <span class="toc-text">4.复杂度的比较</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/08/05/ecRaRO.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">算法（一）时间复杂度</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-02-08T16:00:00.000Z" title="发表于 2017-02-09 00:00:00">2017-02-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T06:43:48.856Z" title="更新于 2020-01-12 14:43:48">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%AE%97%E6%B3%95/">算法</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>算法很重要，但是一般情况下做移动开发并不经常用到，所以很多同学早就将算法打了个大礼包送还给了老师了，况且很多同学并没有学习过算法。这个系列就让对算法头疼的同学能快速的掌握基本的算法。过年放假阶段玩了会游戏NBA2K17的生涯模式，没有比赛的日子也都是训练，而且这些训练都是自发的，没有人逼你，从早上练到晚上，属性也不涨，但是如果日积月累，不训练和训练的人的属性值就会产生较大差距。这个突然让我意识到了现实世界，要想成为一个球星（技术大牛）那就需要日积月累的刻意训练，索性放下游戏，接着写文章吧。</p>
+<a id="more"></a>
+
+<h3 id="1-算法的效率"><a href="#1-算法的效率" class="headerlink" title="1.算法的效率"></a><strong>1.算法的效率</strong></h3><p>虽然计算机能快速的完成运算处理，但实际上，它也需要根据输入数据的大小和算法效率来消耗一定的处理器资源。要想编写出能高效运行的程序，我们就需要考虑到算法的效率。<br>算法的效率主要由以下两个复杂度来评估：<br><strong>时间复杂度</strong>：评估执行程序所需的时间。可以估算出程序对处理器的使用程度。<br><strong>空间复杂度</strong>：评估执行程序所需的存储空间。可以估算出程序对计算机内存的使用程度。</p>
+<p>设计算法时，一般是要先考虑系统环境，然后权衡时间复杂度和空间复杂度，选取一个平衡点。不过，时间复杂度要比空间复杂度更容易产生问题，因此算法研究的主要也是时间复杂度，不特别说明的情况下，复杂度就是指时间复杂度。</p>
+<h3 id="2-时间复杂度"><a href="#2-时间复杂度" class="headerlink" title="2.时间复杂度"></a><strong>2.时间复杂度</strong></h3><p><strong>时间频度</strong><br>一个算法执行所耗费的时间，从理论上是不能算出来的，必须上机运行测试才能知道。但我们不可能也没有必要对每个算法都上机测试，只需知道哪个算法花费的时间多，哪个算法花费的时间少就可以了。并且一个算法花费的时间与算法中语句的执行次数成正比例，哪个算法中语句执行次数多，它花费时间就多。一个算法中的语句执行次数称为语句频度或时间频度。记为T(n)。</p>
+<p><strong>时间复杂度</strong><br>前面提到的时间频度T(n)中，n称为问题的规模，当n不断变化时，时间频度T(n)也会不断变化。但有时我们想知道它变化时呈现什么规律，为此我们引入时间复杂度的概念。一般情况下，算法中基本操作重复执行的次数是问题规模n的某个函数，用T(n)表示，若有某个辅助函数f(n)，使得当n趋近于无穷大时，T（n)/f(n)的极限值为不等于零的常数，则称f(n)是T(n)的同数量级函数，记作T(n)=O(f(n))，它称为算法的渐进时间复杂度，简称<strong>时间复杂度</strong>。</p>
+<h3 id="3-大O表示法"><a href="#3-大O表示法" class="headerlink" title="3.大O表示法"></a><strong>3.大O表示法</strong></h3><p>像前面用O( )来体现算法时间复杂度的记法，我们称之为大O表示法。<br>算法复杂度可以从最理想情况、平均情况和最坏情况三个角度来评估，由于平均情况大多和最坏情况持平，而且评估最坏情况也可以避免后顾之忧，因此一般情况下，我们设计算法时都要直接估算最坏情况的复杂度，而大O表示法O(f(n)就是指出了算法最坏情况下的运行时间。<br>大O表示法O(f(n)中的f(n)的值可以为1、n、logn、n²等，因此我们可以将O(1)、O(n)、O(logn)、O(n²)分别可以称为常数阶、线性阶、对数阶和平方阶，那么如何推导出f(n)的值呢？我们接着来看推导大O阶的方法。</p>
+<p><strong>推导大O阶</strong><br>推导大O阶，我们可以按照如下的规则来进行推导，得到的结果就是大O表示法：<br>1.用常数1来取代运行时间中所有加法常数。<br>2.修改后的运行次数函数中，只保留最高阶项<br>3.如果最高阶项存在且不是1，则去除与这个项相乘的常数。</p>
+<p>在前面大O表示法的语言描述可能有些晦涩难懂，这里用通俗的语言来说，</p>
+<p><strong>常数阶</strong><br>先举了例子，如下所示。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int sum &#x3D; 0,n &#x3D; 100; &#x2F;&#x2F;执行一次  </span><br><span class="line">sum &#x3D; (1+n)*n&#x2F;2; &#x2F;&#x2F;执行一次  </span><br><span class="line">System.out.println (sum); &#x2F;&#x2F;执行一次 </span><br></pre></td></tr></table></figure>
+<p>上面算法的运行的次数的函数为f(n)=3，根据推导大O阶的规则1，我们需要将常数3改为1，则这个算法的时间复杂度为O(1)。如果sum = （1+n）*n/2这条语句再执行10遍，因为这与问题大小n的值并没有关系，所以这个算法的时间复杂度仍旧是O(1)，我们可以称之为常数阶。</p>
+<p><strong>线性阶</strong><br>线性阶主要要分析循环结构的运行情况，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;n;i++)&#123;</span><br><span class="line"><span class="comment">//时间复杂度为O(1)的算法</span></span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面算法循环体中的代码执行了n次，因此时间复杂度为O(n)。</p>
+<p><strong>对数阶</strong><br>接着看如下代码：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">int number&#x3D;1;</span><br><span class="line">while(number&lt;n)&#123;</span><br><span class="line">number&#x3D;number*2;</span><br><span class="line">&#x2F;&#x2F;时间复杂度为O(1)的算法</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出上面的代码，随着number每次乘以2后，都会越来越接近n，当number不小于n时就会退出循环。假设循环的次数为X，则由2^x=n得出x=log₂n，因此得出这个算法的时间复杂度为O(logn)。</p>
+<p><strong>平方阶</strong><br>下面的代码是循环嵌套：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;n;i++)&#123;   </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j=<span class="number">0</span>;j&lt;n;i++)&#123;</span><br><span class="line">       <span class="comment">//复杂度为O(1)的算法</span></span><br><span class="line">       ... </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>内层循环的时间复杂度在讲到线性阶时就已经得知是O(n)，现在经过外层循环n次，那么这段算法的时间复杂度则为O(n²)。<br>接下来我们来算一下下面算法的时间复杂度：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;n;i++)&#123;   </span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">int</span> j=i;j&lt;n;i++)&#123;</span><br><span class="line">       <span class="comment">//复杂度为O(1)的算法</span></span><br><span class="line">       ... </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是内循环中int j=i，而不是int j=0。当i=0时，内循环执行了n次；i=1时内循环执行了n-1次，当i=n-1时执行了1次，我们可以推算出总的执行次数为：</p>
+<p>n+(n-1)+(n-2)+(n-3)+……+1<br>=(n+1)+[(n-1)+2]+[(n-2)+3]+[(n-3)+4]+……<br>=(n+1)+(n+1)+(n+1)+(n+1)+……<br>=(n+1)n/2<br>=n(n+1)/2<br>=n²/2+n/2</p>
+<p>根据此前讲过的推导大O阶的规则的第二条：只保留最高阶，因此保留n²/2。根据第三条去掉和这个项的常数，则去掉1/2,最终这段代码的时间复杂度为O(n²)。</p>
+<p><strong>其他常见复杂度</strong></p>
+<p>除了常数阶、线性阶、平方阶、对数阶，还有如下时间复杂度：<br>f(n)=nlogn时，时间复杂度为O(nlogn)，可以称为nlogn阶。<br>f(n)=n³时，时间复杂度为O(n³)，可以称为立方阶。<br>f(n)=2ⁿ时，时间复杂度为O(2ⁿ)，可以称为指数阶。<br>f(n)=n!时，时间复杂度为O(n!)，可以称为阶乘阶。<br>f(n)=(√n时，时间复杂度为O(√n)，可以称为平方根阶。</p>
+<h3 id="4-复杂度的比较"><a href="#4-复杂度的比较" class="headerlink" title="4.复杂度的比较"></a><strong>4.复杂度的比较</strong></h3><p>下面将算法中常见的f(n)值根据几种典型的数量级来列成一张表，根据这种表，我们来看看各种算法复杂度的差异。</p>
+<table>
+<thead>
+<tr>
+<th align="center">n</th>
+<th align="center">logn</th>
+<th align="center">√n</th>
+<th align="center">nlogn</th>
+<th align="center">n²</th>
+<th align="center">2ⁿ</th>
+<th align="center">n!</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">5</td>
+<td align="center">2</td>
+<td align="center">2</td>
+<td align="center">10</td>
+<td align="center">25</td>
+<td align="center">32</td>
+<td align="center">120</td>
+</tr>
+<tr>
+<td align="center">10</td>
+<td align="center">3</td>
+<td align="center">3</td>
+<td align="center">30</td>
+<td align="center">100</td>
+<td align="center">1024</td>
+<td align="center">3628800</td>
+</tr>
+<tr>
+<td align="center">50</td>
+<td align="center">5</td>
+<td align="center">7</td>
+<td align="center">250</td>
+<td align="center">2500</td>
+<td align="center">约10^15</td>
+<td align="center">约3.0*10^64</td>
+</tr>
+<tr>
+<td align="center">100</td>
+<td align="center">6</td>
+<td align="center">10</td>
+<td align="center">600</td>
+<td align="center">10000</td>
+<td align="center">约10^30</td>
+<td align="center">约9.3*10^157</td>
+</tr>
+<tr>
+<td align="center">1000</td>
+<td align="center">9</td>
+<td align="center">31</td>
+<td align="center">9000</td>
+<td align="center">1000 000</td>
+<td align="center">约10^300</td>
+<td align="center">约4.0*10^2567</td>
+</tr>
+</tbody></table>
+<p>从上表可以看出，O(n)、O(logn)、O(√n )、O(nlogn )随着n的增加，复杂度提升不大，因此这些复杂度属于效率高的算法，反观O(2ⁿ)和O(n!)当n增加到50时，复杂度就突破十位数了，这种效率极差的复杂度最好不要出现在程序中，因此在动手编程时要评估所写算法的最坏情况的复杂度。</p>
+<p>下面给出一个更加直观的图：<br><img src="https://s2.ax1x.com/2019/05/28/VmAZF0.png"></p>
+<p>其中x轴代表n值，y轴代表T(n)值（时间复杂度）。T(n)值随着n的值的变化而变化，其中可以看出O(n!)和O(2ⁿ)随着n值的增大，它们的T(n)值上升幅度非常大，而O(logn)、O(n)、O(nlogn)随着n值的增大，T(n)值上升幅度则很小。<br>常用的时间复杂度按照耗费的时间从小到大依次是：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">O(1)&lt;O(logn)&lt;O(n)&lt;O(nlogn)&lt;O(n²)&lt;O(n³)&lt;O(2ⁿ)&lt;O(n!)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<p>参考资料<br>《大话数据结构》<br>《挑战程序设计竞赛2》<br>《算法》</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/algorithm/1-time-complexity.html">http://liuwangshu.cn/algorithm/1-time-complexity.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/booting/2-zygote.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android系统启动流程（二）解析Zygote进程启动过程</div></div></a></div><div class="next-post pull-right"><a href="/framework/booting/1-init.html"><img class="next-cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android系统启动流程（一）解析init进程启动过程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/algorithm/2-insert-hill.html" title="算法（二）初等排序前篇[插入和希尔排序]"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-02-18</div><div class="title">算法（二）初等排序前篇[插入和希尔排序]</div></div></a></div><div><a href="/algorithm/3-select-bubble.html" title="算法（三）初等排序后篇[选择和冒泡排序]"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-03-02</div><div class="title">算法（三）初等排序后篇[选择和冒泡排序]</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

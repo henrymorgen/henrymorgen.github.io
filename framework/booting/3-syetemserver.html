@@ -1,0 +1,304 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android系统启动流程（三）解析SyetemServer进程启动过程 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  前言上一篇我们学习了Zygote进程，并且知道Zygote进程启动了SyetemServer进程，那么这一篇我们就来学习Android7.0版本的SyetemServer进程的启动过程。  1.Zygote启动SyetemServer进程在上一篇文章中我们讲到在ZygoteInit.java的startSystemServer函数中启动了SyetemServ"><meta name="keywords" content="Android框架层,Android系统启动"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/framework/booting/3-syetemserver.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android系统启动流程（三）解析SyetemServer进程启动过程"><meta property="og:url" content="http://liuwangshu.cn/framework/booting/3-syetemserver.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  前言上一篇我们学习了Zygote进程，并且知道Zygote进程启动了SyetemServer进程，那么这一篇我们就来学习Android7.0版本的SyetemServer进程的启动过程。  1.Zygote启动SyetemServer进程在上一篇文章中我们讲到在ZygoteInit.java的startSystemServer函数中启动了SyetemServ"><meta property="og:image" content="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><meta property="article:published_time" content="2017-02-15T04:08:00.000Z"><meta property="article:modified_time" content="2020-09-17T07:29:29.016Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-17 15:29:29'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Zygote%E5%90%AF%E5%8A%A8SyetemServer%E8%BF%9B%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">1.Zygote启动SyetemServer进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-SyetemServer%E8%BF%9B%E7%A8%8B%E5%90%AF%E5%8A%A8%E8%BF%87%E7%A8%8B"><span class="toc-number">3.</span> <span class="toc-text">2.SyetemServer进程启动过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8Binder%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="toc-number">3.1.</span> <span class="toc-text">启动Binder线程池</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#invokeStaticMain"><span class="toc-number">3.2.</span> <span class="toc-text">invokeStaticMain</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E8%A7%A3%E6%9E%90SyetemServer%E8%BF%9B%E7%A8%8B"><span class="toc-number">4.</span> <span class="toc-text">3.解析SyetemServer进程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93SyetemServer%E8%BF%9B%E7%A8%8B"><span class="toc-number">5.</span> <span class="toc-text">4.总结SyetemServer进程</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/11/MMSseK.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android系统启动流程（三）解析SyetemServer进程启动过程</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-02-15T04:08:00.000Z" title="发表于 2017-02-15 12:08:00">2017-02-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-17T07:29:29.016Z" title="更新于 2020-09-17 15:29:29">2020-09-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>上一篇我们学习了Zygote进程，并且知道Zygote进程启动了SyetemServer进程，那么这一篇我们就来学习Android7.0版本的SyetemServer进程的启动过程。</p>
+<a id="more"></a>
+<h3 id="1-Zygote启动SyetemServer进程"><a href="#1-Zygote启动SyetemServer进程" class="headerlink" title="1.Zygote启动SyetemServer进程"></a><strong>1.Zygote启动SyetemServer进程</strong></h3><p>在上一篇文章中我们讲到在ZygoteInit.java的startSystemServer函数中启动了SyetemServer进程，如下所示。<br><strong>frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">startSystemServer</span><span class="params">(String abiList, String socketName)</span></span></span><br><span class="line"><span class="function">           <span class="keyword">throws</span> MethodAndArgsCaller, RuntimeException </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">       <span class="keyword">if</span> (pid == <span class="number">0</span>) &#123;</span><br><span class="line">           <span class="keyword">if</span> (hasSecondZygote(abiList)) &#123;</span><br><span class="line">               waitForSecondaryZygote(socketName);</span><br><span class="line">           &#125;</span><br><span class="line">           handleSystemServerProcess(parsedArgs);</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>在startSystemServer函数中调用handleSystemServerProcess来启动SyetemServer进程。</p>
+<h3 id="2-SyetemServer进程启动过程"><a href="#2-SyetemServer进程启动过程" class="headerlink" title="2.SyetemServer进程启动过程"></a><strong>2.SyetemServer进程启动过程</strong></h3><p>handleSystemServerProcess函数的代码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">handleSystemServerProcess</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">          ZygoteConnection.Arguments parsedArgs)</span></span></span><br><span class="line"><span class="function">          <span class="keyword">throws</span> ZygoteInit.MethodAndArgsCaller </span>&#123;</span><br><span class="line">      closeServerSocket();<span class="comment">//1</span></span><br><span class="line">    ...</span><br><span class="line">      <span class="keyword">if</span> (parsedArgs.invokeWith != <span class="keyword">null</span>) &#123;</span><br><span class="line">         ...</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          ClassLoader cl = <span class="keyword">null</span>;</span><br><span class="line">          <span class="keyword">if</span> (systemServerClasspath != <span class="keyword">null</span>) &#123;</span><br><span class="line">              cl = createSystemServerClassLoader(systemServerClasspath,</span><br><span class="line">                                                 parsedArgs.targetSdkVersion);</span><br><span class="line">              Thread.currentThread().setContextClassLoader(cl);</span><br><span class="line">          &#125;</span><br><span class="line">          RuntimeInit.zygoteInit(parsedArgs.targetSdkVersion, parsedArgs.remainingArgs, cl);<span class="comment">//2</span></span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>SyetemServer进程是复制了Zygote进程的地址空间，因此也会得到Zygote进程创建的Socket，这个Socket对于SyetemServer进程没有用处，因此，需要注释1处的代码来关闭该Socket。在注释2处调用RuntimeInit的zygoteInit函数，它的代码如下所示。</p>
+<p><strong>frameworks/base/core/java/com/android/internal/os/RuntimeInit.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">zygoteInit</span><span class="params">(<span class="keyword">int</span> targetSdkVersion, String[] argv, ClassLoader classLoader)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> ZygoteInit.MethodAndArgsCaller </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (DEBUG) Slog.d(TAG, <span class="string">&quot;RuntimeInit: Starting application from zygote&quot;</span>);</span><br><span class="line">        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, <span class="string">&quot;RuntimeInit&quot;</span>);</span><br><span class="line">        redirectLogStreams();</span><br><span class="line">        commonInit();</span><br><span class="line">        nativeZygoteInit();<span class="comment">//1</span></span><br><span class="line">        applicationInit(targetSdkVersion, argv, classLoader);<span class="comment">//2</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处调用nativeZygoteInit函数，一看函数的名称就知道调用Native层的代码。</p>
+<h4 id="启动Binder线程池"><a href="#启动Binder线程池" class="headerlink" title="启动Binder线程池"></a><strong>启动Binder线程池</strong></h4><p>接着我们来查看nativeZygoteInit函数对用的JNI文件，如下所示。<br><strong>frameworks/base/core/jni/AndroidRuntime.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> JNINativeMethod gMethods[] = &#123;</span><br><span class="line">    &#123; <span class="string">&quot;nativeFinishInit&quot;</span>, <span class="string">&quot;()V&quot;</span>,</span><br><span class="line">        (<span class="keyword">void</span>*) com_android_internal_os_RuntimeInit_nativeFinishInit &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;nativeZygoteInit&quot;</span>, <span class="string">&quot;()V&quot;</span>,</span><br><span class="line">        (<span class="keyword">void</span>*) com_android_internal_os_RuntimeInit_nativeZygoteInit &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;nativeSetExitWithoutCleanup&quot;</span>, <span class="string">&quot;(Z)V&quot;</span>,</span><br><span class="line">        (<span class="keyword">void</span>*) com_android_internal_os_RuntimeInit_nativeSetExitWithoutCleanup &#125;,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>通过JNI的gMethods数组，可以看出nativeZygoteInit函数对应的是JNI文件AndroidRuntime.cpp的com_android_internal_os_RuntimeInit_nativeZygoteInit函数：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="keyword">static</span> AndroidRuntime* gCurRuntime = <span class="literal">NULL</span>;</span><br><span class="line">...</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">com_android_internal_os_RuntimeInit_nativeZygoteInit</span><span class="params">(JNIEnv* env, jobject clazz)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    gCurRuntime-&gt;onZygoteInit();</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>这里gCurRuntime是AndroidRuntime类型的指针，AndroidRuntime的子类AppRuntime在app_main.cpp中定义，我们来查看AppRuntime的onZygoteInit函数，代码如下所示。<br><strong>frameworks/base/cmds/app_process/app_main.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">onZygoteInit</span><span class="params">()</span></span></span><br><span class="line"><span class="function">   </span>&#123;</span><br><span class="line">       sp&lt;ProcessState&gt; proc = ProcessState::self();</span><br><span class="line">       ALOGV(<span class="string">&quot;App process: starting thread pool.\n&quot;</span>);</span><br><span class="line">       proc-&gt;startThreadPool();<span class="comment">//1</span></span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处的代码用来启动一个Binder线程池，这样SyetemServer进程就可以使用Binder来与其他进程进行通信了。看到这里我们知道RuntimeInit.java的nativeZygoteInit函数主要做的就是启动Binder线程池。</p>
+<h4 id="invokeStaticMain"><a href="#invokeStaticMain" class="headerlink" title="invokeStaticMain"></a><strong>invokeStaticMain</strong></h4><p>我们再回到RuntimeInit.java的代码，在注释2处调用了applicationInit函数，代码如下所示。</p>
+<p><strong>frameworks/base/core/java/com/android/internal/os/RuntimeInit.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">applicationInit</span><span class="params">(<span class="keyword">int</span> targetSdkVersion, String[] argv, ClassLoader classLoader)</span></span></span><br><span class="line"><span class="function">            <span class="keyword">throws</span> ZygoteInit.MethodAndArgsCaller </span>&#123;</span><br><span class="line">...</span><br><span class="line">        invokeStaticMain(args.startClass, args.startArgs, classLoader);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>applicationInit函数中主要调用了invokeStaticMain函数：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">invokeStaticMain</span><span class="params">(String className, String[] argv, ClassLoader classLoader)</span></span></span><br><span class="line"><span class="function">         <span class="keyword">throws</span> ZygoteInit.MethodAndArgsCaller </span>&#123;</span><br><span class="line">     Class&lt;?&gt; cl;</span><br><span class="line">     <span class="keyword">try</span> &#123;</span><br><span class="line">         cl = Class.forName(className, <span class="keyword">true</span>, classLoader);<span class="comment">//1</span></span><br><span class="line">     &#125; <span class="keyword">catch</span> (ClassNotFoundException ex) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</span><br><span class="line">                 <span class="string">&quot;Missing class when invoking static main &quot;</span> + className,</span><br><span class="line">                 ex);</span><br><span class="line">     &#125;</span><br><span class="line">     Method m;</span><br><span class="line">     <span class="keyword">try</span> &#123;</span><br><span class="line">         m = cl.getMethod(<span class="string">&quot;main&quot;</span>, <span class="keyword">new</span> Class[] &#123; String[].class &#125;);//<span class="number">2</span></span><br><span class="line">     &#125; <span class="keyword">catch</span> (NoSuchMethodException ex) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</span><br><span class="line">                 <span class="string">&quot;Missing static main on &quot;</span> + className, ex);</span><br><span class="line">     &#125; <span class="keyword">catch</span> (SecurityException ex) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</span><br><span class="line">                 <span class="string">&quot;Problem getting static main on &quot;</span> + className, ex);</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">int</span> modifiers = m.getModifiers();</span><br><span class="line">     <span class="keyword">if</span> (! (Modifier.isStatic(modifiers) &amp;&amp; Modifier.isPublic(modifiers))) &#123;</span><br><span class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</span><br><span class="line">                 <span class="string">&quot;Main method is not public and static on &quot;</span> + className);</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">throw</span> <span class="keyword">new</span> ZygoteInit.MethodAndArgsCaller(m, argv);<span class="comment">//3</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处className为“com.android.server.SystemServer”，因此通过反射返回的cl为SystemServer类。注释2处找到SystemServer中的main函数。在注释3处将找到的main函数传入到MethodAndArgsCaller异常中并抛出该异常。截获MethodAndArgsCaller异常的代码在ZygoteInit.java的main函数中，如下所示。</p>
+<p><strong>frameworks/base/core/java/com/android/internal/os/ZygoteInit.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String argv[])</span> </span>&#123;</span><br><span class="line">     ...</span><br><span class="line">          closeServerSocket();</span><br><span class="line">      &#125; <span class="keyword">catch</span> (MethodAndArgsCaller caller) &#123;</span><br><span class="line">          caller.run();<span class="comment">//1</span></span><br><span class="line">      &#125; <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line">          Log.e(TAG, <span class="string">&quot;Zygote died with exception&quot;</span>, ex);</span><br><span class="line">          closeServerSocket();</span><br><span class="line">          <span class="keyword">throw</span> ex;</span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>在注释1处调用了MethodAndArgsCaller的run函数：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            mMethod.invoke(<span class="keyword">null</span>, <span class="keyword">new</span> Object[] &#123; mArgs &#125;);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (IllegalAccessException ex) &#123;</span><br><span class="line">         ...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里mMethod指的就是SystemServer的main函数，因此main函数被动态调用。</p>
+<h3 id="3-解析SyetemServer进程"><a href="#3-解析SyetemServer进程" class="headerlink" title="3.解析SyetemServer进程"></a><strong>3.解析SyetemServer进程</strong></h3><p>我们先来查看SystemServer的main函数：<br><strong>frameworks/base/services/java/com/android/server/SystemServer.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">new</span> SystemServer().run();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>main函数中只调用了SystemServer的run函数，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       ...</span><br><span class="line">           System.loadLibrary(<span class="string">&quot;android_servers&quot;</span>);<span class="comment">//1</span></span><br><span class="line">       ...</span><br><span class="line">           mSystemServiceManager = <span class="keyword">new</span> SystemServiceManager(mSystemContext);<span class="comment">//2</span></span><br><span class="line">           LocalServices.addService(SystemServiceManager.class, mSystemServiceManager);</span><br><span class="line">       ...    </span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">           Trace.traceBegin(Trace.TRACE_TAG_SYSTEM_SERVER, <span class="string">&quot;StartServices&quot;</span>);</span><br><span class="line">           startBootstrapServices();<span class="comment">//3</span></span><br><span class="line">           startCoreServices();<span class="comment">//4</span></span><br><span class="line">           startOtherServices();<span class="comment">//5</span></span><br><span class="line">       &#125; <span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">           Slog.e(<span class="string">&quot;System&quot;</span>, <span class="string">&quot;******************************************&quot;</span>);</span><br><span class="line">           Slog.e(<span class="string">&quot;System&quot;</span>, <span class="string">&quot;************ Failure starting system services&quot;</span>, ex);</span><br><span class="line">           <span class="keyword">throw</span> ex;</span><br><span class="line">       &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">           Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);</span><br><span class="line">       &#125;</span><br><span class="line">       ...</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>run函数代码很多，关键就是在注释1处加载了libandroid_servers.so。接下来在注释2处创建SystemServiceManager，它会对系统的服务进行创建、启动和生命周期管理。启动系统的各种服务，在注释3中的startBootstrapServices函数中用SystemServiceManager启动了ActivityManagerService、PowerManagerService、PackageManagerService等服务。在注释4处的函数中则启动了BatteryService、UsageStatsService和WebViewUpdateService。注释5处的startOtherServices函数中则启动了CameraService、AlarmManagerService、VrManagerService等服务，这些服务的父类为SystemService。从注释3、4、5的函数可以看出，官方把系统服务分为了三种类型，分别是引导服务、核心服务和其他服务，其中其他服务为一些非紧要和一些不需要立即启动的服务。系统服务大约有80多个，这里列出部分系统服务以及它们的作用如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th align="center">引导服务</th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Installer</td>
+<td align="center">系统安装apk时的一个服务类，启动完成Installer服务之后才能启动其他的系统服务</td>
+</tr>
+<tr>
+<td align="center">ActivityManagerService</td>
+<td align="center">负责四大组件的启动、切换、调度。</td>
+</tr>
+<tr>
+<td align="center">PowerManagerService</td>
+<td align="center">计算系统中和Power相关的计算，然后决策系统应该如何反应</td>
+</tr>
+<tr>
+<td align="center">LightsService</td>
+<td align="center">管理和显示背光LED</td>
+</tr>
+<tr>
+<td align="center">DisplayManagerService</td>
+<td align="center">用来管理所有显示设备</td>
+</tr>
+<tr>
+<td align="center">UserManagerService</td>
+<td align="center">多用户模式管理</td>
+</tr>
+<tr>
+<td align="center">SensorService</td>
+<td align="center">为系统提供各种感应器服务</td>
+</tr>
+<tr>
+<td align="center">PackageManagerService</td>
+<td align="center">用来对apk进行安装、解析、删除、卸载等等操作</td>
+</tr>
+<tr>
+<td align="center"><strong>核心服务</strong></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">BatteryService</td>
+<td align="center">管理电池相关的服务</td>
+</tr>
+<tr>
+<td align="center">UsageStatsService</td>
+<td align="center">收集用户使用每一个APP的频率、使用时常</td>
+</tr>
+<tr>
+<td align="center">WebViewUpdateService</td>
+<td align="center">WebView更新服务</td>
+</tr>
+<tr>
+<td align="center"><strong>其他服务</strong></td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">CameraService</td>
+<td align="center">摄像头相关服务</td>
+</tr>
+<tr>
+<td align="center">AlarmManagerService</td>
+<td align="center">全局定时器管理服务</td>
+</tr>
+<tr>
+<td align="center">InputManagerService</td>
+<td align="center">管理输入事件</td>
+</tr>
+<tr>
+<td align="center">WindowManagerService</td>
+<td align="center">窗口管理服务</td>
+</tr>
+<tr>
+<td align="center">VrManagerService</td>
+<td align="center">VR模式管理服务</td>
+</tr>
+<tr>
+<td align="center">BluetoothService</td>
+<td align="center">蓝牙管理服务</td>
+</tr>
+<tr>
+<td align="center">NotificationManagerService</td>
+<td align="center">通知管理服务</td>
+</tr>
+<tr>
+<td align="center">DeviceStorageMonitorService</td>
+<td align="center">存储相关管理服务</td>
+</tr>
+<tr>
+<td align="center">LocationManagerService</td>
+<td align="center">定位管理服务</td>
+</tr>
+<tr>
+<td align="center">AudioService</td>
+<td align="center">音频相关管理服务</td>
+</tr>
+<tr>
+<td align="center">…</td>
+<td align="center">….</td>
+</tr>
+</tbody></table>
+<p>比如要启动PowerManagerService则会调用如下代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);</span><br></pre></td></tr></table></figure>
+<p>SystemServiceManager的startService函数启动了PowerManagerService，startService函数如下所示。</p>
+<p><strong>frameworks/base/services/core/java/com/android/server/SystemServiceManager.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">  <span class="keyword">public</span> &lt;T extends SystemService&gt; <span class="function">T <span class="title">startService</span><span class="params">(Class&lt;T&gt; serviceClass)</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">            <span class="keyword">final</span> T service;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Constructor&lt;T&gt; constructor = serviceClass.getConstructor(Context.class);</span><br><span class="line">                service = constructor.newInstance(mContext);<span class="comment">//1</span></span><br><span class="line">            &#125; <span class="keyword">catch</span> (InstantiationException ex) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Failed to create service &quot;</span> + name</span><br><span class="line">                        + <span class="string">&quot;: service could not be instantiated&quot;</span>, ex);</span><br><span class="line">            &#125;</span><br><span class="line">...</span><br><span class="line">            <span class="comment">// Register it.</span></span><br><span class="line">            mServices.add(service);<span class="comment">//2</span></span><br><span class="line">            <span class="comment">// Start it.</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                service.onStart();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (RuntimeException ex) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">&quot;Failed to start service &quot;</span> + name</span><br><span class="line">                        + <span class="string">&quot;: onStart threw an exception&quot;</span>, ex);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> service;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            Trace.traceEnd(Trace.TRACE_TAG_SYSTEM_SERVER);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处的代码用来创建SystemService，这里的SystemService是PowerManagerService，在注释2处将PowerManagerService添加到mServices中，这里mServices是一个存储SystemService类型的ArrayList。接着调用PowerManagerService的onStart函数启动PowerManagerService并返回，这样就完成了PowerManagerService启动的过程。<br>除了用mSystemServiceManager的startService函数来启动系统服务外，也可以通过如下形式来启动系统服务，以PackageManagerService为例：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">mPackageManagerService = PackageManagerService.main(mSystemContext, installer,</span><br><span class="line">               mFactoryTestMode != FactoryTest.FACTORY_TEST_OFF, mOnlyCore);</span><br></pre></td></tr></table></figure>
+<p>直接调用了PackageManagerService的main函数：<br><strong>frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> PackageManagerService <span class="title">main</span><span class="params">(Context context, Installer installer,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> factoryTest, <span class="keyword">boolean</span> onlyCore)</span> </span>&#123;</span><br><span class="line">    <span class="comment">// Self-check for initial settings.</span></span><br><span class="line">    PackageManagerServiceCompilerMapping.checkProperties();</span><br><span class="line">    PackageManagerService m = <span class="keyword">new</span> PackageManagerService(context, installer,</span><br><span class="line">            factoryTest, onlyCore);<span class="comment">//1</span></span><br><span class="line">    m.enableSystemUserPackages();</span><br><span class="line">    <span class="comment">// Disable any carrier apps. We do this very early in boot to prevent the apps from being</span></span><br><span class="line">    <span class="comment">// disabled after already being started.</span></span><br><span class="line">    CarrierAppUtils.disableCarrierAppsUntilPrivileged(context.getOpPackageName(), m,</span><br><span class="line">            UserHandle.USER_SYSTEM);</span><br><span class="line">    ServiceManager.addService(<span class="string">&quot;package&quot;</span>, m);<span class="comment">//2</span></span><br><span class="line">    <span class="keyword">return</span> m;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处直接创建PackageManagerService并在注释2处将PackageManagerService注册到ServiceManager中，ServiceManager用来管理系统中的各种Service，用于系统C/S架构中的Binder机制通信：Client端要使用某个Service，则需要先到ServiceManager查询Service的相关信息，然后根据Service的相关信息与Service所在的Server进程建立通讯通路，这样Client端就可以使用Service了。还有的服务是直接注册到ServiceManager中的，如下所示。</p>
+<p><strong>frameworks/base/services/java/com/android/server/SystemServer.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">telephonyRegistry = <span class="keyword">new</span> TelephonyRegistry(context);</span><br><span class="line">ServiceManager.addService(<span class="string">&quot;telephony.registry&quot;</span>, telephonyRegistry);</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-总结SyetemServer进程"><a href="#4-总结SyetemServer进程" class="headerlink" title="4.总结SyetemServer进程"></a><strong>4.总结SyetemServer进程</strong></h3><p>SyetemServer在启动时做了如下工作：<br>1.启动Binder线程池，这样就可以与其他进程进行通信。<br>2.创建SystemServiceManager用于对系统的服务进行创建、启动和生命周期管理。<br>3.启动各种系统服务。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/framework/booting/3-syetemserver.html">http://liuwangshu.cn/framework/booting/3-syetemserver.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a><a class="post-meta__tags" href="/tags/Android%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/">Android系统启动</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/algorithm/2-insert-hill.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">算法（二）初等排序前篇[插入和希尔排序]</div></div></a></div><div class="next-post pull-right"><a href="/framework/booting/2-zygote.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android系统启动流程（二）解析Zygote进程启动过程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/framework/system-architecture.html" title="Android系统架构与系统源码目录"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-01-23</div><div class="title">Android系统架构与系统源码目录</div></div></a></div><div><a href="/framework/booting/2-zygote.html" title="Android系统启动流程（二）解析Zygote进程启动过程"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-02-13</div><div class="title">Android系统启动流程（二）解析Zygote进程启动过程</div></div></a></div><div><a href="/framework/booting/1-init.html" title="Android系统启动流程（一）解析init进程启动过程"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-02-07</div><div class="title">Android系统启动流程（一）解析init进程启动过程</div></div></a></div><div><a href="/framework/booting/4-launcher.html" title="Android系统启动流程（四）Launcher启动过程与系统启动流程"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VekSyj.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-02-23</div><div class="title">Android系统启动流程（四）Launcher启动过程与系统启动流程</div></div></a></div><div><a href="/application/multithreading/asynctask-soucecode.html" title="AsyncTask源码分析"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-10-19</div><div class="title">AsyncTask源码分析</div></div></a></div><div><a href="/framework/ams/2-activitytask.html" title="Android解析ActivityManagerService（二）ActivityTask和Activity栈管理"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-08-25</div><div class="title">Android解析ActivityManagerService（二）ActivityTask和Activity栈管理</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

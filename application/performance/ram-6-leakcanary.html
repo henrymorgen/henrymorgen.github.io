@@ -1,0 +1,177 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android内存优化（六）LeakCanary使用详解 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  相关文章Android性能优化系列Java虚拟机系列 1.概述如果使用MAT来分析内存问题，会有一些难度，并且效率也不是很高，对于一个内存泄漏问题，可能要进行多次排查和对比。为了能够简单迅速的发现内存泄漏，Square公司基于MAT开源了LeakCanary。   2.使用LeakCanary首先配置build.gradle： dependencies &amp;#"><meta name="keywords" content="Android性能优化,Android内存优化"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/performance/ram-6-leakcanary.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android内存优化（六）LeakCanary使用详解"><meta property="og:url" content="http://liuwangshu.cn/application/performance/ram-6-leakcanary.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  相关文章Android性能优化系列Java虚拟机系列 1.概述如果使用MAT来分析内存问题，会有一些难度，并且效率也不是很高，对于一个内存泄漏问题，可能要进行多次排查和对比。为了能够简单迅速的发现内存泄漏，Square公司基于MAT开源了LeakCanary。   2.使用LeakCanary首先配置build.gradle： dependencies &amp;#"><meta property="og:image" content="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><meta property="article:published_time" content="2017-09-03T16:16:00.000Z"><meta property="article:modified_time" content="2020-01-12T07:14:43.828Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 15:14:43'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="toc-number">1.</span> <span class="toc-text">1.概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%BD%BF%E7%94%A8LeakCanary"><span class="toc-number">2.</span> <span class="toc-text">2.使用LeakCanary</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-LeakCanary%E5%BA%94%E7%94%A8%E4%B8%BE%E4%BE%8B"><span class="toc-number">3.</span> <span class="toc-text">3.LeakCanary应用举例</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/11/MMSseK.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android内存优化（六）LeakCanary使用详解</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-09-03T16:16:00.000Z" title="发表于 2017-09-04 00:16:00">2017-09-04</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T07:14:43.828Z" title="更新于 2020-01-12 15:14:43">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>相关文章<br><a href="http://liuwangshu.cn/tags/Android%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">Android性能优化系列</a><br><a href="http://liuwangshu.cn/tags/Java%E8%99%9A%E6%8B%9F%E6%9C%BA/">Java虚拟机系列</a></p>
+<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1.概述"></a><strong>1.概述</strong></h3><p>如果使用MAT来分析内存问题，会有一些难度，并且效率也不是很高，对于一个内存泄漏问题，可能要进行多次排查和对比。<br>为了能够简单迅速的发现内存泄漏，Square公司基于MAT开源了<a target="_blank" rel="noopener" href="https://github.com/square/leakcanary">LeakCanary</a>。</p>
+<a id="more"></a>
+
+<h3 id="2-使用LeakCanary"><a href="#2-使用LeakCanary" class="headerlink" title="2.使用LeakCanary"></a><strong>2.使用LeakCanary</strong></h3><p>首先配置build.gradle：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">dependencies &#123;</span><br><span class="line">  debugCompile &#x27;com.squareup.leakcanary:leakcanary-android:1.5.2&#x27;</span><br><span class="line">  releaseCompile &#x27;com.squareup.leakcanary:leakcanary-android-no-op:1.5.2&#x27;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来在Application加入如下代码。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LeakApplication</span> <span class="keyword">extends</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onCreate();</span><br><span class="line">    <span class="keyword">if</span> (LeakCanary.isInAnalyzerProcess(<span class="keyword">this</span>)) &#123;<span class="comment">//1</span></span><br><span class="line">      <span class="comment">// This process is dedicated to LeakCanary for heap analysis.</span></span><br><span class="line">      <span class="comment">// You should not init your app in this process.</span></span><br><span class="line">      <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    LeakCanary.install(<span class="keyword">this</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处的代码用来进行过滤操作，如果当前的进程是用来给LeakCanary 进行堆分析的则return，否则会执行LeakCanary的install方法。这样我们就可以使用LeakCanary了，如果检测到某个Activity 有内存泄露，LeakCanary 就会给出提示。</p>
+<h3 id="3-LeakCanary应用举例"><a href="#3-LeakCanary应用举例" class="headerlink" title="3.LeakCanary应用举例"></a><strong>3.LeakCanary应用举例</strong></h3><p>第二节的例子代码只能够检测Activity的内存泄漏，当然还存在其他类的内存泄漏，这时我们就需要使用RefWatcher来进行监控。改写Application，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LeakApplication</span> <span class="keyword">extends</span> <span class="title">Application</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> RefWatcher refWatcher;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate();</span><br><span class="line">        refWatcher= setupLeakCanary();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> RefWatcher <span class="title">setupLeakCanary</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (LeakCanary.isInAnalyzerProcess(<span class="keyword">this</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> RefWatcher.DISABLED;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> LeakCanary.install(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> RefWatcher <span class="title">getRefWatcher</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        LeakApplication leakApplication = (LeakApplication) context.getApplicationContext();</span><br><span class="line">        <span class="keyword">return</span> leakApplication.refWatcher;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>install方法会返回RefWatcher用来监控对象，LeakApplication中还要提供getRefWatcher静态方法来返回全局RefWatcher。<br>最后为了举例，我们在一段存在内存泄漏的代码中引入LeakCanary监控，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_main);</span><br><span class="line">        LeakThread leakThread = <span class="keyword">new</span> LeakThread();</span><br><span class="line">        leakThread.start();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">LeakThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">6</span> * <span class="number">60</span> * <span class="number">1000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDestroy</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onDestroy();</span><br><span class="line">        RefWatcher refWatcher = LeakApplication.getRefWatcher(<span class="keyword">this</span>);<span class="comment">//1</span></span><br><span class="line">        refWatcher.watch(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>MainActivity存在内存泄漏，原因就是非静态内部类LeakThread持有外部类MainActivity的引用，LeakThread中做了耗时操作，导致MainActivity无法被释放。关于内存泄漏可以查看<a href="http://liuwangshu.cn/application/performance/ram-3-memory-leak.html">Android内存优化（三）避免可控的内存泄漏</a>这篇文章。<br>在注释1处得到RefWatcher，并调用它的watch方法，watch方法的参数就是要监控的对象。当然，在这个例子中onDestroy方法是多余的，因为LeakCanary在调用install方法时会启动一个ActivityRefWatcher类，它用于自动监控Activity执行onDestroy方法之后是否发生内存泄露。这里只是为了方便举例，如果想要监控Fragment，在Fragment中添加如上的onDestroy方法是有用的。<br>运行程序，这时会在界面生成一个名为Leaks的应用图标。接下来不断的切换横竖屏，这时会闪出一个提示框，提示内容为：“Dumping memory app will freeze.Brrrr.”。再稍等片刻，内存泄漏信息就会通过Notification展示出来，比如三星S8的通知栏如下所示。<br><img src="https://s2.ax1x.com/2019/05/31/VlFo5j.png" alt="VlFo5j.png"></p>
+<p>Notification中提示了MainActivity发生了内存泄漏， 泄漏的内存为787B。点击Notification就可以进入内存泄漏详细页，除此之外也可以通过Leaks应用的列表界面进入，列表界面如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/31/VlF5Vg.png" alt="VlF5Vg.png"></p>
+<p>内存泄漏详细页如下图所示。<br><img src="https://s2.ax1x.com/2019/05/31/VlFIaQ.png" alt="VlFIaQ.png"></p>
+<p>点击加号就可以查看具体类所在的包名称。整个详情就是一个引用链：MainActiviy的内部类LeakThread引用了LeakThread的<code>this$0</code>，<code>this$0</code>的含义就是内部类自动保留的一个指向所在外部类的引用，而这个外部类就是详情最后一行所给出的MainActiviy的实例，这将会导致MainActivity无法被GC，从而产生内存泄漏。</p>
+<p>除此之外，我们还可以将 heap dump（hprof文件）和info信息分享出去，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/31/VlFhqS.png" alt="VlFhqS.png"></p>
+<p>需要注意的是分享出去的hprof文件并不是标准的hprof文件，还需要将它转换为标准的hprof文件，这样才会被MAT识别从而进行分析，关于MAT可以查看<a href="http://liuwangshu.cn/application/performance/ram-5-mat.html">Android内存优化（五）详解内存分析工具MAT</a>这篇文章。</p>
+<p>解决方法就是将LeakThread改为静态内部类。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">    <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">LeakThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                Thread.sleep(<span class="number">6</span> * <span class="number">60</span> * <span class="number">1000</span>);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                e.printStackTrace();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再次运行程序LeakThread就不会给出内存泄漏的提示了。</p>
+<p>参考资料<br>《高性能Android应用开发》<br><a target="_blank" rel="noopener" href="http://www.jcodecraeer.com/a/anzhuokaifa/androidkaifa/2015/0511/2861.html">使用LeakCanary检测安卓中的内存泄漏（实战）</a><br><a target="_blank" rel="noopener" href="https://github.com/square/leakcanary">https://github.com/square/leakcanary</a><br><a target="_blank" rel="noopener" href="https://www.liaohuqiu.net/cn/posts/leak-canary-read-me/">LeakCanary 中文使用说明</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/llew2011/article/details/52958563">Android 源码系列之&lt;十三&gt;从源码的角度深入理解LeakCanary的内存泄露检测机制(中)</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/performance/ram-6-leakcanary.html">http://liuwangshu.cn/application/performance/ram-6-leakcanary.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">Android性能优化</a><a class="post-meta__tags" href="/tags/Android%E5%86%85%E5%AD%98%E4%BC%98%E5%8C%96/">Android内存优化</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/wm/1-windowmanager.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android解析WindowManager（一）WindowManager体系</div></div></a></div><div class="next-post pull-right"><a href="/framework/ams/2-activitytask.html"><img class="next-cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android解析ActivityManagerService（二）ActivityTask和Activity栈管理</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/performance/ram-1-dvm-art.html" title="Android内存优化（一）DVM和ART原理初探"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-05</div><div class="title">Android内存优化（一）DVM和ART原理初探</div></div></a></div><div><a href="/application/performance/ram-3-memory-leak.html" title="Android内存优化（三）避免可控的内存泄漏"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-21</div><div class="title">Android内存优化（三）避免可控的内存泄漏</div></div></a></div><div><a href="/application/performance/ram-4-memory-tools.html" title="Android内存优化（四）解析Memory Monitor、Allocation Tracker和Heap Dump"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-07-10</div><div class="title">Android内存优化（四）解析Memory Monitor、Allocation Tracker和Heap Dump</div></div></a></div><div><a href="/application/performance/ram-5-mat.html" title="Android内存优化（五）详解内存分析工具MAT"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-08-11</div><div class="title">Android内存优化（五）详解内存分析工具MAT</div></div></a></div><div><a href="/application/performance/ram-2-gc.html" title="Android内存优化（二）DVM和ART的GC日志分析"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-13</div><div class="title">Android内存优化（二）DVM和ART的GC日志分析</div></div></a></div><div><a href="/application/performance/draw-1-performance.html" title="Android绘制优化（一）绘制性能分析"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-03-13</div><div class="title">Android绘制优化（一）绘制性能分析</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

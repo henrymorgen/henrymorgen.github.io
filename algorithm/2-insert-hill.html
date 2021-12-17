@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>算法（二）初等排序前篇[插入和希尔排序] | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  前言排序是算法的基础，排序有很多种方法，有些方法实现起来很简单，但是效率较差，我们可以将这些排序的方法称之为初等排序。这篇文章我们就来学习初等排序中的插入排序和希尔排序。   1.插入排序插入排序比较容易想到，思路与打扑克时排列牌的顺序是类似的。比如我们左手拿牌，然后用右手将牌从左到右，从小到大来排序，这就需要我们把需要进行排列的牌抽出来放到合适的位置，并且"><meta name="keywords" content="算法"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/algorithm/2-insert-hill.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="算法（二）初等排序前篇[插入和希尔排序]"><meta property="og:url" content="http://liuwangshu.cn/algorithm/2-insert-hill.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  前言排序是算法的基础，排序有很多种方法，有些方法实现起来很简单，但是效率较差，我们可以将这些排序的方法称之为初等排序。这篇文章我们就来学习初等排序中的插入排序和希尔排序。   1.插入排序插入排序比较容易想到，思路与打扑克时排列牌的顺序是类似的。比如我们左手拿牌，然后用右手将牌从左到右，从小到大来排序，这就需要我们把需要进行排列的牌抽出来放到合适的位置，并且"><meta property="og:image" content="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><meta property="article:published_time" content="2017-02-18T04:30:00.000Z"><meta property="article:modified_time" content="2020-01-12T06:43:57.417Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 14:43:57'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F"><span class="toc-number">2.</span> <span class="toc-text">1.插入排序</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%9B%BE%E8%A7%A3%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F"><span class="toc-number">2.1.</span> <span class="toc-text">图解插入排序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F"><span class="toc-number">2.2.</span> <span class="toc-text">实现插入排序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%92%E5%85%A5%E6%8E%92%E5%BA%8F%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-number">2.3.</span> <span class="toc-text">插入排序的复杂度</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%B8%8C%E5%B0%94%E6%8E%92%E5%BA%8F"><span class="toc-number">3.</span> <span class="toc-text">2.希尔排序</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%8C%E5%B0%94%E6%8E%92%E5%BA%8F%E5%8E%9F%E7%90%86"><span class="toc-number">3.1.</span> <span class="toc-text">希尔排序原理</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E7%8E%B0%E5%B8%8C%E5%B0%94%E6%8E%92%E5%BA%8F"><span class="toc-number">3.2.</span> <span class="toc-text">实现希尔排序</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%8C%E5%B0%94%E6%8E%92%E5%BA%8F%E7%9A%84%E5%A4%8D%E6%9D%82%E5%BA%A6"><span class="toc-number">3.3.</span> <span class="toc-text">希尔排序的复杂度</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/17/MDe3eU.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">算法（二）初等排序前篇[插入和希尔排序]</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-02-18T04:30:00.000Z" title="发表于 2017-02-18 12:30:00">2017-02-18</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T06:43:57.417Z" title="更新于 2020-01-12 14:43:57">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%AE%97%E6%B3%95/">算法</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>排序是算法的基础，排序有很多种方法，有些方法实现起来很简单，但是效率较差，我们可以将这些排序的方法称之为初等排序。这篇文章我们就来学习初等排序中的插入排序和希尔排序。</p>
+<a id="more"></a>
+
+<h3 id="1-插入排序"><a href="#1-插入排序" class="headerlink" title="1.插入排序"></a><strong>1.插入排序</strong></h3><p>插入排序比较容易想到，思路与打扑克时排列牌的顺序是类似的。比如我们左手拿牌，然后用右手将牌从左到右，从小到大来排序，这就需要我们把需要进行排列的牌抽出来放到合适的位置，并且不断的重复，直到牌的顺序排好，这个过程就可以理解为插入排序。</p>
+<h4 id="图解插入排序"><a href="#图解插入排序" class="headerlink" title="图解插入排序"></a><strong>图解插入排序</strong></h4><p>插入排序过程中会将需要排序的数组，分为两个部分：已排序部分和未排序部分，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/28/VmEBgU.png" alt="VmEBgU.png"></p>
+<p>从图中可以看出这个数组分为两个部分，其中下标为0、1、2的元素为已排列部分，其余的则为未排列部分。</p>
+<p><strong>插入的排序规则：</strong><br>将开头元素视为以排序部分。接着执行如下的处理，直到没有未排序部分。</p>
+<ul>
+<li>取出未排序部分的开头元素赋值给临时保存数据的变量v。</li>
+<li>在已排列的部分将所有比v大的元素向后移动一个位置。</li>
+<li>将取出的元素v插入空位。</li>
+</ul>
+<p>按照这个规则，我们来举一个简单的例子。我们对数组 a={8,3,1,5,2,1} 进行从小到大排序，数组a如下图所示。<br><img src="https://s2.ax1x.com/2019/05/28/VmEDvF.png" alt="VmEDvF.png"></p>
+<p>我们对数组a进行排序，共需要5个步骤：<br>1.接着我们将a[0]=8视为已排序，我们从a[1]开始操作，将a[1]的值3取出，3要小于a[0]的值8，因此将a[0]的值8移动到a[1]，再把3插入到a[0]，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/28/VmEsu4.png" alt="VmEsu4.png"></p>
+<p>2.a[2]的值1要比a[0]和a[1]的值要小，则将a[0]和a[1]顺次向后移一个位置，然后将1插入a[0]，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/28/VmE03T.png" alt="VmE03T.png"></p>
+<p>3.将a[3]中的5拿出来，比它大的是a[2]的8，因此8向后移，将5插入a[3]。如下图所示。<br><img src="https://s2.ax1x.com/2019/05/28/VmEyDJ.png" alt="VmEyDJ.png"></p>
+<p>4.将a[4]中2拿出来，发现a[1]、a[2]、a[3]中的值都比2大，因此将它们依次向后移，将2插入到a[1]中，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/28/VmE2U1.png" alt="VmE2U1.png"></p>
+<p>5.最后将a[5]中的1移到合适的位置，过程和上面一样，最后的排序结果如下图所示。<br><img src="https://s2.ax1x.com/2019/05/28/VmEgER.png" alt="VmEgER.png"></p>
+<h4 id="实现插入排序"><a href="#实现插入排序" class="headerlink" title="实现插入排序"></a><strong>实现插入排序</strong></h4><p>接下来要实现插入排序，针对下图来定义变量。</p>
+<p><img src="https://s2.ax1x.com/2019/05/28/VmE6b9.png" alt="VmE6b9.png"></p>
+<p>如上图所示，i代表未排序部分的开头元素，v是临时保存a[i]值的变量， j代表已排序部分v要插入的位置。<br>根据定义的这三个变量，插入排序的实现思路就是：外层循环i从1开始自增，并在每次循环开始时将a[i]的值保存在v中；内层循环则是j从i-1开始向前自减，并将比v大的元素从a[j]移动到a[j+1]，并将v插入到当前j+1的位置（内层循环后，j会先自减1，因此插入的地方则是j+1的位置），当j等于-1或者a[j]小于等于v则内层循环结束。<br>接下来我们用代码来实现插入排序，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">InsertSort</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> a[] = &#123;<span class="number">8</span>, <span class="number">3</span>, <span class="number">1</span>, <span class="number">5</span>, <span class="number">2</span>, <span class="number">1</span>&#125;;</span><br><span class="line">        ArrayUtils.printArray(a);</span><br><span class="line">        <span class="keyword">int</span> b[] = insert(a);</span><br><span class="line">        ArrayUtils.printArray(b);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] insert(<span class="keyword">int</span>[] a) &#123;</span><br><span class="line">        <span class="keyword">int</span> i, j, v;</span><br><span class="line">        <span class="keyword">int</span> n = a.length;</span><br><span class="line">        <span class="keyword">for</span> (i = <span class="number">1</span>; i &lt; n; i++) &#123;</span><br><span class="line">            v = a[i];</span><br><span class="line">            j = i - <span class="number">1</span>;</span><br><span class="line">            <span class="keyword">while</span> (j &gt;= <span class="number">0</span> &amp;&amp; a[j] &gt; v) &#123;</span><br><span class="line">                a[j + <span class="number">1</span>] = a[j];</span><br><span class="line">                j--;</span><br><span class="line">            &#125;</span><br><span class="line">            a[j + <span class="number">1</span>] = v;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>其中负责打印数组的ArrayUtils类如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayUtils</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">printArray</span><span class="params">(<span class="keyword">int</span>[] array)</span> </span>&#123;</span><br><span class="line">        System.out.print(<span class="string">&quot;&#123;&quot;</span>);</span><br><span class="line">        <span class="keyword">int</span> len=array.length;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; len; i++) &#123;</span><br><span class="line">            System.out.print(array[i]);</span><br><span class="line">            <span class="keyword">if</span> (i &lt; len - <span class="number">1</span>) &#123;</span><br><span class="line">                System.out.print(<span class="string">&quot;, &quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        System.out.println(<span class="string">&quot;&#125;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果为：<br>{8, 3, 1, 5, 2, 1}<br>{1, 1, 2, 3, 5, 8}</p>
+<h4 id="插入排序的复杂度"><a href="#插入排序的复杂度" class="headerlink" title="插入排序的复杂度"></a><strong>插入排序的复杂度</strong></h4><p>根据<a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85/article/details/54882603">算法（一）时间复杂度</a>所讲的，我们来算一下插入排序的时间复杂度。在最坏的情况下，每个i循环都需要执行i次移动，总共需要1+2+……+n-1=n²/2+n/2，根据此前讲过的推导大O阶的规则的我们得出插入排序的时间复杂度为O(n²)。</p>
+<h3 id="2-希尔排序"><a href="#2-希尔排序" class="headerlink" title="2.希尔排序"></a><strong>2.希尔排序</strong></h3><p>插入排序对于大规模的乱序数组，插入排序会很慢，因为它只会交换相邻的元素，元素只能一点一点的从数组的一端移动到另一端。如果最小的元素在数组的末尾，则要将它移动到数组的开头则需要进行n-1次移动。</p>
+<h4 id="希尔排序原理"><a href="#希尔排序原理" class="headerlink" title="希尔排序原理"></a><strong>希尔排序原理</strong></h4><p>希尔排序改进了插入排序这一问题，它交换不相邻的元素对数组进行局部排序，并最终用插入排序将局部有序的数组进行排序。<br>希尔排序的思想就是使得数组中任意间隔h的元素都是有序的，这样的数组可以成为h有序数组。这里拿数组a={4,8,9,1,10,6,2,5}为例，当h为4时，会将这个数组分为h个子数组。</p>
+<p><img src="https://s2.ax1x.com/2019/05/28/VmER4x.png" alt="VmER4x.png"></p>
+<p>从上图可以看到，我们根据h=4，将数组分为了四个子数组，分别是{4,10}、{8,2}、{1,5}、{10,3}。我们分别对这四个子数组进行局部排序，接下来对h进行递减操作，直到h为1，这样最后一次循环就是一个典型的插入排序。</p>
+<h4 id="实现希尔排序"><a href="#实现希尔排序" class="headerlink" title="实现希尔排序"></a><strong>实现希尔排序</strong></h4><p>我们将数组分为h个数组，我们将子数组的每个元素交换到比他大的元素前面去，只需要将插入排序的将移动元素的距离1改为h即可。这样希尔排序的实现就转换为了一个类似于插入排序但使用的增量不同的过程。<br>代码实现如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ShellSort</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">int</span> a[] = &#123;<span class="number">4</span>, <span class="number">8</span>, <span class="number">9</span>, <span class="number">1</span>, <span class="number">10</span>, <span class="number">6</span>, <span class="number">2</span>, <span class="number">5</span>&#125;;</span><br><span class="line">        ArrayUtils.printArray(a);</span><br><span class="line">        <span class="keyword">int</span> b[] = shellSort(a);</span><br><span class="line">        ArrayUtils.printArray(b);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] shellSort(<span class="keyword">int</span>[] a) &#123;</span><br><span class="line">        <span class="keyword">int</span> h = <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">int</span> n = a.length;</span><br><span class="line">        <span class="keyword">while</span> (h &lt; n / <span class="number">3</span>) <span class="comment">//1</span></span><br><span class="line">            h = <span class="number">3</span> * h + <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">while</span> (h &gt;= <span class="number">1</span>) &#123;</span><br><span class="line">        <span class="comment">//增量为h的插入排序</span></span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = h; i &lt; n; i++) &#123;</span><br><span class="line">                <span class="keyword">int</span> v = a[i];</span><br><span class="line">                <span class="keyword">int</span> j = i - h;</span><br><span class="line">                <span class="keyword">while</span> (j &gt;= <span class="number">0</span> &amp;&amp; a[j] &gt; v) &#123;</span><br><span class="line">                    a[j + h] = a[j];</span><br><span class="line">                    j -= h;</span><br><span class="line">                &#125;</span><br><span class="line">                a[j + h] = v;</span><br><span class="line">            &#125;</span><br><span class="line">            h = h / <span class="number">3</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> a;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处的代码是为了得到h值，关于h选什么样的值是最好的，至今还未有定论，这里我们给出比较常用的h值为h = 3 * h + 1，也就是1、4、13、40、121、346、1093……，这些h值会根据数组的大小而改变。接着往下看，下面的代码则是一个增量为h的插入排序。<br>输出结果为：<br>{4, 8, 9, 1, 10, 6, 2, 5}<br>{1, 2, 4, 5, 6, 8, 9, 10}</p>
+<h4 id="希尔排序的复杂度"><a href="#希尔排序的复杂度" class="headerlink" title="希尔排序的复杂度"></a><strong>希尔排序的复杂度</strong></h4><p>希尔排序的复杂度要根据h的值来进行计算，不同的h值会导致不同的复杂度，一般情况下，当h = 3 * h + 1时，希尔排序的复杂度基本维持在O(n^1.25)。</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/henrymorgen/BlogSamples/tree/master/sort"><font size=5>github源码</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/algorithm/2-insert-hill.html">http://liuwangshu.cn/algorithm/2-insert-hill.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E7%AE%97%E6%B3%95/">算法</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/booting/4-launcher.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VekSyj.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android系统启动流程（四）Launcher启动过程与系统启动流程</div></div></a></div><div class="next-post pull-right"><a href="/framework/booting/3-syetemserver.html"><img class="next-cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android系统启动流程（三）解析SyetemServer进程启动过程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/algorithm/1-time-complexity.html" title="算法（一）时间复杂度"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-02-09</div><div class="title">算法（一）时间复杂度</div></div></a></div><div><a href="/algorithm/3-select-bubble.html" title="算法（三）初等排序后篇[选择和冒泡排序]"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-03-02</div><div class="title">算法（三）初等排序后篇[选择和冒泡排序]</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

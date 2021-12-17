@@ -1,0 +1,262 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android网络编程（一）HTTP协议原理 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  相关文章Android网络编程系列 前言这篇文章是这个系列的开篇，作为移动开发者，开发的应用不免会对网络进行访问，虽然现在已经有很多的开源库帮助我们可以轻而易举的访问网络，但是我们仍要去了解网络访问的原理，这也是一个优秀开发人员所必备的知识点。这篇文章我们就先来了解一下HTTP协议原理。  1.HTTP简介HTTP是一个属于应用层的面向对象的协议，由于其简捷"><meta name="keywords" content="Android应用层,Android网络编程"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/network/1-http.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android网络编程（一）HTTP协议原理"><meta property="og:url" content="http://liuwangshu.cn/application/network/1-http.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  相关文章Android网络编程系列 前言这篇文章是这个系列的开篇，作为移动开发者，开发的应用不免会对网络进行访问，虽然现在已经有很多的开源库帮助我们可以轻而易举的访问网络，但是我们仍要去了解网络访问的原理，这也是一个优秀开发人员所必备的知识点。这篇文章我们就先来了解一下HTTP协议原理。  1.HTTP简介HTTP是一个属于应用层的面向对象的协议，由于其简捷"><meta property="og:image" content="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><meta property="article:published_time" content="2016-03-28T03:38:00.000Z"><meta property="article:modified_time" content="2020-01-12T06:48:23.626Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 14:48:23'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-HTTP%E7%AE%80%E4%BB%8B"><span class="toc-number">2.</span> <span class="toc-text">1.HTTP简介</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#HTTP%E5%8D%8F%E8%AE%AE%E7%9A%84%E4%B8%BB%E8%A6%81%E7%89%B9%E7%82%B9"><span class="toc-number">2.1.</span> <span class="toc-text">HTTP协议的主要特点</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#HTTP-URL-%E7%9A%84%E6%A0%BC%E5%BC%8F%E5%A6%82%E4%B8%8B"><span class="toc-number">2.2.</span> <span class="toc-text">HTTP URL 的格式如下</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-HTTP%E7%9A%84%E8%AF%B7%E6%B1%82%E6%8A%A5%E6%96%87"><span class="toc-number">3.</span> <span class="toc-text">2.HTTP的请求报文</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E8%A1%8C"><span class="toc-number">3.1.</span> <span class="toc-text">请求行</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E6%8A%A5%E5%A4%B4"><span class="toc-number">3.2.</span> <span class="toc-text">请求报头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E6%95%B0%E6%8D%AE"><span class="toc-number">3.3.</span> <span class="toc-text">请求数据</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-HTTP%E7%9A%84%E5%93%8D%E5%BA%94%E6%8A%A5%E6%96%87"><span class="toc-number">4.</span> <span class="toc-text">3.HTTP的响应报文</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%8A%B6%E6%80%81%E8%A1%8C"><span class="toc-number">4.1.</span> <span class="toc-text">状态行</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-HTTP%E7%9A%84%E6%B6%88%E6%81%AF%E6%8A%A5%E5%A4%B4"><span class="toc-number">5.</span> <span class="toc-text">4.HTTP的消息报头</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%80%9A%E7%94%A8%E6%8A%A5%E5%A4%B4"><span class="toc-number">5.1.</span> <span class="toc-text">通用报头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AF%B7%E6%B1%82%E6%8A%A5%E5%A4%B4-1"><span class="toc-number">5.2.</span> <span class="toc-text">请求报头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%93%8D%E5%BA%94%E6%8A%A5%E5%A4%B4"><span class="toc-number">5.3.</span> <span class="toc-text">响应报头</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9E%E4%BD%93%E6%8A%A5%E5%A4%B4"><span class="toc-number">5.4.</span> <span class="toc-text">实体报头</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E5%BA%94%E7%94%A8%E4%B8%BE%E4%BE%8B"><span class="toc-number">6.</span> <span class="toc-text">5.应用举例</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/17/MDe3eU.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android网络编程（一）HTTP协议原理</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2016-03-28T03:38:00.000Z" title="发表于 2016-03-28 11:38:00">2016-03-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T06:48:23.626Z" title="更新于 2020-01-12 14:48:23">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>相关文章<br><a href="http://liuwangshu.cn/tags/Android%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">Android网络编程系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>这篇文章是这个系列的开篇，作为移动开发者，开发的应用不免会对网络进行访问，虽然现在已经有很多的开源库帮助我们可以轻而易举的访问网络，但是我们仍要去了解网络访问的原理，这也是一个优秀开发人员所必备的知识点。这篇文章我们就先来了解一下HTTP协议原理。</p>
+<a id="more"></a>
+<h3 id="1-HTTP简介"><a href="#1-HTTP简介" class="headerlink" title="1.HTTP简介"></a><strong>1.HTTP简介</strong></h3><p>HTTP是一个属于应用层的面向对象的协议，由于其简捷、快速的方式，适用于分布式超媒体信息系统。它于1990年提出，经过几年的使用与发展，得到不断地完善和扩展。</p>
+<h4 id="HTTP协议的主要特点"><a href="#HTTP协议的主要特点" class="headerlink" title="HTTP协议的主要特点"></a><strong>HTTP协议的主要特点</strong></h4><ol>
+<li>支持C/S（客户/服务器）模式。</li>
+<li>简单快速：客户向服务器请求服务时，只需传送请求方法和路径。请求方法常用的有GET、HEAD、POST，每种方法规定了客户与服务器联系的类型不同。由于HTTP协议简单，使得HTTP服务器的程序规模小，因而通信速度很快。</li>
+<li>灵活：HTTP允许传输任意类型的数据对象。正在传输的类型由Content-Type加以标记。</li>
+<li>无连接：无连接的含义是限制每次连接只处理一个请求。服务器处理完客户的请求，并收到客户的应答后，即断开连接。采用这种方式可以节省传输时间。</li>
+<li>无状态：HTTP协议是无状态协议，无状态是指协议对于事务处理没有记忆能力。缺少状态意味着如果后续处理需要前面的信息，则它必须重传，这样可能导致每次连接传送的数据量增大。另一方面，在服务器不需要先前信息时它的应答就较快。</li>
+</ol>
+<h4 id="HTTP-URL-的格式如下"><a href="#HTTP-URL-的格式如下" class="headerlink" title="HTTP URL 的格式如下"></a><strong>HTTP URL 的格式如下</strong></h4><figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">http:&#x2F;&#x2F;host[&quot;:&quot;port][abs_path]</span><br></pre></td></tr></table></figure>
+
+<p>http表示要通过HTTP协议来定位网络资源；host表示合法的Internet主机域名或者IP地址；port指定一个端口号，为空则使用默认端口80；abs_path指定请求资源的URI（Web上任意的可用资源）。<br>HTTP有两种报文分别是请求报文和响应报文，让我们先来看看请求报文。</p>
+<h3 id="2-HTTP的请求报文"><a href="#2-HTTP的请求报文" class="headerlink" title="2.HTTP的请求报文"></a><strong>2.HTTP的请求报文</strong></h3><p>先来看看请求报文的一般格式：</p>
+<p><img src="https://s2.ax1x.com/2019/05/29/Vuw5hn.png" alt="Vuw5hn.png"></p>
+<p>通常来说一个HTTP请求报文由请求行、请求报头、空行、和请求数据4个部分组成。</p>
+<h4 id="请求行"><a href="#请求行" class="headerlink" title="请求行"></a><strong>请求行</strong></h4><p>请求行由请求方法，URL字段和HTTP协议的版本组成，格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">Method Request-URI HTTP-Version CRLF</span><br></pre></td></tr></table></figure>
+
+<p>其中 Method表示请求方法；Request-URI是一个统一资源标识符；HTTP-Version表示请求的HTTP协议版本；CRLF表示回车和换行（除了作为结尾的CRLF外，不允许出现单独的CR或LF字符）。</p>
+<p>HTTP请求方法有8种，分别是GET、POST、DELETE、PUT、HEAD、TRACE、CONNECT 、OPTIONS。其中PUT、DELETE、POST、GET分别对应着增删改查，对于移动开发最常用的就是POST和GET了。</p>
+<ol>
+<li>GET：请求获取Request-URI所标识的资源</li>
+<li>POST：在Request-URI所标识的资源后附加新的数据</li>
+<li>HEAD：请求获取由Request-URI所标识的资源的响应消息报头</li>
+<li>PUT：     请求服务器存储一个资源，并用Request-URI作为其标识</li>
+<li>DELETE ：请求服务器删除Request-URI所标识的资源</li>
+<li>TRACE  ： 请求服务器回送收到的请求信息，主要用于测试或诊断</li>
+<li>CONNECT： HTTP/1.1协议中预留给能够将连接改为管道方式的代理服务器。</li>
+<li>OPTIONS ：请求查询服务器的性能，或者查询与资源相关的选项和需求</li>
+</ol>
+<p>例如我去访问我的CSDN博客地址请求行是：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET http:&#x2F;&#x2F;blog.csdn.net&#x2F;itachi85 HTTP&#x2F;1.1</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="请求报头"><a href="#请求报头" class="headerlink" title="请求报头"></a><strong>请求报头</strong></h4><p>在请求行之后会有0个或者多个请求报头，每个请求报头都包含一个名字和一个值，它们之间用“：”分割。请求头部会以一个空行，发送回车符和换行符，通知服务器以下不会有请求头。关于请求报头，会在后面的消息报头一节做统一的解释。</p>
+<h4 id="请求数据"><a href="#请求数据" class="headerlink" title="请求数据"></a><strong>请求数据</strong></h4><p>请求数据不在GET方法中使用，而是在POST方法中使用。POST方法适用于需要客户填写表单的场合，与请求数据相关的最常用的请求头是Content-Type和Content-Length。</p>
+<h3 id="3-HTTP的响应报文"><a href="#3-HTTP的响应报文" class="headerlink" title="3.HTTP的响应报文"></a><strong>3.HTTP的响应报文</strong></h3><p>先来看看响应报文的一般格式：<br><img src="https://s2.ax1x.com/2019/05/29/Vuw4ts.png" alt="Vuw4ts.png"></p>
+<p>HTTP的响应报文由状态行、消息报头、空行、响应正文组成。响应报头后面会讲到，响应正文是服务器返回的资源的内容，先来看看状态行。</p>
+<h4 id="状态行"><a href="#状态行" class="headerlink" title="状态行"></a><strong>状态行</strong></h4><p>1、状态行格式如下：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">HTTP-Version Status-Code Reason-Phrase CRLF</span><br></pre></td></tr></table></figure>
+
+<p>其中，HTTP-Version表示服务器HTTP协议的版本；Status-Code表示服务器发回的响应状态代码；Reason-Phrase表示状态代码的文本描述。<br>状态代码有三位数字组成，第一个数字定义了响应的类别，且有五种可能取值：</p>
+<ul>
+<li>100~199：指示信息，表示请求已接收，继续处理</li>
+<li>200~299：请求成功，表示请求已被成功接收、理解、接受</li>
+<li>300~399：重定向，要完成请求必须进行更进一步的操作</li>
+<li>400~499：客户端错误，请求有语法错误或请求无法实现</li>
+<li>500~599：服务器端错误，服务器未能实现合法的请求</li>
+</ul>
+<p>常见的状态码如下：</p>
+<ul>
+<li>200 OK：客户端请求成功</li>
+<li>400 Bad Request：客户端请求有语法错误，不能被服务器所理解</li>
+<li>401 Unauthorized：请求未经授权，这个状态代码必须和WWW-Authenticate报头域一起使用 </li>
+<li>403 Forbidden：服务器收到请求，但是拒绝提供服务</li>
+<li>500 Internal Server Error：服务器发生不可预期的错误</li>
+<li>503 Server Unavailable：服务器当前不能处理客户端的请求，一段时间后可能恢复正常</li>
+</ul>
+<p>例如访问我的CSDN博客地址响应的状态行是：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">HTTP&#x2F;1.1 200 OK</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-HTTP的消息报头"><a href="#4-HTTP的消息报头" class="headerlink" title="4.HTTP的消息报头"></a><strong>4.HTTP的消息报头</strong></h3><p>消息报头分为通用报头、请求报头、响应报头、实体报头等。消息头由键值对组成，每行一对，关键字和值用英文冒号“:”分隔。</p>
+<h4 id="通用报头"><a href="#通用报头" class="headerlink" title="通用报头"></a><strong>通用报头</strong></h4><p>既可以出现在请求报头，也可以出现在响应报头中</p>
+<ul>
+<li>Date：表示消息产生的日期和时间</li>
+<li>Connection：允许发送指定连接的选项，例如指定连接是连续的，或者指定“close”选项，通知服务器，在响应完成后，关闭连接</li>
+<li>Cache-Control：用于指定缓存指令，缓存指令是单向的（响应中出现的缓存指令在请求中未必会出现），且是独立的（一个消息的缓存指令不会影响另一个消息处理的缓存机制）</li>
+</ul>
+<h4 id="请求报头-1"><a href="#请求报头-1" class="headerlink" title="请求报头"></a><strong>请求报头</strong></h4><p>请求报头通知服务器关于客户端求求的信息，典型的请求头有：</p>
+<ul>
+<li>Host：请求的主机名，允许多个域名同处一个IP地址，即虚拟主机</li>
+<li>User-Agent：发送请求的浏览器类型、操作系统等信息</li>
+<li>Accept：客户端可识别的内容类型列表，用于指定客户端接收那些类型的信息</li>
+<li>Accept-Encoding：客户端可识别的数据编码</li>
+<li>Accept-Language：表示浏览器所支持的语言类型</li>
+<li>Connection：允许客户端和服务器指定与请求/响应连接有关的选项，例如这是为Keep-Alive则表示保持连接。</li>
+<li>Transfer-Encoding：告知接收端为了保证报文的可靠传输，对报文采用了什么编码方式。</li>
+</ul>
+<h4 id="响应报头"><a href="#响应报头" class="headerlink" title="响应报头"></a><strong>响应报头</strong></h4><p>用于服务器传递自身信息的响应，常见的响应报头：</p>
+<ul>
+<li>Location：用于重定向接受者到一个新的位置，常用在更换域名的时候</li>
+<li>Server：包含可服务器用来处理请求的系统信息，与User-Agent请求报头是相对应的</li>
+</ul>
+<h4 id="实体报头"><a href="#实体报头" class="headerlink" title="实体报头"></a><strong>实体报头</strong></h4><p>实体报头用来定于被传送资源的信息，既可以用于请求也可用于响应。请求和响应消息都可以传送一个实体，常见的实体报头为：</p>
+<ul>
+<li>Content-Type：发送给接收者的实体正文的媒体类型</li>
+<li>Content-Lenght：实体正文的长度</li>
+<li>Content-Language：描述资源所用的自然语言，没有设置则该选项则认为实体内容将提供给所有的语言阅读</li>
+<li>Content-Encoding：实体报头被用作媒体类型的修饰符，它的值指示了已经被应用到实体正文的附加内容的编码，因而要获得Content-Type报头域中所引用的媒体类型，必须采用相应的解码机制。</li>
+<li>Last-Modified：实体报头用于指示资源的最后修改日期和时间</li>
+<li>Expires：实体报头给出响应过期的日期和时间</li>
+</ul>
+<h3 id="5-应用举例"><a href="#5-应用举例" class="headerlink" title="5.应用举例"></a><strong>5.应用举例</strong></h3><p>要想查看网页或者手机请求网络的请求报文和响应报文有很多种方法，这里推荐采用Fiddler，在<a target="_blank" rel="noopener" href="http://www.trinea.cn/android/android-network-sniffer/">Android利用Fiddler进行网络数据抓包</a>这篇文章中详尽介绍了如何使用Fiddler，在这里就不赘述了。<br>打开Fiddler，然后用浏览器访问我的CSDN博客网站：<br><img src="https://s2.ax1x.com/2019/05/29/Vuwopq.jpg" alt="Vuwopq.jpg"><br>点击红色画笔的区域就可以看到请求报文和响应报文了</p>
+<p>请求报文：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">GET http:&#x2F;&#x2F;blog.csdn.net&#x2F;itachi85 HTTP&#x2F;1.1                                &#x2F;&#x2F;请求行</span><br><span class="line">Host: blog.csdn.net                                                       &#x2F;&#x2F;请求报头</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Cache-Control: max-age&#x3D;0       </span><br><span class="line">Accept: text&#x2F;html,application&#x2F;xhtml+xml,application&#x2F;xml;q&#x3D;0.9,image&#x2F;webp,*&#x2F;*;q&#x3D;0.8</span><br><span class="line">Upgrade-Insecure-Requests: 1</span><br><span class="line">User-Agent: Mozilla&#x2F;5.0 (Windows NT 6.1; WOW64) AppleWebKit&#x2F;537.36 (KHTML, like Gecko) Chrome&#x2F;47.0.2526.80 Safari&#x2F;537.36 QQBrowser&#x2F;9.3.6872.400</span><br><span class="line">Accept-Encoding: gzip, deflate, sdch</span><br><span class="line">Accept-Language: zh-CN,zh;q&#x3D;0.8</span><br><span class="line">Cookie: bdshare_firstime&#x3D;1443768140949; uuid_tt_dd&#x3D;5028529250430960147_20151002;</span><br><span class="line">...省略</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>很容易看出访问的是我的博客地址<a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85%EF%BC%8C%E8%AF%B7%E6%B1%82%E7%9A%84%E6%96%B9%E6%B3%95%E6%98%AFGET%EF%BC%8C%E5%9B%A0%E4%B8%BA%E6%98%AFGET%E6%96%B9%E6%B3%95%E6%89%80%E4%BB%A5%E5%B9%B6%E6%B2%A1%E6%9C%89%E8%AF%B7%E6%B1%82%E6%95%B0%E6%8D%AE%E3%80%82">http://blog.csdn.net/itachi85，请求的方法是GET，因为是GET方法所以并没有请求数据。</a></p>
+<p>响应报文：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">HTTP&#x2F;1.1 200 OK                                                         &#x2F;&#x2F;状态行</span><br><span class="line">Server: openresty                                                       &#x2F;&#x2F;响应报头</span><br><span class="line">Date: Sun, 27 Mar 2016 08:26:54 GMT</span><br><span class="line">Content-Type: text&#x2F;html; charset&#x3D;utf-8</span><br><span class="line">Transfer-Encoding: chunked</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Keep-Alive: timeout&#x3D;20</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Cache-Control: private</span><br><span class="line">X-Powered-By: PHP 5.4.28</span><br><span class="line">Content-Encoding: gzip</span><br><span class="line">                                                                        &#x2F;&#x2F;不能省略的空格</span><br><span class="line">28b5                                    </span><br><span class="line">        &#125;ysI   1ߡFsgl n- ]&#123;^_ &#123; &#39;z!     C ,  m# 0 !l   &#96;  4x  ly .ݪ*  </span><br><span class="line">  ڴzAt_Xl *  9&#39;O  ɬ  &#39;  ק   3  ^1a</span><br><span class="line">...省略  </span><br></pre></td></tr></table></figure>
+
+
+<p>响应报文没什么可说的，接下来我们配置好手机网络代理，访问一个应用的界面</p>
+<p>请求报文：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">POST http:&#x2F;&#x2F;patientapi.shoujikanbing.com&#x2F;api&#x2F;common&#x2F;getVersion HTTP&#x2F;1.1       &#x2F;&#x2F;请求行</span><br><span class="line">Content-Length: 226                                                          &#x2F;&#x2F;请求报头</span><br><span class="line">Content-Type: application&#x2F;x-www-form-urlencoded</span><br><span class="line">Host: patientapi.shoujikanbing.com</span><br><span class="line">Connection: Keep-Alive</span><br><span class="line">User-Agent: Mozilla&#x2F;5.0 (Linux; U; Android 4.4.4; zh-cn; MI NOTE LTE Build&#x2F;KTU84P) AppleWebKit&#x2F;533.1 (KHTML, like Gecko) Version&#x2F;4.0 Mobile Safari&#x2F;533.1</span><br><span class="line">Accept-Encoding: gzip</span><br><span class="line">                                                             &#x2F;&#x2F;不能省略的空格，下面是请求数据</span><br><span class="line">clientversion&#x3D;2_2.0.0&amp;time&#x3D;1459069342&amp;appId&#x3D;android&amp;channel&#x3D;hjwang&amp;sessionId&#x3D;0d1cee1f31926ffa8894c64804efa855101d56eb21caf5db5dcb9a4955b7fbc9&amp;token&#x3D;b191944d680145b5ed97f2f4ccf03058&amp;deviceId&#x3D;869436020220717&amp;type&#x3D;2&amp;version&#x3D;2.0.0</span><br></pre></td></tr></table></figure>
+
+<p>从请求报文的请求行来看，请求的方法是POST，请求地址为<a target="_blank" rel="noopener" href="http://patientapi.shoujikanbing.com/api/common/getVersion%EF%BC%8C%E5%BE%88%E6%98%BE%E7%84%B6%E6%98%AF%E8%8E%B7%E5%8F%96%E7%89%88%E6%9C%AC%E4%BF%A1%E6%81%AF%E7%9A%84%E6%8E%A5%E5%8F%A3%E3%80%82">http://patientapi.shoujikanbing.com/api/common/getVersion，很显然是获取版本信息的接口。</a></p>
+<p>响应报文：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">HTTP&#x2F;1.1 200 OK                                                              &#x2F;&#x2F;状态行</span><br><span class="line">Server: nginx                                                               &#x2F;&#x2F;响应报头</span><br><span class="line">Date: Sun, 27 Mar 2016 09:02:20 GMT</span><br><span class="line">Content-Type: text&#x2F;html;charset&#x3D;utf-8</span><br><span class="line">Transfer-Encoding: chunked</span><br><span class="line">Connection: keep-alive</span><br><span class="line">Vary: Accept-Encoding</span><br><span class="line">Set-Cookie: sessionId&#x3D;0d1cee1f31926ffa8894c64804efa855101d56eb21caf5db5dcb9a4955b7fbc9; expires&#x3D;Mon, 28-Mar-2016 09:02:20 GMT; Max-Age&#x3D;86400; path&#x3D;&#x2F;; domain&#x3D;.shoujikanbing.com</span><br><span class="line">Set-Cookie: PHPSESSID&#x3D;0d1cee1f31926ffa8894c64804efa855101d56eb21caf5db5dcb9a4955b7fbc9; path&#x3D;&#x2F;; domain&#x3D;.shoujikanbing.com</span><br><span class="line">Expires: Thu, 19 Nov 1981 08:52:00 GMT</span><br><span class="line">Cache-Control: no-store, no-cache, must-revalidate, post-check&#x3D;0, pre-check&#x3D;0</span><br><span class="line">Pragma: no-cache</span><br><span class="line">Content-Encoding: gzip</span><br><span class="line">                                                   &#x2F;&#x2F;不能省略的空格</span><br><span class="line">17f                                                &#x2F;&#x2F;实体报文编码格式为gzip所以显示在这里的响应数据是乱码</span><br><span class="line">       mP N @     &quot;E ?    n m   1  </span><br><span class="line">w ( HL (1^ P nK  E ѷ93&#39;3gNLH  7P  $c \  T 4a6   L:+ 1dY%$g   h H   +</span><br><span class="line"></span><br><span class="line">...省略</span><br></pre></td></tr></table></figure>
+<p>响应报文的实体采用的编码格式为为gzip，所以在Fiddler软件中显示的是乱码。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/network/1-http.html">http://liuwangshu.cn/application/network/1-http.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a><a class="post-meta__tags" href="/tags/Android%E7%BD%91%E7%BB%9C%E7%BC%96%E7%A8%8B/">Android网络编程</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/network/2-httpclienthttp-urlconnection.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android网络编程（二）HttpClient与HttpURLConnection</div></div></a></div><div class="next-post pull-right"><a href="/application/view/8-layout-sourcecode.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android View体系（八）从源码解析View的layout和draw流程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/network/10-retrofit2-annotations.html" title="Android网络编程（十）Retrofit2后篇[注解]"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-11-02</div><div class="title">Android网络编程（十）Retrofit2后篇[注解]</div></div></a></div><div><a href="/application/network/11-retrofit2-sourcecode.html" title="Android网络编程（十一）源码解析Retrofit"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-12-03</div><div class="title">Android网络编程（十一）源码解析Retrofit</div></div></a></div><div><a href="/application/network/12-okhttp4-sourcecode.html" title="Android网络编程（十二）源码解析Okhttp4.x"><img class="cover" src="https://pic.imgdb.cn/item/5e5ce13e98271cb2b8b89845.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2020-03-02</div><div class="title">Android网络编程（十二）源码解析Okhttp4.x</div></div></a></div><div><a href="/application/network/2-httpclienthttp-urlconnection.html" title="Android网络编程（二）HttpClient与HttpURLConnection"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-04-02</div><div class="title">Android网络编程（二）HttpClient与HttpURLConnection</div></div></a></div><div><a href="/application/network/3-volley.html" title="Android网络编程（三）Volley用法全解析"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-04-04</div><div class="title">Android网络编程（三）Volley用法全解析</div></div></a></div><div><a href="/application/network/5-okhttp2x.html" title="Android网络编程（五）OkHttp2.x用法全解析"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-04-18</div><div class="title">Android网络编程（五）OkHttp2.x用法全解析</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

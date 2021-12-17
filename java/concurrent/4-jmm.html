@@ -1,0 +1,226 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Java并发编程（四）Java内存模型 | BATcoder - 刘望舒</title><meta name="description" content="前言此前我们讲到了线程、同步以及volatile关键字，对于Java的并发编程我们有必要了解下Java的内存模型，因为Java线程之间的通信对于工程师来言是完全透明的，内存可见性问题很容易使工程师们觉得困惑，这篇文章我们来主要的讲下Java内存模型的相关概念。   1.共享内存和消息传递线程之间的通信机制有两种：共享内存和消息传递；在共享内存的并发模型里，线程之间共享程序的公共状态，线程之间通过写"><meta name="keywords" content="多线程,Java"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/java/concurrent/4-jmm.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Java并发编程（四）Java内存模型"><meta property="og:url" content="http://liuwangshu.cn/java/concurrent/4-jmm.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="前言此前我们讲到了线程、同步以及volatile关键字，对于Java的并发编程我们有必要了解下Java的内存模型，因为Java线程之间的通信对于工程师来言是完全透明的，内存可见性问题很容易使工程师们觉得困惑，这篇文章我们来主要的讲下Java内存模型的相关概念。   1.共享内存和消息传递线程之间的通信机制有两种：共享内存和消息传递；在共享内存的并发模型里，线程之间共享程序的公共状态，线程之间通过写"><meta property="og:image" content="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><meta property="article:published_time" content="2016-05-29T02:39:06.000Z"><meta property="article:modified_time" content="2017-06-10T13:07:12.216Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2017-06-10 21:07:12'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E5%92%8C%E6%B6%88%E6%81%AF%E4%BC%A0%E9%80%92"><span class="toc-number">2.</span> <span class="toc-text">1.共享内存和消息传递</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Java%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B%E7%9A%84%E6%8A%BD%E8%B1%A1"><span class="toc-number">3.</span> <span class="toc-text">2.Java内存模型的抽象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BB%8E%E6%BA%90%E4%BB%A3%E7%A0%81%E5%88%B0%E6%8C%87%E4%BB%A4%E5%BA%8F%E5%88%97%E7%9A%84%E9%87%8D%E6%8E%92%E5%BA%8F"><span class="toc-number">4.</span> <span class="toc-text">3.从源代码到指令序列的重排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-happens-before%E7%AE%80%E4%BB%8B"><span class="toc-number">5.</span> <span class="toc-text">4.happens-before简介</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#JMM%E7%9A%84%E8%AE%BE%E8%AE%A1%E6%84%8F%E5%9B%BE"><span class="toc-number">5.1.</span> <span class="toc-text">JMM的设计意图</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#happens-before%E7%9A%84%E5%AE%9A%E4%B9%89%E4%B8%8E%E8%A7%84%E5%88%99"><span class="toc-number">5.2.</span> <span class="toc-text">happens-before的定义与规则</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E9%A1%BA%E5%BA%8F%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">6.</span> <span class="toc-text">5.顺序一致性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E7%AB%9E%E4%BA%89%E4%B8%8E%E9%A1%BA%E5%BA%8F%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">6.1.</span> <span class="toc-text">数据竞争与顺序一致性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%A1%BA%E5%BA%8F%E4%B8%80%E8%87%B4%E6%80%A7%E6%A8%A1%E5%9E%8B"><span class="toc-number">6.2.</span> <span class="toc-text">顺序一致性模型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E7%A8%8B%E5%BA%8F%E7%9A%84%E9%A1%BA%E5%BA%8F%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">6.3.</span> <span class="toc-text">同步程序的顺序一致性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%9C%AA%E5%90%8C%E6%AD%A5%E7%A8%8B%E5%BA%8F%E7%9A%84%E9%A1%BA%E5%BA%8F%E4%B8%80%E8%87%B4%E6%80%A7"><span class="toc-number">6.4.</span> <span class="toc-text">未同步程序的顺序一致性</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/08/05/ecRaRO.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Java并发编程（四）Java内存模型</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2016-05-29T02:39:06.000Z" title="发表于 2016-05-29 10:39:06">2016-05-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2017-06-10T13:07:12.216Z" title="更新于 2017-06-10 21:07:12">2017-06-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/">Java</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>此前我们讲到了线程、同步以及volatile关键字，对于Java的并发编程我们有必要了解下Java的内存模型，因为Java线程之间的通信对于工程师来言是完全透明的，内存可见性问题很容易使工程师们觉得困惑，这篇文章我们来主要的讲下Java内存模型的相关概念。</p>
+<a id="more"></a>
+
+<h3 id="1-共享内存和消息传递"><a href="#1-共享内存和消息传递" class="headerlink" title="1.共享内存和消息传递"></a><strong>1.共享内存和消息传递</strong></h3><p>线程之间的通信机制有两种：共享内存和消息传递；在共享内存的并发模型里，线程之间共享程序的公共状态，线程之间通过写-读内存中的公共状态来隐式进行通信。在消息传递的并发模型里，线程之间没有公共状态，线程之间必须通过明确的发送消息来显式进行通信。<br>同步是指程序用于控制不同线程之间操作发生相对顺序的机制。在共享内存并发模型里，同步是显式进行的。工程师必须显式指定某个方法或某段代码需要在线程之间互斥执行。在消息传递的并发模型里，由于消息的发送必须在消息的接收之前，因此同步是隐式进行的。<br>Java的并发采用的是共享内存模型，Java线程之间的通信总是隐式进行，整个通信过程对工程师完全透明。</p>
+<h3 id="2-Java内存模型的抽象"><a href="#2-Java内存模型的抽象" class="headerlink" title="2.Java内存模型的抽象"></a><strong>2.Java内存模型的抽象</strong></h3><p>在java中，所有实例域、静态域和数组元素存储在堆内存中，堆内存在线程之间共享（本文使用“共享变量”这个术语代指实例域，静态域和数组元素）。局部变量，方法定义参数和异常处理器参数不会在线程之间共享，它们不会有内存可见性问题，也不受内存模型的影响。<br>Java线程之间的通信由Java内存模型（本文简称为JMM）控制，JMM决定一个线程对共享变量的写入何时对另一个线程可见。从抽象的角度来看，JMM定义了线程和主内存之间的抽象关系：线程之间的共享变量存储在主内存中，每个线程都有一个私有的本地内存，本地内存中存储了该线程以读/写共享变量的副本。本地内存是JMM的一个抽象概念，并不真实存在。它涵盖了缓存，写缓冲区，寄存器以及其他的硬件和编译器优化。Java内存模型的抽象示意图如下：</p>
+<p><img src="http://img.blog.csdn.net/20160524162149393" alt="这里写图片描述"></p>
+<p>从上图来看，线程A与线程B之间如要通信的话，必须要经历下面2个步骤：</p>
+<ol>
+<li>线程A把本地内存A中更新过的共享变量刷新到主内存中去。 </li>
+<li>线程B到主内存中去读取线程A之前已更新过的共享变量。</li>
+</ol>
+<h3 id="3-从源代码到指令序列的重排序"><a href="#3-从源代码到指令序列的重排序" class="headerlink" title="3.从源代码到指令序列的重排序"></a><strong>3.从源代码到指令序列的重排序</strong></h3><p>在执行程序时为了提高性能，编译器和处理器常常会对指令做重排序。重排序分三种类型：</p>
+<ol>
+<li>编译器优化的重排序。编译器在不改变单线程程序语义的前提下，可以重新安排语句的执行顺序。</li>
+<li>指令级并行的重排序。现代处理器采用了指令级并行技术来将多条指令重叠执行。如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序。</li>
+<li>内存系统的重排序。由于处理器使用缓存和读/写缓冲区，这使得加载和存储操作看上去可能是在乱序执行。<br>从java源代码到最终实际执行的指令序列，会分别经历下面三种重排序：</li>
+</ol>
+<p><img src="http://img.blog.csdn.net/20160524163736602" alt="这里写图片描述"></p>
+<p>上述的1属于编译器重排序，2和3属于处理器重排序。这些重排序都可能会导致多线程程序出现内存可见性问题。对于编译器，JMM的编译器重排序规则会禁止特定类型的编译器重排序（不是所有的编译器重排序都要禁止）。对于处理器重排序，JMM的处理器重排序规则会要求java编译器在生成指令序列时，插入特定类型的内存屏障指令，通过内存屏障指令来禁止特定类型的处理器重排序（不是所有的处理器重排序都要禁止）。<br>JMM属于语言级的内存模型，它确保在不同的编译器和不同的处理器平台之上，通过禁止特定类型的编译器重排序和处理器重排序，为程序员提供一致的内存可见性保证。</p>
+<h3 id="4-happens-before简介"><a href="#4-happens-before简介" class="headerlink" title="4.happens-before简介"></a><strong>4.happens-before简介</strong></h3><p>happens-before是JMM最核心的概念，对于Java工程师来说，理解happens-before是理解JMM的关键。</p>
+<h4 id="JMM的设计意图"><a href="#JMM的设计意图" class="headerlink" title="JMM的设计意图"></a><strong>JMM的设计意图</strong></h4><p>在设计JMM需要考虑两个关键因素：</p>
+<ol>
+<li>工程师对内存模型的使用，希望内存模型易于理解和编程，工程师希望基于一个强内存模型来编写代码。</li>
+<li>编译器和处理器对内存的实现，希望内存模型对他们的束缚越少越好，编译器和处理器希望实现一个弱内存模型。</li>
+</ol>
+<p>这两个因素是互相矛盾的，所以JSR-133专家组设计时需要考虑到一个好的平衡点：一方面为工程师提供足够强的内存可见性，另一方面要对编译器和处理器的限制要尽量松些。</p>
+<p>我们来举了例子：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> a=<span class="number">10</span>;   <span class="comment">//A</span></span><br><span class="line"><span class="keyword">int</span> b=<span class="number">20</span>;   <span class="comment">//B</span></span><br><span class="line"><span class="keyword">int</span> c=a*b;  <span class="comment">//C</span></span><br></pre></td></tr></table></figure>
+<p>上面是一个简单的乘法运算，并存在3个happens-before关系：</p>
+<ol>
+<li>A happens-before B</li>
+<li>B happens-before C</li>
+<li>A happens-before C</li>
+</ol>
+<p>这三个happens-before关系中，2和3是必须的，但1是不必要的。因此，JMM把happens-before要求禁止的重排序分为两类：</p>
+<ol>
+<li>会改变程序执行结果的重排序。</li>
+<li>不会改变程序执行结果的重排序。</li>
+</ol>
+<p>JMM对这两种不同性质的重排序，采取了不同的策略：</p>
+<ol>
+<li>对于会改变程序执行结果的重排序，JMM要求编译器和处理器必须禁止这种重排序。</li>
+<li>对于不会改变程序执行结果的重排序，JMM要求编译器和处理器不做要求，可以允许这种重排序。</li>
+</ol>
+<h4 id="happens-before的定义与规则"><a href="#happens-before的定义与规则" class="headerlink" title="happens-before的定义与规则"></a><strong>happens-before的定义与规则</strong></h4><p>JSR-133使用happens-before的概念来指定两个操作之间的执行顺序，由于这两个操作可以在一个线程内，也可以在不同的线程之间。因此，JMM可以通过happens-before关系向工程师提供跨线程的内存可见性保证。</p>
+<p>happens-before规则如下：</p>
+<ol>
+<li>程序顺序规则：一个线程中的每个操作，happens- before 于该线程中的任意后续操作。</li>
+<li>监视器锁规则：对一个监视器锁的解锁，happens- before 于随后对这个监视器锁的加锁。</li>
+<li>volatile变量规则：对一个volatile域的写，happens- before 于任意后续对这个volatile域的读。</li>
+<li>传递性：如果A happens- before B，且B happens- before C，那么A happens- before<br>C。</li>
+</ol>
+<h3 id="5-顺序一致性"><a href="#5-顺序一致性" class="headerlink" title="5.顺序一致性"></a><strong>5.顺序一致性</strong></h3><p>顺序一致性内存模型是一个理论参考模型，在设计的时候，处理器的内存模型和编程语言的内存模型都会以顺序一致性内存模型为参考。</p>
+<h4 id="数据竞争与顺序一致性"><a href="#数据竞争与顺序一致性" class="headerlink" title="数据竞争与顺序一致性"></a><strong>数据竞争与顺序一致性</strong></h4><p>当程序未正确同步时，就会存在数据竞争。数据竞争指的是：在一个线程中写一个变量，在另一个线程读同一个变量，而且写和读没有通过同步来排序。<br>当代码中包含数据竞争时，程序的执行往往产生违反直觉的结果。如果一个多线程程序能正确同步，这个程序将是一个没有数据竞争的程序。<br>JMM对正确同步的多线程程序的内存一致性做了如下保证：<br>如果程序是正确同步的，程序的执行将具有顺序一致性（sequentially consistent），即程序的执行结果与该程序在顺序一致性内存模型中的执行结果相同。这里的同步是指广义上的同步，包括对常用同步原语（synchronized，volatile和final）的正确使用。</p>
+<h4 id="顺序一致性模型"><a href="#顺序一致性模型" class="headerlink" title="顺序一致性模型"></a><strong>顺序一致性模型</strong></h4><p>顺序一致性内存模型是一个被计算机科学家理想化了的理论参考模型，它为程序员提供了极强的内存可见性保证。顺序一致性内存模型有两大特性：</p>
+<ol>
+<li>一个线程中的所有操作必须按照程序的顺序来执行。</li>
+<li>（不管程序是否同步）所有线程都只能看到一个单一的操作执行顺序。在顺序一致性内存模型中，每个操作都必须原子执行且立刻对所有线程可见。</li>
+</ol>
+<p>顺序一致性内存模型为程序员提供的视图如下：<br><img src="http://img.blog.csdn.net/20160528163458237" alt="这里写图片描述"></p>
+<p>在概念上，顺序一致性模型有一个单一的全局内存，这个内存通过一个左右摆动的开关可以连接到任意一个线程。同时，每一个线程必须按程序的顺序来执行内存读/写操作。从上图我们可以看出，在任意时间点最多只能有一个线程可以连接到内存。当多个线程并发执行时，图中的开关装置能把所有线程的所有内存读/写操作串行化。</p>
+<p>顺序一致性内存模型中的每个操作必须立即对任意线程可见，但是在JMM中就没有这个保证。未同步程序在JMM中不但整体的执行顺序是无序的，而且所有线程看到的操作执行顺序也可能不一致。比如，在当前线程把写过的数据缓存在本地内存中，且还没有刷新到主内存之前，这个写操作仅对当前线程可见；从其他线程的角度来观察，会认为这个写操作根本还没有被当前线程执行。只有当前线程把本地内存中写过的数据刷新到主内存之后，这个写操作才能对其他线程可见。在这种情况下，当前线程和其它线程看到的操作执行顺序将不一致。</p>
+<h4 id="同步程序的顺序一致性"><a href="#同步程序的顺序一致性" class="headerlink" title="同步程序的顺序一致性"></a><strong>同步程序的顺序一致性</strong></h4><p>我们接下来看看正确同步的程序如何具有顺序一致性。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SynchronizedExample</span> </span>&#123;</span><br><span class="line"><span class="keyword">int</span> a = <span class="number">0</span>;</span><br><span class="line"><span class="keyword">boolean</span> flag = <span class="keyword">false</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">writer</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    a = <span class="number">1</span>;</span><br><span class="line">    flag = <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">reader</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (flag) &#123;</span><br><span class="line">        <span class="keyword">int</span> i = a;</span><br><span class="line">        ……</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面示例代码中，假设A线程执行writer()方法后，B线程执行reader()方法。这是一个正确同步的多线程程序。根据JMM规范，该程序的执行结果将与该程序在顺序一致性模型中的执行结果相同。下面是该程序在两个内存模型中的执行时序对比图：</p>
+<p><img src="http://img.blog.csdn.net/20160528170045021" alt="这里写图片描述"></p>
+<p>在顺序一致性模型中，所有操作完全按程序的顺序串行执行。而在JMM中，临界区内的代码可以重排序（但JMM不允许临界区内的代码“逸出”到临界区之外，那样会破坏监视器的语义）。JMM会在退出监视器和进入监视器这两个关键时间点做一些特别处理，使得线程在这两个时间点具有与顺序一致性模型相同的内存视图。虽然线程A在临界区内做了重排序，但由于监视器的互斥执行的特性，这里的线程B根本无法“观察”到线程A在临界区内的重排序。这种重排序既提高了执行效率，又没有改变程序的执行结果。<br>从这里我们可以看到JMM在具体实现上的基本方针：在不改变（正确同步的）程序执行结果的前提下，尽可能的为编译器和处理器的优化打开方便之门。</p>
+<h4 id="未同步程序的顺序一致性"><a href="#未同步程序的顺序一致性" class="headerlink" title="未同步程序的顺序一致性"></a><strong>未同步程序的顺序一致性</strong></h4><p>JMM不保证未同步程序的执行结果与该程序在顺序一致性模型中的执行结果一致。因为未同步程序在顺序一致性模型中执行时，整体上是无序的，其执行结果无法预知。保证未同步程序在两个模型中的执行结果一致毫无意义。<br>和顺序一致性模型一样，未同步程序在JMM中的执行时，整体上也是无序的，其执行结果也无法预知。<br>同时，未同步程序在这两个模型中的执行特性有下面几个差异：</p>
+<ol>
+<li>顺序一致性模型保证单线程内的操作会按程序的顺序执行，而JMM不保证单线程内的操作会按程序的顺序执行（比如上面正确同步的多线程程序在临界区内的重排序）。</li>
+<li>顺序一致性模型保证所有线程只能看到一致的操作执行顺序，而JMM不保证所有线程能看到一致的操作执行顺序。</li>
+<li>JMM不保证对64位的long型和double型变量的读/写操作具有原子性，而顺序一致性模型保证对所有的内存读/写操作都具有原子性。</li>
+</ol>
+<p>对于第三个差异：在一些32位的处理器上，如果要求对64位数据的读/写操作具有原子性，会有比较大的开销。为了照顾这种处理器，java语言规范鼓励但不强求JVM对64位的long型变量和double型变量的读/写具有原子性。当JVM在这种处理器上运行时，会把一个64位long/ double型变量的读/写操作拆分为两个32位的读/写操作来执行。这两个32位的读/写操作可能会被分配到不同的总线事务中执行，此时对这个64位变量的读/写将不具有原子性。<br>当单个内存操作不具有原子性，将可能会产生意想不到后果。请看下面示意图：<br><img src="http://img.blog.csdn.net/20160528211025319" alt="这里写图片描述"></p>
+<p>如上图所示，假设处理器A写一个long型变量，同时处理器B要读这个long型变量。处理器A中64位的写操作被拆分为两个32位的写操作，且这两个32位的写操作被分配到不同的写事务中执行。同时处理器B中64位的读操作被拆分为两个32位的读操作，且这两个32位的读操作被分配到同一个的读事务中执行。当处理器A和B按上图的时序来执行时，处理器B将看到仅仅被处理器A“写了一半“的无效值。</p>
+<p>参考资料：<br>《Java并发编程的艺术》<br> <a target="_blank" rel="noopener" href="http://www.infoq.com/cn/articles/java-memory-model-1?utm_source=infoq&utm_medium=related_content_link&utm_campaign=relatedContent_articles_clk">深入理解Java内存模型（一）——基础</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/java/concurrent/4-jmm.html">http://liuwangshu.cn/java/concurrent/4-jmm.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程</a><a class="post-meta__tags" href="/tags/Java/">Java</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/view/11-custom-viewgroup.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android View体系（十一）自定义ViewGroup</div></div></a></div><div class="next-post pull-right"><a href="/application/view/10-custom-group.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android View体系（十）自定义组合控件</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/java/concurrent/2-synchronous.html" title="Java并发编程（二）同步"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-12-15</div><div class="title">Java并发编程（二）同步</div></div></a></div><div><a href="/java/concurrent/3-volatile.html" title="Java并发编程（三）volatile域"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-10-05</div><div class="title">Java并发编程（三）volatile域</div></div></a></div><div><a href="/java/concurrent/1-thread.html" title="Java并发编程（一）线程定义、状态和属性"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-10-05</div><div class="title">Java并发编程（一）线程定义、状态和属性</div></div></a></div><div><a href="/java/concurrent/7-concurrentlinkedqueue.html" title="Java并发编程（七）ConcurrentLinkedQueue的实现原理和源码分析"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-08-14</div><div class="title">Java并发编程（七）ConcurrentLinkedQueue的实现原理和源码分析</div></div></a></div><div><a href="/java/concurrent/5-concurrenthashmap.html" title="Java并发编程（五）ConcurrentHashMap的实现原理和源码分析"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-07-21</div><div class="title">Java并发编程（五）ConcurrentHashMap的实现原理和源码分析</div></div></a></div><div><a href="/java/concurrent/6-blockingqueue.html" title="Java并发编程（六）阻塞队列"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-07-31</div><div class="title">Java并发编程（六）阻塞队列</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

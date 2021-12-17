@@ -1,0 +1,273 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android包管理机制（一）PackageInstaller的初始化 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  关联系列Android包管理机制系列  前言包管理机制是Android中的重要机制，是应用开发和系统开发需要掌握的知识点之一。包指的是Apk、jar和so文件等等，它们被加载到Android内存中，由一个包转变成可执行的代码，这就需要一个机制来进行包的加载、解析、管理等操作，这就是包管理机制。包管理机制由许多类一起组成，其中核心为PackageManager"><meta name="keywords" content="Android框架层,Android包管理机制"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/framework/pms/1-packageinstaller-initialize.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android包管理机制（一）PackageInstaller的初始化"><meta property="og:url" content="http://liuwangshu.cn/framework/pms/1-packageinstaller-initialize.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  关联系列Android包管理机制系列  前言包管理机制是Android中的重要机制，是应用开发和系统开发需要掌握的知识点之一。包指的是Apk、jar和so文件等等，它们被加载到Android内存中，由一个包转变成可执行的代码，这就需要一个机制来进行包的加载、解析、管理等操作，这就是包管理机制。包管理机制由许多类一起组成，其中核心为PackageManager"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VepOBV.jpg"><meta property="article:published_time" content="2018-06-13T16:16:00.000Z"><meta property="article:modified_time" content="2020-09-17T07:31:11.337Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-17 15:31:11'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-PackageManager%E7%AE%80%E4%BB%8B"><span class="toc-number">2.</span> <span class="toc-text">1.PackageManager简介</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-APK%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84%E5%92%8C%E5%AE%89%E8%A3%85%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">2.APK文件结构和安装方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AF%BB%E6%89%BEPackageInstaller%E5%85%A5%E5%8F%A3"><span class="toc-number">4.</span> <span class="toc-text">3.寻找PackageInstaller入口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-PackageInstallerActivity%E8%A7%A3%E6%9E%90"><span class="toc-number">5.</span> <span class="toc-text">4.PackageInstallerActivity解析</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E6%80%BB%E7%BB%93"><span class="toc-number">6.</span> <span class="toc-text">5.总结</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VepOBV.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android包管理机制（一）PackageInstaller的初始化</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-06-13T16:16:00.000Z" title="发表于 2018-06-14 00:16:00">2018-06-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-17T07:31:11.337Z" title="更新于 2020-09-17 15:31:11">2020-09-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>关联系列<br><a href="http://liuwangshu.cn/tags/Android%E5%8C%85%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/">Android包管理机制系列</a></p>
+<a id="more"></a>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>包管理机制是Android中的重要机制，是应用开发和系统开发需要掌握的知识点之一。<br>包指的是Apk、jar和so文件等等，它们被加载到Android内存中，由一个包转变成可执行的代码，这就需要一个机制来进行包的加载、解析、管理等操作，这就是包管理机制。包管理机制由许多类一起组成，其中核心为PackageManagerService（PMS）,它负责对包进行管理，如果直接讲PMS会比较难以理解，因此我们需要一个切入点，这个切入点就是常见的APK的安装。<br>讲到APK的安装之前，先了解下PackageManager、APK文件结构和安装方式。</p>
+<h3 id="1-PackageManager简介"><a href="#1-PackageManager简介" class="headerlink" title="1.PackageManager简介"></a><strong>1.PackageManager简介</strong></h3><p>与ActivityManager和AMS的关系类似，PMS也有一个对应的管理类PackageManager，用于向应用程序进程提供一些功能。PackageManager是一个抽象类，它的具体实现类为ApplicationPackageManager，ApplicationPackageManager中的方法会通过IPackageManager与AMS进行进程间通信，因此PackageManager所提供的功能最终是由PMS来实现的，这么设计的主要用意是为了避免系统服务PMS直接被访问。PackageManager提供了一些功能，主要有以下几点：     </p>
+<ol>
+<li>获取一个应用程序的所有信息（ApplicationInfo）。</li>
+<li>获取四大组件的信息。</li>
+<li>查询permission相关信息。</li>
+<li>获取包的信息。</li>
+<li>安装、卸载APK.</li>
+</ol>
+<h3 id="2-APK文件结构和安装方式"><a href="#2-APK文件结构和安装方式" class="headerlink" title="2.APK文件结构和安装方式"></a><strong>2.APK文件结构和安装方式</strong></h3><p>APK是AndroidPackage的缩写，即Android安装包，它实际上是zip格式的压缩文件，一般情况下，解压后的文件结构如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th align="center">目录/文件</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">assert</td>
+<td>存放的原生资源文件,通过AssetManager类访问。</td>
+</tr>
+<tr>
+<td align="center">lib</td>
+<td>存放库文件。</td>
+</tr>
+<tr>
+<td align="center">META-INF</td>
+<td>保存应用的签名信息，签名信息可以验证APK文件的完整性。</td>
+</tr>
+<tr>
+<td align="center">res</td>
+<td>存放资源文件。res中除了raw子目录，其他的子目录都参与编译，这些子目录下的资源是通过编译出的R类在代码中访问。</td>
+</tr>
+<tr>
+<td align="center">AndroidManifest.xml</td>
+<td>用来声明应用程序的包名称、版本、组件和权限等数据。 apk中的AndroidManifest.xml经过压缩，可以通过AXMLPrinter2工具解开。</td>
+</tr>
+<tr>
+<td align="center">classes.dex</td>
+<td>Java源码编译后生成的Java字节码文件。</td>
+</tr>
+<tr>
+<td align="center">resources.arsc</td>
+<td>编译后的二进制资源文件。</td>
+</tr>
+</tbody></table>
+<p>APK的安装场景主要有以下几种：</p>
+<ul>
+<li>通过adb命令安装：adb 命令包括adb push/install</li>
+<li>用户下载的Apk，通过系统安装器packageinstaller安装该Apk。packageinstaller是系统内置的应用程序，用于安装和卸载应用程序。</li>
+<li>系统开机时安装系统应用。</li>
+<li>电脑或者手机上的应用商店自动安装。</li>
+</ul>
+<p>这4种方式最终都是由PMS来进行处理，在此之前的调用链是不同的，本篇文章会介绍第二种方式，对于用户来说，这是比较常用的安装方式；对于开发者来说，这是调用链比较长的安装方式，能学到的更多。其他的安装场景会在本系列的后续文章进行讲解。</p>
+<h3 id="3-寻找PackageInstaller入口"><a href="#3-寻找PackageInstaller入口" class="headerlink" title="3.寻找PackageInstaller入口"></a><strong>3.寻找PackageInstaller入口</strong></h3><p>在Android7.0之前我们可以通过如下代码安装指定路径中的APK。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent(Intent.ACTION_VIEW);</span><br><span class="line">intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</span><br><span class="line">intent.setDataAndType(Uri.parse(<span class="string">&quot;file://&quot;</span> + path),<span class="string">&quot;application/vnd.android.package-archive&quot;</span>);</span><br><span class="line">context.startActivity(intent);</span><br></pre></td></tr></table></figure>
+
+<p>但是Android7.0或更高版本再这么做，就会报FileUriExposedException异常。这是因为StrictMode API 政策禁止应用程序将file:// Uri暴露给另一个应用程序，如果包含file:// Uri的 intent 离开你的应用，就会报FileUriExposedException 异常。为了解决这个问题，谷歌提供了FileProvider，FileProvider继承自ContentProvider ，使用它可以将file://Uri替换为content://Uri，具体怎么使用FileProvider并不是本文的重点，只要知道无论是Android7.0之前还是Android7.0以及更高版本，都会调用如下代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Intent intent = <span class="keyword">new</span> Intent(Intent.ACTION_VIEW);</span><br><span class="line">intent.setDataAndType(xxxxx, <span class="string">&quot;application/vnd.android.package-archive&quot;</span>);</span><br></pre></td></tr></table></figure>
+<p>Intent的Action属性为ACTION_VIEW，Type属性指定Intent的数据类型为application/vnd.android.package-archive。<br>能隐式匹配的Activity为InstallStart，需要注意的是，这里分析的源码基于Android8.0，7.0能隐式匹配的Activity为PackageInstallerActivity。<br><strong>packages/apps/PackageInstaller/AndroidManifest.xml</strong></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">activity</span> <span class="attr">android:name</span>=<span class="string">&quot;.InstallStart&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">android:exported</span>=<span class="string">&quot;true&quot;</span></span></span><br><span class="line"><span class="tag">               <span class="attr">android:excludeFromRecents</span>=<span class="string">&quot;true&quot;</span>&gt;</span></span><br><span class="line">           <span class="tag">&lt;<span class="name">intent-filter</span> <span class="attr">android:priority</span>=<span class="string">&quot;1&quot;</span>&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.VIEW&quot;</span> /&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.action.INSTALL_PACKAGE&quot;</span> /&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">category</span> <span class="attr">android:name</span>=<span class="string">&quot;android.intent.category.DEFAULT&quot;</span> /&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:scheme</span>=<span class="string">&quot;file&quot;</span> /&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:scheme</span>=<span class="string">&quot;content&quot;</span> /&gt;</span></span><br><span class="line">               <span class="tag">&lt;<span class="name">data</span> <span class="attr">android:mimeType</span>=<span class="string">&quot;application/vnd.android.package-archive&quot;</span> /&gt;</span></span><br><span class="line">           <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></span><br><span class="line">        ...</span><br><span class="line">       <span class="tag">&lt;/<span class="name">activity</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>InstallStart是PackageInstaller中的入口Activity，其中PackageInstaller是系统内置的应用程序，用于安装和卸载应用。当我们调用PackageInstaller来安装应用时会跳转到InstallStart，并调用它的onCreate方法：<br><strong>packages/apps/PackageInstaller/src/com/android/packageinstaller/InstallStart.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(<span class="meta">@Nullable</span> Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">         <span class="keyword">if</span> (PackageInstaller.ACTION_CONFIRM_PERMISSIONS.equals(intent.getAction())) &#123;<span class="comment">//1</span></span><br><span class="line">          nextActivity.setClass(<span class="keyword">this</span>, PackageInstallerActivity.class);</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">          Uri packageUri = intent.getData();</span><br><span class="line">          <span class="keyword">if</span> (packageUri == <span class="keyword">null</span>) &#123;<span class="comment">//2</span></span><br><span class="line">              Intent result = <span class="keyword">new</span> Intent();</span><br><span class="line">              result.putExtra(Intent.EXTRA_INSTALL_RESULT,</span><br><span class="line">                      PackageManager.INSTALL_FAILED_INVALID_URI);</span><br><span class="line">              setResult(RESULT_FIRST_USER, result);</span><br><span class="line">              nextActivity = <span class="keyword">null</span>;</span><br><span class="line">          &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">              <span class="keyword">if</span> (packageUri.getScheme().equals(SCHEME_CONTENT)) &#123;<span class="comment">//3</span></span><br><span class="line">                  nextActivity.setClass(<span class="keyword">this</span>, InstallStaging.class);</span><br><span class="line">              &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                  nextActivity.setClass(<span class="keyword">this</span>, PackageInstallerActivity.class);</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> (nextActivity != <span class="keyword">null</span>) &#123;</span><br><span class="line">          startActivity(nextActivity);</span><br><span class="line">      &#125;</span><br><span class="line">      finish();</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处判断Intent的Action是否为CONFIRM_PERMISSIONS，根据本文的应用情景显然不是，接着往下看，注释2处判断packageUri 是否为空也不成立，注释3处，判断Uri的Scheme协议是否是content，如果是就跳转到InstallStaging，如果不是就跳转到PackageInstallerActivity。本文的应用情景中，Android7.0以及更高版本我们会使用FileProvider来处理URI ，FileProvider会隐藏共享文件的真实路径，将路径转换成content://Uri路径，这样就会跳转到InstallStaging。InstallStaging的onResume方法如下所示。</p>
+<p><strong>packages/apps/PackageInstaller/src/com/android/packageinstaller/InstallStaging.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line">  <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onResume</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      <span class="keyword">super</span>.onResume();</span><br><span class="line">      <span class="keyword">if</span> (mStagingTask == <span class="keyword">null</span>) &#123;</span><br><span class="line">          <span class="keyword">if</span> (mStagedFile == <span class="keyword">null</span>) &#123;</span><br><span class="line">              <span class="keyword">try</span> &#123;</span><br><span class="line">                  mStagedFile = TemporaryFileManager.getStagedFile(<span class="keyword">this</span>);<span class="comment">//1</span></span><br><span class="line">              &#125; <span class="keyword">catch</span> (IOException e) &#123;</span><br><span class="line">                  showError();</span><br><span class="line">                  <span class="keyword">return</span>;</span><br><span class="line">              &#125;</span><br><span class="line">          &#125;</span><br><span class="line">          mStagingTask = <span class="keyword">new</span> StagingAsyncTask();</span><br><span class="line">          mStagingTask.execute(getIntent().getData());<span class="comment">//2</span></span><br><span class="line">      &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>注释1处如果File类型的mStagedFile 为null，则创建mStagedFile ，mStagedFile用于存储临时数据。 注释2处启动StagingAsyncTask，并传入了content协议的Uri，如下所示。<br><strong>packages/apps/PackageInstaller/src/com/android/packageinstaller/InstallStaging.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">StagingAsyncTask</span> <span class="keyword">extends</span> <span class="title">AsyncTask</span>&lt;<span class="title">Uri</span>, <span class="title">Void</span>, <span class="title">Boolean</span>&gt; </span>&#123;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> Boolean <span class="title">doInBackground</span><span class="params">(Uri... params)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (params == <span class="keyword">null</span> || params.length &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            Uri packageUri = params[<span class="number">0</span>];</span><br><span class="line">            <span class="keyword">try</span> (InputStream in = getContentResolver().openInputStream(packageUri)) &#123;</span><br><span class="line">                <span class="keyword">if</span> (in == <span class="keyword">null</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">                &#125;</span><br><span class="line">                <span class="keyword">try</span> (OutputStream out = <span class="keyword">new</span> FileOutputStream(mStagedFile)) &#123;</span><br><span class="line">                    <span class="keyword">byte</span>[] buffer = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">4096</span>];</span><br><span class="line">                    <span class="keyword">int</span> bytesRead;</span><br><span class="line">                    <span class="keyword">while</span> ((bytesRead = in.read(buffer)) &gt;= <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="keyword">if</span> (isCancelled()) &#123;</span><br><span class="line">                            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">                        &#125;</span><br><span class="line">                        out.write(buffer, <span class="number">0</span>, bytesRead);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">            &#125; <span class="keyword">catch</span> (IOException | SecurityException e) &#123;</span><br><span class="line">                Log.w(LOG_TAG, <span class="string">&quot;Error staging apk from content URI&quot;</span>, e);</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onPostExecute</span><span class="params">(Boolean success)</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (success) &#123;</span><br><span class="line">                Intent installIntent = <span class="keyword">new</span> Intent(getIntent());</span><br><span class="line">                installIntent.setClass(InstallStaging.<span class="keyword">this</span>, PackageInstallerActivity.class);</span><br><span class="line">                installIntent.setData(Uri.fromFile(mStagedFile));</span><br><span class="line">                installIntent</span><br><span class="line">                        .setFlags(installIntent.getFlags() &amp; ~Intent.FLAG_ACTIVITY_FORWARD_RESULT);</span><br><span class="line">                installIntent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);</span><br><span class="line">                startActivityForResult(installIntent, <span class="number">0</span>);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                showError();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>doInBackground方法中将packageUri（content协议的Uri）的内容写入到mStagedFile中，如果写入成功，onPostExecute方法中会跳转到PackageInstallerActivity中，并将mStagedFile传进去。绕了一圈又回到了PackageInstallerActivity，这里可以看出InstallStaging主要起了转换的作用，将content协议的Uri转换为File协议，然后跳转到PackageInstallerActivity，这样就可以像此前版本（Android7.0之前）一样启动安装流程了。</p>
+<h3 id="4-PackageInstallerActivity解析"><a href="#4-PackageInstallerActivity解析" class="headerlink" title="4.PackageInstallerActivity解析"></a><strong>4.PackageInstallerActivity解析</strong></h3><p>从功能上来说，PackageInstallerActivity才是应用安装器PackageInstaller真正的入口Activity，PackageInstallerActivity的onCreate方法如下所示。<br><strong>packages/apps/PackageInstaller/src/com/android/packageinstaller/PackageInstallerActivity.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle icicle)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onCreate(icicle);</span><br><span class="line">    <span class="keyword">if</span> (icicle != <span class="keyword">null</span>) &#123;</span><br><span class="line">        mAllowUnknownSources = icicle.getBoolean(ALLOW_UNKNOWN_SOURCES_KEY);</span><br><span class="line">    &#125;</span><br><span class="line">    mPm = getPackageManager();</span><br><span class="line">    mIpm = AppGlobals.getPackageManager();</span><br><span class="line">    mAppOpsManager = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);</span><br><span class="line">    mInstaller = mPm.getPackageInstaller();</span><br><span class="line">    mUserManager = (UserManager) getSystemService(Context.USER_SERVICE);</span><br><span class="line">    ...</span><br><span class="line">    <span class="comment">//根据Uri的Scheme进行预处理</span></span><br><span class="line">    <span class="keyword">boolean</span> wasSetUp = processPackageUri(packageUri);<span class="comment">//1</span></span><br><span class="line">    <span class="keyword">if</span> (!wasSetUp) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    bindUi(R.layout.install_confirm, <span class="keyword">false</span>);</span><br><span class="line">    <span class="comment">//判断是否是未知来源的应用，如果开启允许安装未知来源选项则直接初始化安装</span></span><br><span class="line">    checkIfAllowedAndInitiateInstall();<span class="comment">//2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先初始话安装所需要的各种对象，比如PackageManager、IPackageManager、AppOpsManager和UserManager等等，它们的描述如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th align="left">类名</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">PackageManager</td>
+<td align="center">用于向应用程序进程提供一些功能，最终的功能是由PMS来实现的</td>
+</tr>
+<tr>
+<td align="left">IPackageManager</td>
+<td align="center">一个AIDL的接口，用于和PMS进行进程间通信</td>
+</tr>
+<tr>
+<td align="left">AppOpsManager</td>
+<td align="center">用于权限动态检测,在Android4.3中被引入</td>
+</tr>
+<tr>
+<td align="left">PackageInstaller</td>
+<td align="center">提供安装、升级和删除应用程序功能</td>
+</tr>
+<tr>
+<td align="left">UserManager</td>
+<td align="center">用于多用户管理</td>
+</tr>
+</tbody></table>
+<p>注释1处的processPackageUri方法如下所示。<br> <strong>packages/apps/PackageInstaller/src/com/android/packageinstaller/PackageInstallerActivity.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">processPackageUri</span><span class="params">(<span class="keyword">final</span> Uri packageUri)</span> </span>&#123;</span><br><span class="line">     mPackageURI = packageUri;</span><br><span class="line">     <span class="keyword">final</span> String scheme = packageUri.getScheme();<span class="comment">//1</span></span><br><span class="line">     <span class="keyword">switch</span> (scheme) &#123;</span><br><span class="line">         <span class="keyword">case</span> SCHEME_PACKAGE: &#123;</span><br><span class="line">             <span class="keyword">try</span> &#123;</span><br><span class="line">              ...</span><br><span class="line">         &#125; <span class="keyword">break</span>;</span><br><span class="line">         <span class="keyword">case</span> SCHEME_FILE: &#123;</span><br><span class="line">             File sourceFile = <span class="keyword">new</span> File(packageUri.getPath());<span class="comment">//1</span></span><br><span class="line">             <span class="comment">//得到sourceFile的包信息</span></span><br><span class="line">             PackageParser.Package parsed = PackageUtil.getPackageInfo(<span class="keyword">this</span>, sourceFile);<span class="comment">//2</span></span><br><span class="line">             <span class="keyword">if</span> (parsed == <span class="keyword">null</span>) &#123;</span><br><span class="line">                 Log.w(TAG, <span class="string">&quot;Parse error when parsing manifest. Discontinuing installation&quot;</span>);</span><br><span class="line">                 showDialogInner(DLG_PACKAGE_ERROR);</span><br><span class="line">                 setPmResult(PackageManager.INSTALL_FAILED_INVALID_APK);</span><br><span class="line">                 <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">             &#125;</span><br><span class="line">             <span class="comment">//对parsed进行进一步处理得到包信息PackageInfo</span></span><br><span class="line">             mPkgInfo = PackageParser.generatePackageInfo(parsed, <span class="keyword">null</span>,</span><br><span class="line">                     PackageManager.GET_PERMISSIONS, <span class="number">0</span>, <span class="number">0</span>, <span class="keyword">null</span>,</span><br><span class="line">                     <span class="keyword">new</span> PackageUserState());<span class="comment">//3</span></span><br><span class="line">             mAppSnippet = PackageUtil.getAppSnippet(<span class="keyword">this</span>, mPkgInfo.applicationInfo, sourceFile);</span><br><span class="line">         &#125; <span class="keyword">break</span>;</span><br><span class="line">         <span class="keyword">default</span>: &#123;</span><br><span class="line">             Log.w(TAG, <span class="string">&quot;Unsupported scheme &quot;</span> + scheme);</span><br><span class="line">             setPmResult(PackageManager.INSTALL_FAILED_INVALID_URI);</span><br><span class="line">             finish();</span><br><span class="line">             <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>首先在注释1处得到packageUri的Scheme协议，接着根据这个Scheme协议分别对package协议和file协议进行处理，如果不是这两个协议就会关闭PackageInstallerActivity并return false。我们主要来看file协议的处理，注释1处根据packageUri创建一个新的File。注释2处的内部会用PackageParser的parsePackage方法解析这个File（这个File其实是APK文件），得到APK的包信息Package ，Package包含了该APK的所有信息。注释3处会将Package根据uid、用户状态信息和PackageManager的配置等变量对包信息Package做进一步处理得到PackageInfo。<br>回到PackageInstallerActivity的onCreate方法的注释2处，checkIfAllowedAndInitiateInstall方法如下所示。<br> <strong>packages/apps/PackageInstaller/src/com/android/packageinstaller/PackageInstallerActivity.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">checkIfAllowedAndInitiateInstall</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="comment">//判断如果允许安装未知来源或者根据Intent判断得出该APK不是未知来源</span></span><br><span class="line">       <span class="keyword">if</span> (mAllowUnknownSources || !isInstallRequestFromUnknownSource(getIntent())) &#123;<span class="comment">//1</span></span><br><span class="line">           <span class="comment">//初始化安装</span></span><br><span class="line">           initiateInstall();<span class="comment">//2</span></span><br><span class="line">           <span class="keyword">return</span>;</span><br><span class="line">       &#125;</span><br><span class="line">       <span class="comment">// 如果管理员限制来自未知源的安装, 就弹出提示Dialog或者跳转到设置界面</span></span><br><span class="line">       <span class="keyword">if</span> (isUnknownSourcesDisallowed()) &#123;</span><br><span class="line">           <span class="keyword">if</span> ((mUserManager.getUserRestrictionSource(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,</span><br><span class="line">                   Process.myUserHandle()) &amp; UserManager.RESTRICTION_SOURCE_SYSTEM) != <span class="number">0</span>) &#123;    </span><br><span class="line">               showDialogInner(DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER);</span><br><span class="line">               <span class="keyword">return</span>;</span><br><span class="line">           &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">               startActivity(<span class="keyword">new</span> Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS));</span><br><span class="line">               finish();</span><br><span class="line">           &#125;</span><br><span class="line">       &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">           handleUnknownSources();<span class="comment">//3</span></span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处判断允许安装未知来源或者根据Intent判断得出该APK不是未知来源，就调用注释2处的initiateInstall方法来初始化安装。如果管理员限制来自未知源的安装, 就弹出提示Dialog或者跳转到设置界面，否则就调用注释3处的handleUnknownSources方法来处理未知来源的APK。注释2处的initiateInstall方法如下所示。<br> <strong>packages/apps/PackageInstaller/src/com/android/packageinstaller/PackageInstallerActivity.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initiateInstall</span><span class="params">()</span> </span>&#123;</span><br><span class="line">      String pkgName = mPkgInfo.packageName;<span class="comment">//1</span></span><br><span class="line">      String[] oldName = mPm.canonicalToCurrentPackageNames(<span class="keyword">new</span> String[] &#123; pkgName &#125;);</span><br><span class="line">      <span class="keyword">if</span> (oldName != <span class="keyword">null</span> &amp;&amp; oldName.length &gt; <span class="number">0</span> &amp;&amp; oldName[<span class="number">0</span>] != <span class="keyword">null</span>) &#123;</span><br><span class="line">          pkgName = oldName[<span class="number">0</span>];</span><br><span class="line">          mPkgInfo.packageName = pkgName;</span><br><span class="line">          mPkgInfo.applicationInfo.packageName = pkgName;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">          <span class="comment">//根据包名获取应用程序信息</span></span><br><span class="line">          mAppInfo = mPm.getApplicationInfo(pkgName,</span><br><span class="line">                  PackageManager.MATCH_UNINSTALLED_PACKAGES);<span class="comment">//2</span></span><br><span class="line">          <span class="keyword">if</span> ((mAppInfo.flags&amp;ApplicationInfo.FLAG_INSTALLED) == <span class="number">0</span>) &#123;</span><br><span class="line">              mAppInfo = <span class="keyword">null</span>;</span><br><span class="line">          &#125;</span><br><span class="line">      &#125; <span class="keyword">catch</span> (NameNotFoundException e) &#123;</span><br><span class="line">          mAppInfo = <span class="keyword">null</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="comment">//初始化安装确认界面</span></span><br><span class="line">      startInstallConfirm();<span class="comment">//3</span></span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处得到包名，注释2处根据包名获取获取应用程序信息ApplicationInfo。注释3处的startInstallConfirm方法如下所示。<br>  <strong>packages/apps/PackageInstaller/src/com/android/packageinstaller/PackageInstallerActivity.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startInstallConfirm</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="comment">//省略初始化界面代码</span></span><br><span class="line">     ...</span><br><span class="line">     AppSecurityPermissions perms = <span class="keyword">new</span> AppSecurityPermissions(<span class="keyword">this</span>, mPkgInfo);<span class="comment">//1</span></span><br><span class="line">     <span class="keyword">final</span> <span class="keyword">int</span> N = perms.getPermissionCount(AppSecurityPermissions.WHICH_ALL);</span><br><span class="line">     <span class="keyword">if</span> (mAppInfo != <span class="keyword">null</span>) &#123;</span><br><span class="line">         msg = (mAppInfo.flags &amp; ApplicationInfo.FLAG_SYSTEM) != <span class="number">0</span></span><br><span class="line">                 ? R.string.install_confirm_question_update_system</span><br><span class="line">                 : R.string.install_confirm_question_update;</span><br><span class="line">         mScrollView = <span class="keyword">new</span> CaffeinatedScrollView(<span class="keyword">this</span>);</span><br><span class="line">         mScrollView.setFillViewport(<span class="keyword">true</span>);</span><br><span class="line">         <span class="keyword">boolean</span> newPermissionsFound = <span class="keyword">false</span>;</span><br><span class="line">         <span class="keyword">if</span> (!supportsRuntimePermissions) &#123;</span><br><span class="line">             newPermissionsFound =</span><br><span class="line">                     (perms.getPermissionCount(AppSecurityPermissions.WHICH_NEW) &gt; <span class="number">0</span>);</span><br><span class="line">             <span class="keyword">if</span> (newPermissionsFound) &#123;</span><br><span class="line">                 permVisible = <span class="keyword">true</span>;</span><br><span class="line">                 mScrollView.addView(perms.getPermissionsView(</span><br><span class="line">                         AppSecurityPermissions.WHICH_NEW));<span class="comment">//2</span></span><br><span class="line">             &#125;</span><br><span class="line">         &#125;</span><br><span class="line">     ...</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>startInstallConfirm方法中首先初始化安装确认界面，就是我们平常安装APK时出现的界面，界面上有确认和取消按钮并会列出安装该APK需要访问的系统权限。需要注意的是，不同厂商定制的Android系统会有不同的安装确认界面。<br>注释1处会创建AppSecurityPermissions，它会提取出APK中权限信息并展示出来，这个负责展示的View是AppSecurityPermissions的内部类PermissionItemView。注释2处调用AppSecurityPermissions的getPermissionsView方法来获取PermissionItemView，并将PermissionItemView添加到CaffeinatedScrollView中，这样安装该APK需要访问的系统权限就可以全部的展示出来了，PackageInstaller的初始化工作就完成了。</p>
+<h3 id="5-总结"><a href="#5-总结" class="headerlink" title="5.总结"></a><strong>5.总结</strong></h3><p>现在来总结下PackageInstaller初始化的过程：</p>
+<ol>
+<li>根据Uri的Scheme协议不同，跳转到不同的界面，content协议跳转到InstallStart，其他的跳转到PackageInstallerActivity。本文应用场景中，如果是Android7.0以及更高版本会跳转到InstallStart。</li>
+<li>InstallStart将content协议的Uri转换为File协议，然后跳转到PackageInstallerActivity。</li>
+<li>PackageInstallerActivity会分别对package协议和file协议的Uri进行处理，如果是file协议会解析APK文件得到包信息PackageInfo。</li>
+<li>PackageInstallerActivity中会对未知来源进行处理，如果允许安装未知来源或者根据Intent判断得出该APK不是未知来源，就会初始化安装确认界面，如果管理员限制来自未知源的安装, 就弹出提示Dialog或者跳转到设置界面。</li>
+</ol>
+<p>PackageInstaller的初始化就讲到这，关于PackageInstaller的安装APK的过程会在本系列的下一篇文章进行讲解。</p>
+<p>参考资料<br><a target="_blank" rel="noopener" href="https://maoao530.github.io/2017/01/18/package-install/">应用程序安装流程</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/framework/pms/1-packageinstaller-initialize.html">http://liuwangshu.cn/framework/pms/1-packageinstaller-initialize.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a><a class="post-meta__tags" href="/tags/Android%E5%8C%85%E7%AE%A1%E7%90%86%E6%9C%BA%E5%88%B6/">Android包管理机制</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VepOBV.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/life/c-ronaldo.html"><img class="prev-cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">程序员如果也能像C罗一样自律和勤奋，必将成为大神</div></div></a></div><div class="next-post pull-right"><a href="/application/plug-in/1.activity.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info"> Android插件化原理（一）Activity插件化</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/framework/pms/2-packageinstaller-apk.html" title="Android包管理机制（二）PackageInstaller安装APK"><img class="cover" src="https://s2.ax1x.com/2019/05/27/Ve9939.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-06-28</div><div class="title">Android包管理机制（二）PackageInstaller安装APK</div></div></a></div><div><a href="/framework/pms/3-pms-install.html" title="Android包管理机制（三）PMS处理APK的安装"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VeC1z9.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-07-13</div><div class="title">Android包管理机制（三）PMS处理APK的安装</div></div></a></div><div><a href="/framework/pms/4-pms-start.html" title="Android包管理机制（四）PMS的创建过程"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VeCIQs.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-07-30</div><div class="title">Android包管理机制（四）PMS的创建过程</div></div></a></div><div><a href="/framework/pms/5-packageparser.html" title="Android包管理机制（五）APK是如何被解析的"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VeiagH.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-17</div><div class="title">Android包管理机制（五）APK是如何被解析的</div></div></a></div><div><a href="/framework/system-architecture.html" title="Android系统架构与系统源码目录"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-01-23</div><div class="title">Android系统架构与系统源码目录</div></div></a></div><div><a href="/application/multithreading/asynctask-soucecode.html" title="AsyncTask源码分析"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-10-19</div><div class="title">AsyncTask源码分析</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

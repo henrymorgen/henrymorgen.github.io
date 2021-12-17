@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android输入系统（一）输入事件传递流程和InputManagerService的诞生 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  关联系列解析WMS系列View体系系列  前言很多同学可能会认为输入系统是不是和View的事件分发有些关联，确实是有些关联，只不过View事件分发只能算是输入系统事件传递的一部分。这个系列讲的输入系统主要是我们不常接触的，但还是需要去了解的那部分。 1. 输入事件传递流程的组成部分输入系统是外界与Android设备交互的基础，仅凭输入系统是无法完成输入事件传"><meta name="keywords" content="Android框架层,Android输入系统"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/framework/ims/1-ims-produce.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android输入系统（一）输入事件传递流程和InputManagerService的诞生"><meta property="og:url" content="http://liuwangshu.cn/framework/ims/1-ims-produce.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  关联系列解析WMS系列View体系系列  前言很多同学可能会认为输入系统是不是和View的事件分发有些关联，确实是有些关联，只不过View事件分发只能算是输入系统事件传递的一部分。这个系列讲的输入系统主要是我们不常接触的，但还是需要去了解的那部分。 1. 输入事件传递流程的组成部分输入系统是外界与Android设备交互的基础，仅凭输入系统是无法完成输入事件传"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZhfoT.jpg"><meta property="article:published_time" content="2018-10-28T16:16:00.000Z"><meta property="article:modified_time" content="2020-09-17T07:30:14.364Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-17 15:30:14'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%BE%93%E5%85%A5%E4%BA%8B%E4%BB%B6%E4%BC%A0%E9%80%92%E6%B5%81%E7%A8%8B%E7%9A%84%E7%BB%84%E6%88%90%E9%83%A8%E5%88%86"><span class="toc-number">2.</span> <span class="toc-text">1. 输入事件传递流程的组成部分</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%BE%93%E5%85%A5%E7%B3%BB%E7%BB%9F%E9%83%A8%E5%88%86"><span class="toc-number">2.1.</span> <span class="toc-text">输入系统部分</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#WMS%E5%A4%84%E7%90%86%E9%83%A8%E5%88%86"><span class="toc-number">2.2.</span> <span class="toc-text">WMS处理部分</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#View%E5%A4%84%E7%90%86%E9%83%A8%E5%88%86"><span class="toc-number">2.3.</span> <span class="toc-text">View处理部分</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-IMS%E7%9A%84%E8%AF%9E%E7%94%9F"><span class="toc-number">3.</span> <span class="toc-text">2. IMS的诞生</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-SyetemServer%E5%A4%84%E7%90%86%E9%83%A8%E5%88%86"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 SyetemServer处理部分</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-InputManagerService%E6%9E%84%E9%80%A0%E6%96%B9%E6%B3%95"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 InputManagerService构造方法</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZhfoT.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android输入系统（一）输入事件传递流程和InputManagerService的诞生</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-10-28T16:16:00.000Z" title="发表于 2018-10-29 00:16:00">2018-10-29</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-17T07:30:14.364Z" title="更新于 2020-09-17 15:30:14">2020-09-17</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>关联系列<br><a href="http://liuwangshu.cn/tags/WindowManagerService/">解析WMS系列</a><br><a href="http://liuwangshu.cn/tags/View%E4%BD%93%E7%B3%BB/">View体系系列</a></p>
+<a id="more"></a>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>很多同学可能会认为输入系统是不是和View的事件分发有些关联，确实是有些关联，只不过View事件分发只能算是输入系统事件传递的一部分。这个系列讲的输入系统主要是我们不常接触的，但还是需要去了解的那部分。</p>
+<h3 id="1-输入事件传递流程的组成部分"><a href="#1-输入事件传递流程的组成部分" class="headerlink" title="1. 输入事件传递流程的组成部分"></a><strong>1. 输入事件传递流程的组成部分</strong></h3><p>输入系统是外界与Android设备交互的基础，仅凭输入系统是无法完成输入事件传递的，因此需要输入系统和Android系统的其他成员来共同完成事件传递。输入系统事件传递需要经过以下几个部分。<br><img src="https://s2.ax1x.com/2019/05/27/VZh4FU.png"></p>
+<p>输入事件传递流程可以大致的分为三个部分，分别是输入系统部分、WMS处理部分和View处理部分。下面分别对这几个部分进行简单的介绍。</p>
+<h4 id="输入系统部分"><a href="#输入系统部分" class="headerlink" title="输入系统部分"></a><strong>输入系统部分</strong></h4><p>输入系统部分主要又分为输入子系统和InputManagerService组成（以下简称IMS），在Android中还有一个IMS(IP Multimedia Subsystem)意为为IP多媒体子系统，不要搞混了。<br>Android的输入设备有很多种，比如屏幕、键盘、鼠标、游戏手柄、操纵杆等等，其中应用开发接触最多的屏幕。当输入设备可用时，Linux内核会在/dev/input中创建对应的设备节点。<br>用户操作这些输入设备时会产生各种事件比如按键事件、触摸事件、鼠标事件等。<br>输入事件所产生的原始信息会被Linux内核中的输入子系统采集，原始信息由Kernel space的驱动层一直传递到User space的设备节点。</p>
+<p>Android提供了getevent和sendevent两个工具帮助开发者从设备节点读取输入事件和写入输入事件。<br><img src="https://s2.ax1x.com/2019/05/27/VZhIW4.png"></p>
+<p>IMS所做的工作就是监听/dev/input下的所有的设备节点，当设备节点有数据时会将数据进行加工处理并找到合适的Window，将输入事件派发给它。</p>
+<h4 id="WMS处理部分"><a href="#WMS处理部分" class="headerlink" title="WMS处理部分"></a><strong>WMS处理部分</strong></h4><p>在<a href="http://liuwangshu.cn/framework/wms/1-wms-produce.html">Android解析WindowManagerService（一）WMS的诞生</a>这篇文章中我讲过WMS的职责有四种，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/27/VZhTSJ.png"></p>
+<p>WMS的职责之一就是输入系统的中转站，WMS作为Window的管理者，会配合IMS将输入事件交由合适的Window来处理。</p>
+<h4 id="View处理部分"><a href="#View处理部分" class="headerlink" title="View处理部分"></a><strong>View处理部分</strong></h4><p>View处理部分应该是大家最熟悉的了，一般情况下，输入事件最终会交由View来处理，应用开发者就可以通过一些回调方法轻松得到这个事件的封装类并对其进行处理，比如onTouchEvent(MotionEvent ev)方法。关于View体系可以查看<a href="http://liuwangshu.cn/tags/View%E4%BD%93%E7%B3%BB/">View体系</a>这一系列文章。</p>
+<h3 id="2-IMS的诞生"><a href="#2-IMS的诞生" class="headerlink" title="2. IMS的诞生"></a><strong>2. IMS的诞生</strong></h3><p>输入事件传递流程的组成部分我们已经了解了，本系列主要讲解输入系统部分中IMS对输入事件的处理，在这之前我们需要了解IMS的诞生。</p>
+<h4 id="2-1-SyetemServer处理部分"><a href="#2-1-SyetemServer处理部分" class="headerlink" title="2.1 SyetemServer处理部分"></a><strong>2.1 SyetemServer处理部分</strong></h4><p>与AMS、WMS、PMS一样，IMS的在SyetemServer进程中被创建的，SyetemServer进程用来创建系统服务，不了解它的可以查看<a href="http://liuwangshu.cn/framework/booting/3-syetemserver.html"> Android系统启动流程（三）解析SyetemServer进程启动过程</a>  这篇文章。<br>从SyetemServer的入口方法main方法开始讲起，如下所示。<br><strong>frameworks/base/services/java/com/android/server/SystemServer.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">new</span> SystemServer().run();</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>main方法中只调用了SystemServer的run方法，如下所示。<br><strong>frameworks/base/services/java/com/android/server/SystemServer.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        traceBeginAndSlog(<span class="string">&quot;StartServices&quot;</span>);</span><br><span class="line">        <span class="comment">//启动引导服务</span></span><br><span class="line">        startBootstrapServices();<span class="comment">//1</span></span><br><span class="line">        <span class="comment">//启动核心服务</span></span><br><span class="line">        startCoreServices();<span class="comment">//2</span></span><br><span class="line">        <span class="comment">//启动其他服务</span></span><br><span class="line">        startOtherServices();<span class="comment">//3</span></span><br><span class="line">        SystemServerInitThreadPool.shutdown();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Throwable ex) &#123;</span><br><span class="line">        Slog.e(<span class="string">&quot;System&quot;</span>, <span class="string">&quot;******************************************&quot;</span>);</span><br><span class="line">        Slog.e(<span class="string">&quot;System&quot;</span>, <span class="string">&quot;************ Failure starting system services&quot;</span>, ex);</span><br><span class="line">        <span class="keyword">throw</span> ex;</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        traceEnd();</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在注释1中的startBootstrapServices方法中用SystemServiceManager启动了ActivityManagerService、PowerManagerService、PackageManagerService等服务。在注释2处的startCoreServices方法中则启动了DropBoxManagerService、BatteryService、UsageStatsService和WebViewUpdateService。注释3处的startOtherServices方法中启动了CameraService、AlarmManagerService、VrManagerService等服务。这些服务的父类均为SystemService。从注释1、2、3的方法可以看出，官方把系统服务分为了三种类型，分别是引导服务、核心服务和其他服务，其中其他服务是一些非紧要和一些不需要立即启动的服务。这些系统服务总共有100多个，我们熟知的AMS和PMS属于引导服务，WMS属于其他服务。<br>本文要讲的IMS属于其他服务，这里列出其他服务以及它们的作用，见下表。</p>
+<table>
+<thead>
+<tr>
+<th align="center"><strong>其他服务</strong></th>
+<th align="center">作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">CameraService</td>
+<td align="center">摄像头相关服务</td>
+</tr>
+<tr>
+<td align="center">AlarmManagerService</td>
+<td align="center">全局定时器管理服务</td>
+</tr>
+<tr>
+<td align="center">InputManagerService</td>
+<td align="center">管理输入事件</td>
+</tr>
+<tr>
+<td align="center">WindowManagerService</td>
+<td align="center">窗口管理服务</td>
+</tr>
+<tr>
+<td align="center">VrManagerService</td>
+<td align="center">VR模式管理服务</td>
+</tr>
+<tr>
+<td align="center">BluetoothService</td>
+<td align="center">蓝牙管理服务</td>
+</tr>
+<tr>
+<td align="center">NotificationManagerService</td>
+<td align="center">通知管理服务</td>
+</tr>
+<tr>
+<td align="center">DeviceStorageMonitorService</td>
+<td align="center">存储相关管理服务</td>
+</tr>
+<tr>
+<td align="center">LocationManagerService</td>
+<td align="center">定位管理服务</td>
+</tr>
+<tr>
+<td align="center">AudioService</td>
+<td align="center">音频相关管理服务</td>
+</tr>
+<tr>
+<td align="center">…</td>
+<td align="center">….</td>
+</tr>
+</tbody></table>
+<p>查看启动其他服务的注释3处的startOtherServices方法。<br><strong>frameworks/base/services/java/com/android/server/SystemServer.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startOtherServices</span><span class="params">()</span> </span>&#123;</span><br><span class="line"> ...</span><br><span class="line">           inputManager = <span class="keyword">new</span> InputManagerService(context);<span class="comment">//1</span></span><br><span class="line">           traceEnd();</span><br><span class="line">           traceBeginAndSlog(<span class="string">&quot;StartWindowManagerService&quot;</span>);</span><br><span class="line">           <span class="comment">// WMS needs sensor service ready</span></span><br><span class="line">           ConcurrentUtils.waitForFutureNoInterrupt(mSensorServiceStart, START_SENSOR_SERVICE);</span><br><span class="line">           mSensorServiceStart = <span class="keyword">null</span>;</span><br><span class="line">           wm = WindowManagerService.main(context, inputManager,</span><br><span class="line">                   mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL,</span><br><span class="line">                   !mFirstBoot, mOnlyCore, <span class="keyword">new</span> PhoneWindowManager());<span class="comment">//2</span></span><br><span class="line">           ServiceManager.addService(Context.WINDOW_SERVICE, wm);</span><br><span class="line">           ServiceManager.addService(Context.INPUT_SERVICE, inputManager);</span><br><span class="line">           traceEnd();</span><br><span class="line">...           </span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处创建了IMS，注释2处执行了WMS的main方法，其内部会创建WMS。需要注意的是，main方法的其中一个参数就是注释1处创建的IMS，在本地第1节中我们知道WMS是输入系统的中转站，其内部包含了IMS引用并不意外。紧接着将WMS和IMS添加到ServiceManager中进行统一的管理。</p>
+<h4 id="2-2-InputManagerService构造方法"><a href="#2-2-InputManagerService构造方法" class="headerlink" title="2.2 InputManagerService构造方法"></a><strong>2.2 InputManagerService构造方法</strong></h4><p>我们接着来查看IMS的构造方法。<br><strong>frameworks/base/services/core/java/com/android/server/input/InputManagerService.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">InputManagerService</span><span class="params">(Context context)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.mContext = context;</span><br><span class="line">        <span class="keyword">this</span>.mHandler = <span class="keyword">new</span> InputManagerHandler(DisplayThread.get().getLooper());<span class="comment">//1</span></span><br><span class="line">        mUseDevInputEventForAudioJack =</span><br><span class="line">                context.getResources().getBoolean(R.bool.config_useDevInputEventForAudioJack);</span><br><span class="line">        Slog.i(TAG, <span class="string">&quot;Initializing input manager, mUseDevInputEventForAudioJack=&quot;</span></span><br><span class="line">                + mUseDevInputEventForAudioJack);</span><br><span class="line">        mPtr = nativeInit(<span class="keyword">this</span>, mContext, mHandler.getLooper().getQueue());<span class="comment">//2</span></span><br><span class="line"></span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处用android.display线程的Looper创建了InputManagerHandler，这样InputManagerHandler会运行在android.display线程，android.display线程是系统共享的单例前台线程，这个线程内部执行了WMS的创建，具体见 <a href="http://liuwangshu.cn/framework/wms/1-wms-produce.html">Android解析WindowManagerService（一）WMS的诞生</a>这篇文章。<br>注释2处调用了nativeInit方法，很明显是要通过JNI调用Navive方法。<br><strong>frameworks/base/services/core/jni/com_android_server_input_InputManagerService.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> jlong <span class="title">nativeInit</span><span class="params">(JNIEnv* env, jclass <span class="comment">/* clazz */</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">        jobject serviceObj, jobject contextObj, jobject messageQueueObj)</span> </span>&#123;</span><br><span class="line">    sp&lt;MessageQueue&gt; messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);</span><br><span class="line">    <span class="keyword">if</span> (messageQueue == <span class="literal">NULL</span>) &#123;</span><br><span class="line">        jniThrowRuntimeException(env, <span class="string">&quot;MessageQueue is not initialized.&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    NativeInputManager* im = <span class="keyword">new</span> NativeInputManager(contextObj, serviceObj,</span><br><span class="line">            messageQueue-&gt;getLooper());<span class="comment">//1</span></span><br><span class="line">    im-&gt;incStrong(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">reinterpret_cast</span>&lt;jlong&gt;(im);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处创建了NativeInputManager，最后会调用reinterpret_cast运算符将NativeInputManager指针强制转换并返回（重新解释比特位）。NativeInputManager的构造函数如下所示。<br><strong>frameworks/base/services/core/jni/com_android_server_input_InputManagerService.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">NativeInputManager::NativeInputManager(jobject contextObj,</span><br><span class="line">        jobject serviceObj, <span class="keyword">const</span> sp&lt;Looper&gt;&amp; looper) :</span><br><span class="line">        mLooper(looper), mInteractive(<span class="literal">true</span>) &#123;</span><br><span class="line">    ...</span><br><span class="line">    sp&lt;EventHub&gt; eventHub = <span class="keyword">new</span> EventHub();</span><br><span class="line">    mInputManager = <span class="keyword">new</span> InputManager(eventHub, <span class="keyword">this</span>, <span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>NativeInputManager构造函数中创建了EventHub和InputManager，EventHub通过Linux内核的INotify与Epoll机制监听设备节点，通过EventHub的getEvent函数读取设备节点的增删事件和原始输入事件，本系列后续文章会详细介绍EventHub。InputManager的构造函数如下所示。<br><strong>frameworks/native/services/inputflinger/InputManager.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">InputManager::InputManager(</span><br><span class="line">        <span class="keyword">const</span> sp&lt;EventHubInterface&gt;&amp; eventHub,</span><br><span class="line">        <span class="keyword">const</span> sp&lt;InputReaderPolicyInterface&gt;&amp; readerPolicy,</span><br><span class="line">        <span class="keyword">const</span> sp&lt;InputDispatcherPolicyInterface&gt;&amp; dispatcherPolicy) &#123;</span><br><span class="line">    mDispatcher = <span class="keyword">new</span> InputDispatcher(dispatcherPolicy);</span><br><span class="line">    mReader = <span class="keyword">new</span> InputReader(eventHub, readerPolicy, mDispatcher);</span><br><span class="line">    initialize();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">InputManager::initialize</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    mReaderThread = <span class="keyword">new</span> InputReaderThread(mReader);</span><br><span class="line">    mDispatcherThread = <span class="keyword">new</span> InputDispatcherThread(mDispatcher);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>InputManager构造函数中创建了InputReader和InputDispatcher，InputReader会不断循环读取EventHub中的原始输入事件，将这些原始输入事件进行加工后交由InputDispatcher，InputDispatcher中保存了WMS中的所有Window信息（WMS会将窗口的信息实时的更新到InputDispatcher中），这样InputDispatcher就可以将输入事件派发给合适的Window。InputReader和InputDispatcher都是耗时操作，因此在initialize函数中创建了供它们运行的线程InputReaderThread和InputDispatcherThread。<br>InputManagerService构造方法描绘了如下的IMS简图。</p>
+<p><img src="https://s2.ax1x.com/2019/05/27/VZh5YF.png"></p>
+<p>从上面的简图可以看出来，IMS主要的工作都在Native层中，这些内容会在本系列的后续文章进行介绍。</p>
+<p>感谢<br>《深入理解Android》卷3<br>《深入理解Android内核设计思想》<br><a target="_blank" rel="noopener" href="https://blog.csdn.net/u013604527/article/details/53432623">https://blog.csdn.net/u013604527/article/details/53432623</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/deng-tao/p/6094049.html">https://www.cnblogs.com/deng-tao/p/6094049.html</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/framework/ims/1-ims-produce.html">http://liuwangshu.cn/framework/ims/1-ims-produce.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a><a class="post-meta__tags" href="/tags/Android%E8%BE%93%E5%85%A5%E7%B3%BB%E7%BB%9F/">Android输入系统</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZhfoT.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/life/android-wheretogo.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">寒冬已至？四面楚歌的Android工程师该何去何从</div></div></a></div><div class="next-post pull-right"><a href="/life/android-advanced-decode-corrigendum.html"><img class="next-cover" src="https://s2.ax1x.com/2019/06/01/V1YrrT.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">《Android进阶解密》勘误</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/framework/ims/3-inputdispatcher.html" title="Android输入系统（三）InputReader的加工类型和InputDispatcher的分发过程"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZq6l8.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-12-09</div><div class="title">Android输入系统（三）InputReader的加工类型和InputDispatcher的分发过程</div></div></a></div><div><a href="/framework/ims/2-inputevent.html" title="Android输入系统（二）IMS的启动过程和输入事件的处理"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZ4dXR.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-11-16</div><div class="title">Android输入系统（二）IMS的启动过程和输入事件的处理</div></div></a></div><div><a href="/framework/ims/4-inputtarget.html" title="Android输入系统（四）输入事件是如何分发到目标窗口的？"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZHOvF.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-01-04</div><div class="title">Android输入系统（四）输入事件是如何分发到目标窗口的？</div></div></a></div><div><a href="/framework/system-architecture.html" title="Android系统架构与系统源码目录"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-01-23</div><div class="title">Android系统架构与系统源码目录</div></div></a></div><div><a href="/application/multithreading/asynctask-soucecode.html" title="AsyncTask源码分析"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-10-19</div><div class="title">AsyncTask源码分析</div></div></a></div><div><a href="/framework/ams/2-activitytask.html" title="Android解析ActivityManagerService（二）ActivityTask和Activity栈管理"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-08-25</div><div class="title">Android解析ActivityManagerService（二）ActivityTask和Activity栈管理</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

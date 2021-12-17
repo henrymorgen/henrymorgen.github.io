@@ -1,0 +1,182 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Java并发编程（二）同步 | BATcoder - 刘望舒</title><meta name="description" content="线程是指程序在执行过程中，能够执行程序代码的一个执行单元。在java语言中，线程有四种状态：运行 、就绪、挂起和结束。 进程是指一段正在执行的程序。而线程有时也被成为轻量级的进程，他是程序执行的最小单元，一个进程可以拥有多个线程，各个线程之间共享程序的内功空间（代码段、数据段和堆空间）及一些进程级的资源（例如打开的文件），但是各个线程都拥有自己的棧空间。"><meta name="keywords" content="多线程,Java"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/java/concurrent/2-synchronous.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Java并发编程（二）同步"><meta property="og:url" content="http://liuwangshu.cn/java/concurrent/2-synchronous.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="线程是指程序在执行过程中，能够执行程序代码的一个执行单元。在java语言中，线程有四种状态：运行 、就绪、挂起和结束。 进程是指一段正在执行的程序。而线程有时也被成为轻量级的进程，他是程序执行的最小单元，一个进程可以拥有多个线程，各个线程之间共享程序的内功空间（代码段、数据段和堆空间）及一些进程级的资源（例如打开的文件），但是各个线程都拥有自己的棧空间。"><meta property="og:image" content="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><meta property="article:published_time" content="2015-12-15T06:15:06.000Z"><meta property="article:modified_time" content="2017-06-10T13:06:29.816Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: false,
+  postUpdate: '2017-06-10 21:06:29'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Java并发编程（二）同步</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2015-12-15T06:15:06.000Z" title="发表于 2015-12-15 14:15:06">2015-12-15</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2017-06-10T13:06:29.816Z" title="更新于 2017-06-10 21:06:29">2017-06-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/">Java</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p>如果你的java基础较弱，或者不大了解java多线程请先看这篇文章<a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85/article/details/48878057">java多线程（一）线程定义、状态和属性</a></p>
+<p>同步一直是java多线程的难点，在我们做android开发时也很少应用，但这并不是我们不熟悉同步的理由。希望这篇文章能使更多的人能够了解并且应用java的同步。<br>在多线程的应用中，两个或者两个以上的线程需要共享对同一个数据的存取。如果两个线程存取相同的对象，并且每一个线程都调用了修改该对象的方法，这种情况通常成为竞争条件。<br>竞争条件最容易理解的例子就是：比如火车卖票，火车票是一定的，但卖火车票的窗口到处都有，每个窗口就相当于一个线程，这么多的线程共用所有的火车票这个资源。并且无法保证其原子性，如果在一个时间点上，两个线程同时使用这个资源，那他们取出的火车票是一样的（座位号一样），这样就会给乘客造成麻烦。解决方法为，当一个线程要使用火车票这个资源时，我们就交给它一把锁，等它把事情做完后在把锁给另一个要用这个资源的线程。这样就不会出现上述情况。 </p>
+<p> <strong>1. 锁对象</strong><br>synchronized关键字自动提供了锁以及相关的条件，大多数需要显式锁的情况使用synchronized非常的方便，但是等我们了解ReentrantLock类和条件对象时，我们能更好的理解synchronized关键字。ReentrantLock是JAVA SE 5.0引入的， 用ReentrantLock保护代码块的结构如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">mLock.lock();</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">finally</span>&#123;</span><br><span class="line">mLock.unlock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这一结构确保任何时刻只有一个线程进入临界区，一旦一个线程封锁了锁对象，其他任何线程都无法通过lock语句。当其他线程调用lock时，它们则被阻塞直到第一个线程释放锁对象。把解锁的操作放在finally中是十分必要的，如果在临界区发生了异常，锁是必须要释放的，否则其他线程将会永远阻塞。</p>
+<p> <strong>2. 条件对象</strong><br> 进入临界区时，却发现在某一个条件满足之后，它才能执行。要使用一个条件对象来管理那些已经获得了一个锁但是却不能做有用工作的线程，条件对象又称作条件变量。<br> 我们来看看下面的例子来看看为何需要条件对象</p>
+<p>假设一个场景我们需要用银行转账，我们首先写了银行的类，它的构造函数需要传入账户数量和账户金额</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Bank</span> </span>&#123;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">double</span>[] accounts;</span><br><span class="line">    <span class="keyword">private</span> Lock bankLock;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Bank</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">double</span> initialBalance)</span></span>&#123;</span><br><span class="line">        accounts=<span class="keyword">new</span> <span class="keyword">double</span>[n];</span><br><span class="line">        bankLock=<span class="keyword">new</span> ReentrantLock();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;accounts.length;i++)&#123;</span><br><span class="line">            accounts[i]=initialBalance;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>接下来我们要提款，写一个提款的方法，from是转账方，to是接收方，amount转账金额，结果我们发现转账方余额不足，如果有其他线程给这个转账方再存足够的钱就可以转账成功了，但是这个线程已经获取了锁，它具有排他性，别的线程也无法获取锁来进行存款操作，这就是我们需要引入条件对象的原因。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(<span class="keyword">int</span> from,<span class="keyword">int</span> to,<span class="keyword">int</span> amount)</span></span>&#123;</span><br><span class="line">     bankLock.lock();</span><br><span class="line">     <span class="keyword">try</span>&#123;</span><br><span class="line">         <span class="keyword">while</span> (accounts[from]&lt;amount)&#123;</span><br><span class="line">             <span class="comment">//wait</span></span><br><span class="line">         &#125;</span><br><span class="line">     &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">         bankLock.unlock();</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>一个锁对象拥有多个相关的条件对象，可以用newCondition方法获得一个条件对象，我们得到条件对象后调用await方法，当前线程就被阻塞了并放弃了锁</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Bank</span> </span>&#123;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">double</span>[] accounts;</span><br><span class="line">    <span class="keyword">private</span> Lock bankLock;</span><br><span class="line">    <span class="keyword">private</span> Condition condition;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Bank</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">double</span> initialBalance)</span></span>&#123;</span><br><span class="line">        accounts=<span class="keyword">new</span> <span class="keyword">double</span>[n];</span><br><span class="line">        bankLock=<span class="keyword">new</span> ReentrantLock();</span><br><span class="line">        <span class="comment">//得到条件对象</span></span><br><span class="line">        condition=bankLock.newCondition();</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;accounts.length;i++)&#123;</span><br><span class="line">            accounts[i]=initialBalance;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(<span class="keyword">int</span> from,<span class="keyword">int</span> to,<span class="keyword">int</span> amount)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">        bankLock.lock();</span><br><span class="line">        <span class="keyword">try</span>&#123;</span><br><span class="line">            <span class="keyword">while</span> (accounts[from]&lt;amount)&#123;</span><br><span class="line">                <span class="comment">//阻塞当前线程，并放弃锁</span></span><br><span class="line">                condition.await();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">            bankLock.unlock();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>等待获得锁的线程和调用await方法的线程本质上是不同的，一旦一个线程调用的await方法，他就会进入该条件的等待集。当锁可用时，该线程不能马上解锁，相反他处于阻塞状态，直到另一个线程调用了同一个条件上的signalAll方法时为止。当另一个线程准备转账给我们此前的转账方时，只要调用condition.signalAll()；该调用会重新激活因为这一条件而等待的所有线程。<br>当一个线程调用了await方法他没法重新激活自身，并寄希望于其他线程来调用signalAll方法来激活自身，如果没有其他线程来激活等待的线程，那么就会产生死锁现象，如果所有的其他线程都被阻塞，最后一个活动线程在解除其他线程阻塞状态前调用await,那么它也被阻塞，就没有任何线程可以解除其他线程的阻塞，程序就被挂起了。<br>那何时调用signalAll呢？正常来说应该是有利于等待线程的方向改变时来调用signalAll。在这个例子里就是，当一个账户余额发生变化时，等待的线程应该有机会检查余额。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(<span class="keyword">int</span> from,<span class="keyword">int</span> to,<span class="keyword">int</span> amount)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">       bankLock.lock();</span><br><span class="line">       <span class="keyword">try</span>&#123;</span><br><span class="line">           <span class="keyword">while</span> (accounts[from]&lt;amount)&#123;</span><br><span class="line">               <span class="comment">//阻塞当前线程，并放弃锁</span></span><br><span class="line">               condition.await();</span><br><span class="line">           &#125;</span><br><span class="line">           <span class="comment">//转账的操作</span></span><br><span class="line">           ...</span><br><span class="line">           condition.signalAll();</span><br><span class="line">       &#125;<span class="keyword">finally</span> &#123;</span><br><span class="line">           bankLock.unlock();</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>当调用signalAll方法时并不是立即激活一个等待线程，它仅仅解除了等待线程的阻塞，以便这些线程能够在当前线程退出同步方法后，通过竞争实现对对象的访问。还有一个方法是signal，它则是随机解除某个线程的阻塞，如果该线程仍然不能运行，那么则再次被阻塞，如果没有其他线程再次调用signal，那么系统就死锁了。</p>
+<p> <strong>3. Synchronized关键字</strong><br> Lock和Condition接口为程序设计人员提供了高度的锁定控制，然而大多数情况下，并不需要那样的控制，并且可以使用一种嵌入到java语言内部的机制。从Java1.0版开始，Java中的每一个对象都有一个内部锁。如果一个方法用synchronized关键字声明，那么对象的锁将保护整个方法。也就是说，要调用该方法，线程必须获得内部的对象锁。<br>换句话说，</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>等价于</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">method</span><span class="params">()</span></span>&#123;</span><br><span class="line"><span class="keyword">this</span>.lock.lock();</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line"></span><br><span class="line">&#125;<span class="keyword">finally</span>&#123;</span><br><span class="line"><span class="keyword">this</span>.lock.unlock();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面银行的例子，我们可以将Bank类的transfer方法声明为synchronized,而不是使用一个显示的锁。<br>内部对象锁只有一个相关条件，wait方法添加到一个线程到等待集中，notifyAll或者notify方法解除等待线程的阻塞状态。也就是说wait相当于调用condition.await()，notifyAll等价于condition.signalAll();</p>
+<p>我们上面的例子transfer方法也可以这样写：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(<span class="keyword">int</span> from,<span class="keyword">int</span> to,<span class="keyword">int</span> amount)</span><span class="keyword">throws</span> InterruptedException</span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (accounts[from]&lt;amount) &#123;</span><br><span class="line">        wait();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//转账的操作</span></span><br><span class="line">    ...</span><br><span class="line">    notifyAll();   </span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到使用synchronized关键字来编写代码要简洁很多，当然要理解这一代码，你必须要了解每一个对象有一个内部锁，并且该锁有一个内部条件。由锁来管理那些试图进入synchronized方法的线程，由条件来管理那些调用wait的线程。</p>
+<p> <strong>4. 同步阻塞</strong><br> 上面我们说过，每一个Java对象都有一个锁，线程可以调用同步方法来获得锁，还有另一种机制可以获得锁，通过进入一个同步阻塞，当线程进入如下形式的阻塞：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">synchronized</span>(obj)&#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>于是他获得了obj的锁。再来看看Bank类</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Bank</span> </span>&#123;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">double</span>[] accounts;</span><br><span class="line"><span class="keyword">private</span> Object lock=<span class="keyword">new</span> Object();</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="title">Bank</span><span class="params">(<span class="keyword">int</span> n,<span class="keyword">double</span> initialBalance)</span></span>&#123;</span><br><span class="line">        accounts=<span class="keyword">new</span> <span class="keyword">double</span>[n];</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;accounts.length;i++)&#123;</span><br><span class="line">            accounts[i]=initialBalance;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(<span class="keyword">int</span> from,<span class="keyword">int</span> to,<span class="keyword">int</span> amount)</span></span>&#123;</span><br><span class="line">        <span class="keyword">synchronized</span>(lock)&#123;</span><br><span class="line">          <span class="comment">//转账的操作</span></span><br><span class="line">            ...</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在此，lock对象创建仅仅是用来使用每个Java对象持有的锁。有时开发人员使用一个对象的锁来实现额外的原子操作，称为客户端锁定。例如Vector类，它的方法是同步的。现在假设在Vector中存储银行余额</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(Vector&lt;Double&gt;accounts,<span class="keyword">int</span> from,<span class="keyword">int</span> to,<span class="keyword">int</span> amount)</span></span>&#123;</span><br><span class="line">  accounts.set(from,accounts.get(from)-amount);</span><br><span class="line">  accounts.set(to,accounts.get(to)+amount;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Vecror类的get和set方法是同步的，但是这并未对我们有所帮助。在第一次对get调用完成以后，一个线程完全可能在transfer方法中被被剥夺运行权，于是另一个线程可能在相同的存储位置存入了不同的值，但是，我们可以截获这个锁</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transfer</span><span class="params">(Vector&lt;Double&gt;accounts,<span class="keyword">int</span> from,<span class="keyword">int</span> to,<span class="keyword">int</span> amount)</span></span>&#123;</span><br><span class="line">  <span class="keyword">synchronized</span>(accounts)&#123;</span><br><span class="line">  accounts.set(from,accounts.get(from)-amount);</span><br><span class="line">  accounts.set(to,accounts.get(to)+amount;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>客户端锁定（同步代码块）是非常脆弱的，通常不推荐使用，一般实现同步最好用java.util.concurrent包下提供的类，比如阻塞队列。如果同步方法适合你的程序，那么请尽量的使用同步方法，他可以减少编写代码的数量，减少出错的几率，如果特别需要使用Lock/Condition结构提供的独有特性时，才使用Lock/Condition。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/java/concurrent/2-synchronous.html">http://liuwangshu.cn/java/concurrent/2-synchronous.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程</a><a class="post-meta__tags" href="/tags/Java/">Java</a></div><div class="post_share"><div class="social-share" data-image="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/md/1-tablayout.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android Design Support Library（一）用TabLayout实现类似网易选项卡动态滑动效果</div></div></a></div><div class="next-post pull-right"><a href="/application/feature/5x-toolbar.html"><img class="next-cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android5.x Toolbar和Palette应用解析</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/java/concurrent/3-volatile.html" title="Java并发编程（三）volatile域"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-10-05</div><div class="title">Java并发编程（三）volatile域</div></div></a></div><div><a href="/java/concurrent/4-jmm.html" title="Java并发编程（四）Java内存模型"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-05-29</div><div class="title">Java并发编程（四）Java内存模型</div></div></a></div><div><a href="/java/concurrent/1-thread.html" title="Java并发编程（一）线程定义、状态和属性"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-10-05</div><div class="title">Java并发编程（一）线程定义、状态和属性</div></div></a></div><div><a href="/java/concurrent/7-concurrentlinkedqueue.html" title="Java并发编程（七）ConcurrentLinkedQueue的实现原理和源码分析"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-08-14</div><div class="title">Java并发编程（七）ConcurrentLinkedQueue的实现原理和源码分析</div></div></a></div><div><a href="/java/concurrent/5-concurrenthashmap.html" title="Java并发编程（五）ConcurrentHashMap的实现原理和源码分析"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-07-21</div><div class="title">Java并发编程（五）ConcurrentHashMap的实现原理和源码分析</div></div></a></div><div><a href="/java/concurrent/6-blockingqueue.html" title="Java并发编程（六）阻塞队列"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-07-31</div><div class="title">Java并发编程（六）阻塞队列</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

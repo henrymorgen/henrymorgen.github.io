@@ -1,0 +1,232 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Java并发编程（六）阻塞队列 | BATcoder - 刘望舒</title><meta name="description" content="前言在 Android多线程(一)线程池这篇文章时，当我们要创建ThreadPoolExecutor的时候需要传进来一个类型为BlockingQueue的参数，它就是阻塞队列，在这一篇文章里我们会介绍阻塞队列的定义、种类、实现原理以及应用。   1.什么是阻塞队列阻塞队列常用于生产者和消费者的场景，生产者是往队列里添加元素的线程，消费者是从队列里拿元素的线程。阻塞队列就是生产者存放元素的容器，而消"><meta name="keywords" content="多线程,Java"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/java/concurrent/6-blockingqueue.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Java并发编程（六）阻塞队列"><meta property="og:url" content="http://liuwangshu.cn/java/concurrent/6-blockingqueue.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="前言在 Android多线程(一)线程池这篇文章时，当我们要创建ThreadPoolExecutor的时候需要传进来一个类型为BlockingQueue的参数，它就是阻塞队列，在这一篇文章里我们会介绍阻塞队列的定义、种类、实现原理以及应用。   1.什么是阻塞队列阻塞队列常用于生产者和消费者的场景，生产者是往队列里添加元素的线程，消费者是从队列里拿元素的线程。阻塞队列就是生产者存放元素的容器，而消"><meta property="og:image" content="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><meta property="article:published_time" content="2016-07-31T03:09:00.000Z"><meta property="article:modified_time" content="2017-06-10T13:07:54.687Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2017-06-10 21:07:54'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97"><span class="toc-number">2.</span> <span class="toc-text">1.什么是阻塞队列</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#BlockingQueue%E6%9C%89%E4%B8%A4%E4%B8%AA%E5%B8%B8%E8%A7%81%E9%98%BB%E5%A1%9E%E5%9C%BA%E6%99%AF"><span class="toc-number">2.1.</span> <span class="toc-text">BlockingQueue有两个常见阻塞场景</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#BlockingQueue%E7%9A%84%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95"><span class="toc-number">2.2.</span> <span class="toc-text">BlockingQueue的核心方法</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8F%92%E5%85%A5%E5%92%8C%E7%A7%BB%E9%99%A4%E6%93%8D%E4%BD%9C%E7%9A%844%E7%A7%8D%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F"><span class="toc-number">2.3.</span> <span class="toc-text">插入和移除操作的4种处理方式</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Java%E4%B8%AD%E7%9A%84%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97"><span class="toc-number">3.</span> <span class="toc-text">2.Java中的阻塞队列</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#ArrayBlockingQueue"><span class="toc-number">3.1.</span> <span class="toc-text">ArrayBlockingQueue</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LinkedBlockingQueue"><span class="toc-number">3.2.</span> <span class="toc-text">LinkedBlockingQueue</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#PriorityBlockingQueue"><span class="toc-number">3.3.</span> <span class="toc-text">PriorityBlockingQueue</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#DelayQueue"><span class="toc-number">3.4.</span> <span class="toc-text">DelayQueue</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#SynchronousQueue"><span class="toc-number">3.5.</span> <span class="toc-text">*SynchronousQueue**</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LinkedTransferQueue"><span class="toc-number">3.6.</span> <span class="toc-text">LinkedTransferQueue</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#LinkedBlockingDeque"><span class="toc-number">3.7.</span> <span class="toc-text">LinkedBlockingDeque</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86%EF%BC%88JDK1-7%EF%BC%89"><span class="toc-number">4.</span> <span class="toc-text">3.阻塞队列的实现原理（JDK1.7）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E9%98%BB%E5%A1%9E%E9%98%9F%E5%88%97%E7%9A%84%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">5.</span> <span class="toc-text">4.阻塞队列的使用场景</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/08/05/ecRaRO.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Java并发编程（六）阻塞队列</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2016-07-31T03:09:00.000Z" title="发表于 2016-07-31 11:09:00">2016-07-31</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2017-06-10T13:07:54.687Z" title="更新于 2017-06-10 21:07:54">2017-06-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/">Java</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>在<a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85/article/details/44874511"> Android多线程(一)线程池</a>这篇文章时，当我们要创建ThreadPoolExecutor的时候需要传进来一个类型为BlockingQueue的参数，它就是阻塞队列，在这一篇文章里我们会介绍阻塞队列的定义、种类、实现原理以及应用。</p>
+<a id="more"></a>
+
+<h3 id="1-什么是阻塞队列"><a href="#1-什么是阻塞队列" class="headerlink" title="1.什么是阻塞队列"></a><strong>1.什么是阻塞队列</strong></h3><p>阻塞队列常用于生产者和消费者的场景，生产者是往队列里添加元素的线程，消费者是从队列里拿元素的线程。阻塞队列就是生产者存放元素的容器，而消费者也只从容器里拿元素。</p>
+<h4 id="BlockingQueue有两个常见阻塞场景"><a href="#BlockingQueue有两个常见阻塞场景" class="headerlink" title="BlockingQueue有两个常见阻塞场景"></a><strong>BlockingQueue有两个常见阻塞场景</strong></h4><ol>
+<li><p>当队列中没有数据的情况下，消费者端的所有线程都会被自动阻塞（挂起），直到有数据放入队列。</p>
+<p><img src="http://img.blog.csdn.net/20160729144900266" alt="这里写图片描述"></p>
+</li>
+<li><p>当队列中填满数据的情况下，生产者端的所有线程都会被自动阻塞（挂起），直到队列中有空的位置，线程被自动唤醒。</p>
+<p><img src="http://img.blog.csdn.net/20160729145028001" alt="这里写图片描述"></p>
+</li>
+</ol>
+<p>那么支持以上两种阻塞场景的队列我们称之为阻塞队列。</p>
+<h4 id="BlockingQueue的核心方法"><a href="#BlockingQueue的核心方法" class="headerlink" title="BlockingQueue的核心方法"></a><strong>BlockingQueue的核心方法</strong></h4><p>放入数据：</p>
+<ul>
+<li>offer(anObject):表示如果可能的话,将anObject加到BlockingQueue里,即如果BlockingQueue可以容纳,<br>则返回true,否则返回false.（本方法不阻塞当前执行方法的线程）　　</li>
+<li>offer(E o, long timeout, TimeUnit unit),可以设定等待的时间，如果在指定的时间内，还不能往队列中<br>加入BlockingQueue，则返回失败。</li>
+<li>put(anObject):把anObject加到BlockingQueue里,如果BlockQueue没有空间,则调用此方法的线程被阻断直到BlockingQueue里面有空间再继续.</li>
+</ul>
+<p>获取数据：</p>
+<ul>
+<li>poll(time):取走BlockingQueue里排在首位的对象,若不能立即取出,则可以等time参数规定的时间,<br>取不到时返回null;</li>
+<li>poll(long timeout, TimeUnit unit)：从BlockingQueue取出一个队首的对象，如果在指定时间内，<br>队列一旦有数据可取，则立即返回队列中的数据。否则知道时间超时还没有数据可取，返回失败。</li>
+<li>take():取走BlockingQueue里排在首位的对象,若BlockingQueue为空,阻断进入等待状态直到<br>BlockingQueue有新的数据被加入;</li>
+<li>drainTo():一次性从BlockingQueue获取所有可用的数据对象（还可以指定获取数据的个数），<br>通过该方法，可以提升获取数据效率；不需要多次分批加锁或释放锁。</li>
+</ul>
+<h4 id="插入和移除操作的4种处理方式"><a href="#插入和移除操作的4种处理方式" class="headerlink" title="插入和移除操作的4种处理方式"></a><strong>插入和移除操作的4种处理方式</strong></h4><ul>
+<li><p>抛出异常：是指当阻塞队列满时候，再往队列里插入元素，会抛出IllegalStateException(“Queue<br>full”)异常。当队列为空时，从队列里获取元素时会抛出NoSuchElementException异常 。</p>
+</li>
+<li><p>返回特殊值：插入方法会返回是否成功，成功则返回true。移除方法，则是从队列里拿出一个元素，如果没有则返回null</p>
+</li>
+<li><p>一直阻塞：当阻塞队列满时，如果生产者线程往队列里put元素，队列会一直阻塞生产者线程，直到拿到数据，或者响应中断退出。当队列空时，消费者线程试图从队列里take元素，队列也会阻塞消费者线程，直到队列可用。</p>
+</li>
+<li><p>超时退出：当阻塞队列满时，队列会阻塞生产者线程一段时间，如果超过一定的时间，生产者线程就会退出。</p>
+</li>
+</ul>
+<h3 id="2-Java中的阻塞队列"><a href="#2-Java中的阻塞队列" class="headerlink" title="2.Java中的阻塞队列"></a><strong>2.Java中的阻塞队列</strong></h3><p>JDK7提供了7个阻塞队列，分别是：</p>
+<ul>
+<li>ArrayBlockingQueue ：由数组结构组成的有界阻塞队列。</li>
+<li>LinkedBlockingQueue ：由链表结构组成的有界阻塞队列。</li>
+<li>PriorityBlockingQueue ：支持优先级排序的无界阻塞队列。</li>
+<li>DelayQueue：使用优先级队列实现的无界阻塞队列。</li>
+<li>SynchronousQueue：不存储元素的阻塞队列。</li>
+<li>LinkedTransferQueue：由链表结构组成的无界阻塞队列。</li>
+<li>LinkedBlockingDeque：由链表结构组成的双向阻塞队列。</li>
+</ul>
+<h4 id="ArrayBlockingQueue"><a href="#ArrayBlockingQueue" class="headerlink" title="ArrayBlockingQueue"></a><strong>ArrayBlockingQueue</strong></h4><p>用数组实现的有界阻塞队列。此队列按照先进先出（FIFO）的原则对元素进行排序。默认情况下不保证访问者公平的访问队列，所谓公平访问队列是指阻塞的所有生产者线程或消费者线程，当队列可用时，可以按照阻塞的先后顺序访问队列，即先阻塞的生产者线程，可以先往队列里插入元素，先阻塞的消费者线程，可以先从队列里获取元素。通常情况下为了保证公平性会降低吞吐量。我们可以使用以下代码创建一个公平的阻塞队列：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ArrayBlockingQueue fairQueue = <span class="keyword">new</span>  ArrayBlockingQueue(<span class="number">1000</span>,<span class="keyword">true</span>);</span><br></pre></td></tr></table></figure>
+
+<h4 id="LinkedBlockingQueue"><a href="#LinkedBlockingQueue" class="headerlink" title="LinkedBlockingQueue"></a><strong>LinkedBlockingQueue</strong></h4><p>基于链表的阻塞队列，同ArrayListBlockingQueue类似，此队列按照先进先出（FIFO）的原则对元素进行排序，其内部也维持着一个数据缓冲队列（该队列由一个链表构成），当生产者往队列中放入一个数据时，队列会从生产者手中获取数据，并缓存在队列内部，而生产者立即返回；只有当队列缓冲区达到最大值缓存容量时（LinkedBlockingQueue可以通过构造函数指定该值），才会阻塞生产者队列，直到消费者从队列中消费掉一份数据，生产者线程会被唤醒，反之对于消费者这端的处理也基于同样的原理。而LinkedBlockingQueue之所以能够高效的处理并发数据，还因为其对于生产者端和消费者端分别采用了独立的锁来控制数据同步，这也意味着在高并发的情况下生产者和消费者可以并行地操作队列中的数据，以此来提高整个队列的并发性能。<br>作为开发者，我们需要注意的是，如果构造一个LinkedBlockingQueue对象，而没有指定其容量大小，LinkedBlockingQueue会默认一个类似无限大小的容量（Integer.MAX_VALUE），这样的话，如果生产者的速度一旦大于消费者的速度，也许还没有等到队列满阻塞产生，系统内存就有可能已被消耗殆尽了。<br>ArrayBlockingQueue和LinkedBlockingQueue是两个最普通也是最常用的阻塞队列，一般情况下，在处理多线程间的生产者消费者问题，使用这两个类足以。</p>
+<h4 id="PriorityBlockingQueue"><a href="#PriorityBlockingQueue" class="headerlink" title="PriorityBlockingQueue"></a><strong>PriorityBlockingQueue</strong></h4><p>是一个支持优先级的无界队列。默认情况下元素采取自然顺序升序排列。可以自定义实现compareTo()方法来指定元素进行排序规则，或者初始化PriorityBlockingQueue时，指定构造参数Comparator来对元素进行排序。需要注意哦的是不能保证同优先级元素的顺序。</p>
+<h4 id="DelayQueue"><a href="#DelayQueue" class="headerlink" title="DelayQueue"></a><strong>DelayQueue</strong></h4><p>是一个支持延时获取元素的无界阻塞队列。队列使用PriorityQueue来实现。队列中的元素必须实现Delayed接口，在创建元素时可以指定多久才能从队列中获取当前元素。只有在延迟期满时才能从队列中提取元素。我们可以将DelayQueue运用在以下应用场景：</p>
+<ul>
+<li>缓存系统的设计：可以用DelayQueue保存缓存元素的有效期，使用一个线程循环查询DelayQueue，一旦能从DelayQueue中获取元素时，表示缓存有效期到了。</li>
+<li>定时任务调度：使用DelayQueue保存当天将会执行的任务和执行时间，一旦从DelayQueue中获取到任务就开始执行，从比如TimerQueue就是使用DelayQueue实现的。</li>
+</ul>
+<h4 id="SynchronousQueue"><a href="#SynchronousQueue" class="headerlink" title="*SynchronousQueue**"></a>*SynchronousQueue**</h4><p>是一个不存储元素的阻塞队列。每一个put操作必须等待一个take操作，否则不能继续添加元素。SynchronousQueue可以看成是一个传球手，负责把生产者线程处理的数据直接传递给消费者线程。队列本身并不存储任何元素，非常适合于传递性场景,比如在一个线程中使用的数据，传递给另外一个线程使用，SynchronousQueue的吞吐量高于LinkedBlockingQueue 和 ArrayBlockingQueue。</p>
+<h4 id="LinkedTransferQueue"><a href="#LinkedTransferQueue" class="headerlink" title="LinkedTransferQueue"></a><strong>LinkedTransferQueue</strong></h4><p>是一个由链表结构组成的无界阻塞TransferQueue队列。相对于其他阻塞队列，LinkedTransferQueue多了tryTransfer和transfer方法。<br>transfer方法。如果当前有消费者正在等待接收元素（消费者使用take()方法或带时间限制的poll()方法时），transfer方法可以把生产者传入的元素立刻transfer（传输）给消费者。如果没有消费者在等待接收元素，transfer方法会将元素存放在队列的tail节点，并等到该元素被消费者消费了才返回。transfer方法的关键代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Node pred = tryAppend(s, haveData);</span><br><span class="line"><span class="keyword">return</span> awaitMatch(s, pred, e, (how == TIMED), nanos);</span><br></pre></td></tr></table></figure>
+<p>第一行代码是试图把存放当前元素的s节点作为tail节点。第二行代码是让CPU自旋等待消费者消费元素。因为自旋会消耗CPU，所以自旋一定的次数后使用Thread.yield()方法来暂停当前正在执行的线程，并执行其他线程。</p>
+<p>tryTransfer方法。则是用来试探下生产者传入的元素是否能直接传给消费者。如果没有消费者等待接收元素，则返回false。和transfer方法的区别是tryTransfer方法无论消费者是否接收，方法立即返回。而transfer方法是必须等到消费者消费了才返回。</p>
+<p>对于带有时间限制的tryTransfer(E e, long timeout, TimeUnit unit)方法，则是试图把生产者传入的元素直接传给消费者，但是如果没有消费者消费该元素则等待指定的时间再返回，如果超时还没消费元素，则返回false，如果在超时时间内消费了元素，则返回true。</p>
+<h4 id="LinkedBlockingDeque"><a href="#LinkedBlockingDeque" class="headerlink" title="LinkedBlockingDeque"></a><strong>LinkedBlockingDeque</strong></h4><p>是一个由链表结构组成的双向阻塞队列。所谓双向队列指的你可以从队列的两端插入和移出元素。双端队列因为多了一个操作队列的入口，在多线程同时入队时，也就减少了一半的竞争。相比其他的阻塞队列，LinkedBlockingDeque多了addFirst，addLast，offerFirst，offerLast，peekFirst，peekLast等方法，以First单词结尾的方法，表示插入，获取（peek）或移除双端队列的第一个元素。以Last单词结尾的方法，表示插入，获取或移除双端队列的最后一个元素。另外插入方法add等同于addLast，移除方法remove等效于removeFirst。但是take方法却等同于takeFirst，不知道是不是Jdk的bug，使用时还是用带有First和Last后缀的方法更清楚。</p>
+<p>在初始化LinkedBlockingDeque时可以设置容量防止其过渡膨胀。另外双向阻塞队列可以运用在“工作窃取”模式中。</p>
+<h3 id="3-阻塞队列的实现原理（JDK1-7）"><a href="#3-阻塞队列的实现原理（JDK1-7）" class="headerlink" title="3.阻塞队列的实现原理（JDK1.7）"></a><strong>3.阻塞队列的实现原理（JDK1.7）</strong></h3><p>以ArrayBlockingQueue为例，我们先来看看代码：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ArrayBlockingQueue</span>&lt;<span class="title">E</span>&gt; <span class="keyword">extends</span> <span class="title">AbstractQueue</span>&lt;<span class="title">E</span>&gt;</span></span><br><span class="line"><span class="class">        <span class="keyword">implements</span> <span class="title">BlockingQueue</span>&lt;<span class="title">E</span>&gt;, <span class="title">java</span>.<span class="title">io</span>.<span class="title">Serializable</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">long</span> serialVersionUID = -<span class="number">817911632652898426L</span>;</span><br><span class="line">    <span class="comment">/** The queued items */</span></span><br><span class="line">    <span class="keyword">final</span> Object[] items;</span><br><span class="line">    <span class="comment">/** items index for next take, poll, peek or remove */</span></span><br><span class="line">    <span class="keyword">int</span> takeIndex;</span><br><span class="line">    <span class="comment">/** items index for next put, offer, or add */</span></span><br><span class="line">    <span class="keyword">int</span> putIndex;</span><br><span class="line">    <span class="comment">/** Number of elements in the queue */</span></span><br><span class="line">    <span class="keyword">int</span> count;</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock lock;</span><br><span class="line">    <span class="comment">/** Condition for waiting takes */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Condition notEmpty;</span><br><span class="line">    <span class="comment">/** Condition for waiting puts */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Condition notFull;</span><br><span class="line"> ...省略</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>从上面代码可以看出ArrayBlockingQueue是维护一个Object类型的数组，takeIndex和putIndex分别表示队首元素和队尾元素的下标，count表示队列中元素的个数，lock则是一个可重入锁，notEmpty和notFull是等待条件。接下来我们看看关键方法put：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(E e)</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (e == <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">    <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">this</span>.lock;</span><br><span class="line">    lock.lockInterruptibly();</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (count == items.length)</span><br><span class="line">            notFull.await();</span><br><span class="line">        enqueue(e);</span><br><span class="line">    &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">        lock.unlock();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>从put方法的实现可以看出，它先获取了锁，并且获取的是可中断锁，然后判断当前元素个数是否等于数组的长度，如果相等，则调用notFull.await()进行等待，当被其他线程唤醒时，通过enqueue(e)方法插入元素，最后解锁。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">  * Inserts element at current put position, advances, and signals.</span></span><br><span class="line"><span class="comment">  * Call only when holding lock.</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line"> <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(E x)</span> </span>&#123;</span><br><span class="line">     <span class="comment">// assert lock.getHoldCount() == 1;</span></span><br><span class="line">     <span class="comment">// assert items[putIndex] == null;</span></span><br><span class="line">     <span class="keyword">final</span> Object[] items = <span class="keyword">this</span>.items;</span><br><span class="line">     items[putIndex] = x;</span><br><span class="line">     <span class="keyword">if</span> (++putIndex == items.length) putIndex = <span class="number">0</span>;</span><br><span class="line">     count++;</span><br><span class="line">     notEmpty.signal();</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>插入成功后，通过notEmpty唤醒正在等待取元素的线程。再来看看take方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> E <span class="title">take</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException </span>&#123;</span><br><span class="line">     <span class="keyword">final</span> ReentrantLock lock = <span class="keyword">this</span>.lock;</span><br><span class="line">     lock.lockInterruptibly();</span><br><span class="line">     <span class="keyword">try</span> &#123;</span><br><span class="line">         <span class="keyword">while</span> (count == <span class="number">0</span>)</span><br><span class="line">             notEmpty.await();</span><br><span class="line">         <span class="keyword">return</span> dequeue();</span><br><span class="line">     &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">         lock.unlock();</span><br><span class="line">     &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>跟put方法实现类似，put方法等待的是notFull信号，而take方法等待的是notEmpty信号。在take方法中，如果可以取元素，则通过dequeue方法取得元素，下面是dequeue方法的实现：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">private</span> E <span class="title">dequeue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">       <span class="comment">// assert lock.getHoldCount() == 1;</span></span><br><span class="line">       <span class="comment">// assert items[takeIndex] != null;</span></span><br><span class="line">       <span class="keyword">final</span> Object[] items = <span class="keyword">this</span>.items;</span><br><span class="line">       <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">       E x = (E) items[takeIndex];</span><br><span class="line">       items[takeIndex] = <span class="keyword">null</span>;</span><br><span class="line">       <span class="keyword">if</span> (++takeIndex == items.length) takeIndex = <span class="number">0</span>;</span><br><span class="line">       count--;</span><br><span class="line">       <span class="keyword">if</span> (itrs != <span class="keyword">null</span>)</span><br><span class="line">           itrs.elementDequeued();</span><br><span class="line">       notFull.signal();</span><br><span class="line">       <span class="keyword">return</span> x;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-阻塞队列的使用场景"><a href="#4-阻塞队列的使用场景" class="headerlink" title="4.阻塞队列的使用场景"></a><strong>4.阻塞队列的使用场景</strong></h3><p>除了线程池的实现使用阻塞队列之外，我们可以在生产者-消费者模式来使用阻塞队列，首先使用Object.wait()、Object.notify()和非阻塞队列实现生产者-消费者模式：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> queueSize = <span class="number">10</span>;</span><br><span class="line">    <span class="keyword">private</span> PriorityQueue&lt;Integer&gt; queue = <span class="keyword">new</span> PriorityQueue&lt;Integer&gt;(queueSize);  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">        Test test = <span class="keyword">new</span> Test();</span><br><span class="line">        Producer producer = test.<span class="function">new <span class="title">Producer</span><span class="params">()</span></span>;</span><br><span class="line">        Consumer consumer = test.n<span class="function">ew <span class="title">Consumer</span><span class="params">()</span></span>;       </span><br><span class="line">        producer.start();</span><br><span class="line">        consumer.start();</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Consumer</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;         </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">                <span class="keyword">synchronized</span> (queue) &#123;</span><br><span class="line">                    <span class="keyword">while</span>(queue.size() == <span class="number">0</span>)&#123;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            System.out.println(<span class="string">&quot;队列空，等待数据&quot;</span>);</span><br><span class="line">                            queue.wait();</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                            e.printStackTrace();</span><br><span class="line">                            queue.notify();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    queue.poll();          <span class="comment">//每次移走队首元素</span></span><br><span class="line">                    queue.notify();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Producer</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;       </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">                <span class="keyword">synchronized</span> (queue) &#123;</span><br><span class="line">                    <span class="keyword">while</span>(queue.size() == queueSize)&#123;</span><br><span class="line">                        <span class="keyword">try</span> &#123;</span><br><span class="line">                            System.out.println(<span class="string">&quot;队列满，等待有空余空间&quot;</span>);</span><br><span class="line">                            queue.wait();</span><br><span class="line">                        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                            e.printStackTrace();</span><br><span class="line">                            queue.notify();</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;</span><br><span class="line">                    queue.offer(<span class="number">1</span>);        <span class="comment">//每次插入一个元素</span></span><br><span class="line">                    queue.notify();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;       </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面是使用阻塞队列实现的生产者-消费者模式：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> queueSize = <span class="number">10</span>;</span><br><span class="line">    <span class="keyword">private</span> ArrayBlockingQueue&lt;Integer&gt; queue = <span class="keyword">new</span> ArrayBlockingQueue&lt;Integer&gt;(queueSize); </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span>  </span>&#123;</span><br><span class="line">        Test test = <span class="keyword">new</span> Test();</span><br><span class="line">        Producer producer = test.n<span class="function">ew <span class="title">Producer</span><span class="params">()</span></span>;</span><br><span class="line">        Consumer consumer = test.n<span class="function">ew <span class="title">Consumer</span><span class="params">()</span></span>;         </span><br><span class="line">        producer.start();</span><br><span class="line">        consumer.start();</span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Consumer</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;  </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    queue.take();</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;   </span><br><span class="line">    &#125;</span><br><span class="line">     </span><br><span class="line">    <span class="class"><span class="keyword">class</span> <span class="title">Producer</span> <span class="keyword">extends</span> <span class="title">Thread</span></span>&#123;    </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;         </span><br><span class="line">            <span class="keyword">while</span>(<span class="keyword">true</span>)&#123;</span><br><span class="line">                <span class="keyword">try</span> &#123;</span><br><span class="line">                    queue.put(<span class="number">1</span>);</span><br><span class="line">                &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">                    e.printStackTrace();</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;     </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>很显然使用阻塞队列实现不需要单独考虑同步和线程间通信的问题，实现起来很简单。</p>
+<p>参考资料：<br>《Java并发编程的艺术》 </p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/java/concurrent/6-blockingqueue.html">http://liuwangshu.cn/java/concurrent/6-blockingqueue.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/">多线程</a><a class="post-meta__tags" href="/tags/Java/">Java</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/network/7-okhttp3-sourcecode.html"><img class="prev-cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android网络编程（七）源码解析OkHttp前篇[请求网络]</div></div></a></div><div class="next-post pull-right"><a href="/designpatterns/8-facade.html"><img class="next-cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">设计模式（八）外观模式</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/java/concurrent/2-synchronous.html" title="Java并发编程（二）同步"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-12-15</div><div class="title">Java并发编程（二）同步</div></div></a></div><div><a href="/java/concurrent/3-volatile.html" title="Java并发编程（三）volatile域"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-10-05</div><div class="title">Java并发编程（三）volatile域</div></div></a></div><div><a href="/java/concurrent/4-jmm.html" title="Java并发编程（四）Java内存模型"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-05-29</div><div class="title">Java并发编程（四）Java内存模型</div></div></a></div><div><a href="/java/concurrent/1-thread.html" title="Java并发编程（一）线程定义、状态和属性"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-10-05</div><div class="title">Java并发编程（一）线程定义、状态和属性</div></div></a></div><div><a href="/java/concurrent/7-concurrentlinkedqueue.html" title="Java并发编程（七）ConcurrentLinkedQueue的实现原理和源码分析"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-08-14</div><div class="title">Java并发编程（七）ConcurrentLinkedQueue的实现原理和源码分析</div></div></a></div><div><a href="/java/concurrent/5-concurrenthashmap.html" title="Java并发编程（五）ConcurrentHashMap的实现原理和源码分析"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-07-21</div><div class="title">Java并发编程（五）ConcurrentHashMap的实现原理和源码分析</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

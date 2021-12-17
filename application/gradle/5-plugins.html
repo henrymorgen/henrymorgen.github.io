@@ -1,0 +1,203 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gradle核心思想（五）通俗易懂的Gradle插件讲解 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  关联文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解   前言在本系列的前作中，我们学习了为什么要用Gradle、Gradl"><meta name="keywords" content="Gradle核心思想"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/gradle/5-plugins.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Gradle核心思想（五）通俗易懂的Gradle插件讲解"><meta property="og:url" content="http://liuwangshu.cn/application/gradle/5-plugins.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  关联文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解   前言在本系列的前作中，我们学习了为什么要用Gradle、Gradl"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZxypn.jpg"><meta property="article:published_time" content="2019-02-13T16:18:00.000Z"><meta property="article:modified_time" content="2020-09-16T13:13:21.084Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-16 21:13:21'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Gradle%E6%8F%92%E4%BB%B6%E6%A6%82%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">1.Gradle插件概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%BA%94%E7%94%A8Gradle%E6%8F%92%E4%BB%B6"><span class="toc-number">3.</span> <span class="toc-text">2.应用Gradle插件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-%E8%84%9A%E6%9C%AC%E6%8F%92%E4%BB%B6"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 脚本插件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E5%AF%B9%E8%B1%A1%E6%8F%92%E4%BB%B6"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 对象插件</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2-1-%E5%86%85%E9%83%A8%E6%8F%92%E4%BB%B6"><span class="toc-number">3.2.1.</span> <span class="toc-text">2.2.1 内部插件</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-2-2-%E7%AC%AC%E4%B8%89%E6%96%B9%E6%8F%92%E4%BB%B6"><span class="toc-number">3.2.2.</span> <span class="toc-text">2.2.2 第三方插件</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-%E6%8F%92%E4%BB%B6DSL"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 插件DSL</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-%E8%87%AA%E5%AE%9A%E4%B9%89%E5%AF%B9%E8%B1%A1%E6%8F%92%E4%BB%B6"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 自定义对象插件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Gradle%E6%8F%92%E4%BB%B6%E7%9A%84%E4%BD%9C%E7%94%A8%E5%92%8C%E5%A5%BD%E5%A4%84"><span class="toc-number">4.</span> <span class="toc-text">3.Gradle插件的作用和好处</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZxypn.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Gradle核心思想（五）通俗易懂的Gradle插件讲解</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-02-13T16:18:00.000Z" title="发表于 2019-02-14 00:18:00">2019-02-14</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-16T13:13:21.084Z" title="更新于 2020-09-16 21:13:21">2020-09-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>关联文章<br><a href="http://liuwangshu.cn/application/gradle/1-study-gradle.html">Gradle核心思想（一）为什么现在要用Gradle？</a><br><a href="http://liuwangshu.cn/application/gradle/2-primer.html">Gradle核心思想（二）Gradle入门前奏</a><br><a href="http://liuwangshu.cn/application/gradle/3-groovy.html">Gradle核心思想（三）Groovy快速入门指南</a><br><a href="http://liuwangshu.cn/application/gradle/4-wrapper.html">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</a><br><a href="http://liuwangshu.cn/application/gradle/5-plugins.html">Gradle核心思想（五）通俗易懂的Gradle插件讲解</a></p>
+<a id="more"></a>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>在本系列的前作中，我们学习了为什么要用Gradle、Gradle的入门基础和Groovy的基础，这些文章为Gradle的入门打下了基础，这一篇我们要来学习Gradle的插件。</p>
+<h3 id="1-Gradle插件概述"><a href="#1-Gradle插件概述" class="headerlink" title="1.Gradle插件概述"></a><strong>1.Gradle插件概述</strong></h3><p>说到Gradle插件前，我们先要了解下什么是插件。在Android进阶三部曲第二部《Android进阶解密》一书中，我为了讲解插件化的原理，讲解了什么是插件，我们先来看看下面这张图。<br><img src="https://s2.ax1x.com/2019/05/27/VZxrfs.png" alt="VZxrfs.png"><br>可以看到初始的机器人只有照相、地图、浏览器、计算机等功能，这显然是比较乏味的，我们可以给这个机器人安装很多其他的应用，使它提供更多的功能，如下图所示</p>
+<p><img src="https://s2.ax1x.com/2019/05/27/VZxc60.png" alt="VZxc60.png"></p>
+<p>我们给这个机器人安装了很多应用，这些应用不仅覆盖了人的衣食住行还提供了娱乐功能，我们可以玩游戏、听音乐和购物等等，机器人也得到了极大的提升，能够购为人类提供更多的服务。这些安装的应用可以理解为插件，这个插件可以自由的进行插拔，比如我们需要玩游戏时可以安装王者荣耀，如果不好玩就把它卸载掉。这么说来其实Android、iOS、Mac等操作系统采用的都是这种思想，而Gradle也是如此。<br>Gradle本身和初始的机器人一样，只是提供了基本的核心功能，其他的特性比如编译Java源码的能力，编译Android工程的能力等等就需要通过插件来实现了。本篇文章主要说的是Gradle插件，而不是Android Gradle插件。</p>
+<h3 id="2-应用Gradle插件"><a href="#2-应用Gradle插件" class="headerlink" title="2.应用Gradle插件"></a><strong>2.应用Gradle插件</strong></h3><p>要想应用插件，主要有两个步骤，一是解析插件，二是把插件应用到项目中，应用插件通过 Project.apply() 方法来完成。<br>在Gradle中一般有两种类型的插件，分别叫做脚本插件和对象插件。脚本插件是额外的构建脚本，它会进一步配置构建，可以把它理解为一个普通的build.gradle。对象插件又叫做二进制插件，是实现了Plugin接口的类，下面分别介绍如何使用它们。</p>
+<h4 id="2-1-脚本插件"><a href="#2-1-脚本插件" class="headerlink" title="2.1 脚本插件"></a><strong>2.1 脚本插件</strong></h4><p>在上一篇文章<a href="http://liuwangshu.cn/application/gradle/4-wrapper.html">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</a>的例子基础上，定义一个other.gradle，例子的目录结构是如下图所示。<br><img src="https://s2.ax1x.com/2019/05/27/VZxDYj.png" alt="VZxDYj.png"></p>
+<p><strong>other.gradle</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ext&#123;</span><br><span class="line">verson=<span class="string">&#x27;1.0&#x27;</span></span><br><span class="line">url=<span class="string">&#x27;http://liuwangshu.cn&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这实际上不算是一个真正的脚本插件，就是一个简单的脚本，主要是用于演示脚本插件是如何被应用的。我们在build.gradle中来应用这个插件：<br><strong>build.gradle</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply from: <span class="string">&#x27;other.gradle&#x27;</span></span><br><span class="line">task test &#123;</span><br><span class="line">    doLast &#123;</span><br><span class="line">        println <span class="string">&quot;版本为：$&#123;verson&#125;,地址为：$&#123;url&#125;&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>apply是Gradle project中提供的方法，用于配置项目中的插件。执行gradlew.bat test，会打印出想要的结果。</p>
+<h4 id="2-2-对象插件"><a href="#2-2-对象插件" class="headerlink" title="2.2 对象插件"></a><strong>2.2 对象插件</strong></h4><p>我们知道对象插件就是实现了<code>org.gradle.api.plugins&lt;Project&gt;</code>接口的插件，对象插件可以分为内部插件和第三方插件。</p>
+<h5 id="2-2-1-内部插件"><a href="#2-2-1-内部插件" class="headerlink" title="2.2.1 内部插件"></a><strong>2.2.1 内部插件</strong></h5><p>如果我们想要应用Java插件可以这么写：<br><strong>build.gradle</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply plugin: org.gradle.api.plugins.JavaPlugin  </span><br></pre></td></tr></table></figure>
+<p>Gradle默认就导入了org.gradle.api.plugins包，因此我们也可以去掉包名：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply plugin: JavaPlugin  </span><br></pre></td></tr></table></figure>
+<p>实现了org.gradle.api.plugins接口的插件会有pulginid，使用pulginid是最简洁、最常用的方式：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply plugin: <span class="string">&#x27;java&#x27;</span>  </span><br></pre></td></tr></table></figure>
+<p>Gradle 的发行包中有大量的插件，这些插件有很多类型，比如语言插件、集成插件、软件开发插件等等，如果我们想<br>向项目添加 c++ 源代码编译功能，可以这么写：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply plugin: <span class="string">&#x27;cpp&#x27;</span>  </span><br></pre></td></tr></table></figure>
+<h5 id="2-2-2-第三方插件"><a href="#2-2-2-第三方插件" class="headerlink" title="2.2.2 第三方插件"></a><strong>2.2.2 第三方插件</strong></h5><p>第三方的对象插件通常是jar文件，要想让构建脚本知道第三方插件的存在，需要使用buildscrip来设置。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">  repositories &#123;</span><br><span class="line">    maven &#123;</span><br><span class="line">      url <span class="string">&quot;https://plugins.gradle.org/m2/&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  dependencies &#123;</span><br><span class="line">    classpath <span class="string">&quot;com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">apply plugin: <span class="string">&quot;com.jfrog.bintray&quot;</span></span><br></pre></td></tr></table></figure>
+<p>在buildscrip中来定义插件所在的原始仓库和插件的依赖 ，再通过apply方法配置就可以了。Android Gradle插件也属于第三方插件，如果我们想引入Android Gradle插件，可以这么写：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        jcenter()</span><br><span class="line">    &#125;</span><br><span class="line">    dependencies &#123;</span><br><span class="line">        classpath <span class="string">&#x27;com.android.tools.build:gradle:2.3.2&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">apply plugin: <span class="string">&#x27;com.android.application&#x27;</span></span><br></pre></td></tr></table></figure>
+<p>这样我们就可以使用Android Gradle插件，通过apply方法来使用App工程插件，这样项目会编译成为一个apk，这里涉及了Android相关的知识，脱离了本文的讨论范围，具体的请见后续的Gradle for Android系列。</p>
+<h4 id="2-3-插件DSL"><a href="#2-3-插件DSL" class="headerlink" title="2.3 插件DSL"></a><strong>2.3 插件DSL</strong></h4><p>Gradle的特性有四种状态，分别是Internal、Incubating、Public、Deprecated，插件DSL属于Incubating状态（孵化状态）。<br>这也导致插件DSL的特性在将来的Gradle版本中可能会发生变化，直到它不再孵化为止。<br>使用Java插件可以这么写：<br><strong>build.gradle</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;java&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>很简洁，当然这是使用内部插件，如果外部插件被托管在<a target="_blank" rel="noopener" href="https://plugins.gradle.org/%EF%BC%8C%E4%B9%9F%E5%8F%AF%E4%BB%A5%E8%BF%99%E6%A0%B7%E5%86%99%EF%BC%9A">https://plugins.gradle.org/，也可以这样写：</a><br><strong>build.gradle</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">  id <span class="string">&quot;com.jfrog.bintray&quot;</span> version <span class="string">&quot;1.8.4&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>不需要再配置buildscript了，直接配置plugins来使用插件。</p>
+<h4 id="2-4-自定义对象插件"><a href="#2-4-自定义对象插件" class="headerlink" title="2.4 自定义对象插件"></a><strong>2.4 自定义对象插件</strong></h4><p>对象插件是实现了<code>org.gradle.api.plugins&lt;Project&gt;</code>接口的插件，这个接口中只定义个一个简单的apply方法，想要自定义插件就需要去实现<code>org.gradle.api.plugins&lt;Project&gt;</code>接口。<br>来实现一个简单的自定义插件，为了方便测试，不再采用文本编辑，而是使用IntelliJ来编辑（AS也可以），用IntelliJ来打开2.1小节的例子，改写build.gradle文件:<br><strong>build.gradle</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply plugin:CustomPlugin</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomPlugin</span> <span class="keyword">implements</span> <span class="title">Plugin</span>&lt;<span class="title">Project</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">apply</span><span class="params">(Project project)</span> </span>&#123;</span><br><span class="line">        project.task(<span class="string">&#x27;CustomPluginTask&#x27;</span>) &#123;</span><br><span class="line">            doLast &#123;</span><br><span class="line">                println <span class="string">&quot;自定义插件&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在build.gradle中自定义了一个插件CustomPlugin，在apply方法中创建一个名称为CustomPluginTask的任务。在IntelliJ的Terminal中输入gradlew.bat CustomPluginTask来执行CustomPluginTask任务。<br><img src="https://s2.ax1x.com/2019/05/27/VZx6lq.png" alt="VZx6lq.png"></p>
+<p>这个例子只能在自己项目中使用，而且比较简单，更复杂的由于篇幅原因会在本系列的下一篇文章进行介绍。</p>
+<h3 id="3-Gradle插件的作用和好处"><a href="#3-Gradle插件的作用和好处" class="headerlink" title="3.Gradle插件的作用和好处"></a><strong>3.Gradle插件的作用和好处</strong></h3><p>Gradle插件可以做什么呢？主要有以下的几点</p>
+<ul>
+<li>为项目配置依赖。</li>
+<li>为项目配置约定，比如约定源代码的存放位置。</li>
+<li>为项目添加任务，完成测试、编译、打包等任务。</li>
+<li>为项目中的核心对象和其他插件的对象添加拓展类型。</li>
+</ul>
+<p>使用Gradle插件主要有以下的好处：</p>
+<ul>
+<li>重用和减少维护在多个项目类似的逻辑的开销。</li>
+<li>更高程度的模块化。</li>
+<li>封装必要的逻辑，并允许构建脚本尽可能是声明性地。</li>
+</ul>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><p>本篇的文章篇幅不长，主要是没有更多的介绍自定义对象插件，这个会在下一篇文章进行介绍。可能有的同学发现了，本系列的Gradle的文章都尽量不和Android和AS有所关联，为的是摆脱Android的束缚，Gradle本身就是一门技术，当我们了解了Gradle的核心思想后，再去学习Android Gradle时会有豁然开朗的效果。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/gradle/5-plugins.html">http://liuwangshu.cn/application/gradle/5-plugins.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Gradle%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3/">Gradle核心思想</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZxypn.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/gradle/6-custonplugin.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZzVAg.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Gradle核心思想（六）自定义Gradle插件的三种方式</div></div></a></div><div class="next-post pull-right"><a href="/application/gradle/4-wrapper.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VZvIQP.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/gradle/1-study-gradle.html" title="Gradle核心思想（一）为什么现在要用Gradle？"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZO95n.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-08-08</div><div class="title">Gradle核心思想（一）为什么现在要用Gradle？</div></div></a></div><div><a href="/application/gradle/2-primer.html" title="Gradle核心思想（二）Gradle入门前奏"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZvkxP.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-27</div><div class="title">Gradle核心思想（二）Gradle入门前奏</div></div></a></div><div><a href="/application/gradle/3-groovy.html" title="Gradle核心思想（三）Groovy快速入门指南"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZvBxx.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-04</div><div class="title">Gradle核心思想（三）Groovy快速入门指南</div></div></a></div><div><a href="/application/gradle/4-wrapper.html" title="Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZvIQP.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-01-20</div><div class="title">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</div></div></a></div><div><a href="/application/gradle/6-custonplugin.html" title="Gradle核心思想（六）自定义Gradle插件的三种方式"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZzVAg.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-02-24</div><div class="title">Gradle核心思想（六）自定义Gradle插件的三种方式</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

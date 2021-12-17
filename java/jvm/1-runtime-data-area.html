@@ -1,0 +1,220 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Java虚拟机（一）结构原理与运行时数据区域 | BATcoder - 刘望舒</title><meta name="description" content="前言本来计划要写Android内存优化的，觉得有必要在此之前介绍一下Java虚拟机的相关知识，Java虚拟机也并不是三言两语能够介绍完的，因此开了Java虚拟机系列，这一篇文章我们来学习Java虚拟机的结构原理与运行时数据区域。   1.Java虚拟机概述Oracle官方定义的Java技术体系主要包括以下几个部分：  Java程序设计语言 各种平台的Java虚拟机 Class文件格式 Java A"><meta name="keywords" content="Java,Java虚拟机"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/java/jvm/1-runtime-data-area.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Java虚拟机（一）结构原理与运行时数据区域"><meta property="og:url" content="http://liuwangshu.cn/java/jvm/1-runtime-data-area.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="前言本来计划要写Android内存优化的，觉得有必要在此之前介绍一下Java虚拟机的相关知识，Java虚拟机也并不是三言两语能够介绍完的，因此开了Java虚拟机系列，这一篇文章我们来学习Java虚拟机的结构原理与运行时数据区域。   1.Java虚拟机概述Oracle官方定义的Java技术体系主要包括以下几个部分：  Java程序设计语言 各种平台的Java虚拟机 Class文件格式 Java A"><meta property="og:image" content="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><meta property="article:published_time" content="2017-04-21T04:15:16.000Z"><meta property="article:modified_time" content="2018-01-08T13:54:14.099Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2018-01-08 21:54:14'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A6%82%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">1.Java虚拟机概述</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%AE%B6%E6%97%8F"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 Java虚拟机家族</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%89%A7%E8%A1%8C%E6%B5%81%E7%A8%8B"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 Java虚拟机执行流程</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E7%BB%93%E6%9E%84"><span class="toc-number">3.</span> <span class="toc-text">2.Java虚拟机结构</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-Class%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 Class文件格式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E7%B1%BB%E5%8A%A0%E8%BD%BD%E5%99%A8%E5%AD%90%E7%B3%BB%E7%BB%9F"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 类加载器子系统</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-%E6%95%B0%E6%8D%AE%E7%B1%BB%E5%9E%8B"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 数据类型</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-%E8%BF%90%E8%A1%8C%E6%97%B6%E6%95%B0%E6%8D%AE%E5%8C%BA%E5%9F%9F"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 运行时数据区域</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-1-%E7%A8%8B%E5%BA%8F%E8%AE%A1%E6%95%B0%E5%99%A8"><span class="toc-number">3.4.1.</span> <span class="toc-text">2.4.1 程序计数器</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-2-Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E6%A0%88"><span class="toc-number">3.4.2.</span> <span class="toc-text">2.4.2 Java虚拟机栈</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-3-%E6%9C%AC%E5%9C%B0%E6%96%B9%E6%B3%95%E6%A0%88"><span class="toc-number">3.4.3.</span> <span class="toc-text">2.4.3 本地方法栈</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-4-Java%E5%A0%86"><span class="toc-number">3.4.4.</span> <span class="toc-text">2.4.4 Java堆</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#2-4-5-%E6%96%B9%E6%B3%95%E5%8C%BA"><span class="toc-number">3.4.5.</span> <span class="toc-text">2.4.5 方法区</span></a></li></ol></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/17/MDe3eU.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Java虚拟机（一）结构原理与运行时数据区域</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-04-21T04:15:16.000Z" title="发表于 2017-04-21 12:15:16">2017-04-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2018-01-08T13:54:14.099Z" title="更新于 2018-01-08 21:54:14">2018-01-08</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Java/">Java</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>本来计划要写Android内存优化的，觉得有必要在此之前介绍一下Java虚拟机的相关知识，Java虚拟机也并不是三言两语能够介绍完的，因此开了Java虚拟机系列，这一篇文章我们来学习Java虚拟机的结构原理与运行时数据区域。</p>
+<a id="more"></a>
+
+<h3 id="1-Java虚拟机概述"><a href="#1-Java虚拟机概述" class="headerlink" title="1.Java虚拟机概述"></a><strong>1.Java虚拟机概述</strong></h3><p>Oracle官方定义的Java技术体系主要包括以下几个部分：</p>
+<ul>
+<li>Java程序设计语言</li>
+<li>各种平台的Java虚拟机</li>
+<li>Class文件格式</li>
+<li>Java API类库</li>
+<li>第三方Java类库</li>
+</ul>
+<p>可以把Java程序设计语言、Java虚拟机和Java API类库这三部分统称为JDK（Java Development Kit），它是Java程序开发的最小环境。另外，Java API中的Java SE API子集和Java虚拟机这两部分统称为JRE（Java Runtime Environment），它是Java程序运行的标准环境。<br>从上面可以看出Java虚拟机及其重要，它是整个Java平台的基石，是Java语言编译代码的运行平台。你可以把Java虚拟机看做一个抽象的计算机，它有各种指令集和各种运行时数据区域。</p>
+<h4 id="1-1-Java虚拟机家族"><a href="#1-1-Java虚拟机家族" class="headerlink" title="1.1 Java虚拟机家族"></a><strong>1.1 Java虚拟机家族</strong></h4><p>很多同学可能认为Java虚拟机，就是一个虚拟机而已，它还有家族？或者认为Java虚拟机指的就是Oracle的HotSpot虚拟机。这里来简单介绍Java虚拟机家族，自从1996年Sun公司发布的JDK1.0中包含的Sun Classic VM到今天，出现和消亡了很多种虚拟机，我们这里只简单介绍目前存活的相对主流Java虚拟机。</p>
+<p><strong>HotSpot VM</strong><br>Oracle JDK和OpenJDK中自带的虚拟机，是最主流的和使用范围最广的Java虚拟机。介绍Java虚拟机的技术文章，如果不做特殊说明，大部分都是介绍HotSpot VM的。HotSpot VM并非是Sun公司开发的，而是由Longview Technologies这家小公司设计的，它在1997年被Sun公司收购，Sun公司又在2009年被Oracle收购。<br><strong>J9 VM  **<br>J9 VM 是IBM开发的VM，目前是其主力发展的Java虚拟机。J9 VM的市场定位和HotSpot VM接近，它是一款设计上从服务端到桌面应用再到嵌入式都考虑到的多用途虚拟机，目前J9 VM的性能水平大致跟HotSpot VM是一个档次的。<br>**Zing VM</strong><br>以Oracle的HotSpot VM为基础，改进了许多会影响延迟的细节。最大的三个卖点是：</p>
+<ul>
+<li>1.低延迟，“无暂停”的C4 GC，GC带来的暂停可以控制在10ms以下的级别，支持的Java堆大小可以到1TB；</li>
+<li>2.启动后快速预热功能。</li>
+<li>3.可管理性：零开销、可在生产环境全时开启的、整合在JVM内的监控工具Zing Vision。</li>
+</ul>
+<h4 id="1-2-Java虚拟机执行流程"><a href="#1-2-Java虚拟机执行流程" class="headerlink" title="1.2 Java虚拟机执行流程"></a><strong>1.2 Java虚拟机执行流程</strong></h4><p>当我们执行一个Java程序时，它的执行流程是怎样的呢？如下图所示。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1417629-5c03fab9827fbda2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Java程序执行流程(2).png"></p>
+<p>从上图可以看到Java虚拟机与java语言没有什么必然联系，它只与特定的二进制文件：Class文件有关。</p>
+<h3 id="2-Java虚拟机结构"><a href="#2-Java虚拟机结构" class="headerlink" title="2.Java虚拟机结构"></a><strong>2.Java虚拟机结构</strong></h3><p>这里所讲的体系结构，是指的Java虚拟机的抽象行为，而不是具体的比如HotSpot VM的实现。按照Java虚拟机规范，抽象的Java虚拟机如下图所示。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1417629-3a2a7c7286d0418a.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="Java虚拟机体系结构(3).png"></p>
+<h4 id="2-1-Class文件格式"><a href="#2-1-Class文件格式" class="headerlink" title="2.1 Class文件格式"></a><strong>2.1 Class文件格式</strong></h4><p>Java文件被编译后生成了Class文件，这种二进制格式文件不依赖于特定的硬件和操作系统。每一个Class文件中都对应着唯一一个类或者接口的的定义信息，但是类或者接口并不一定定义在文件中，比如类和接口可以通过类加载器来直接生成。</p>
+<p>ClassFile的文件结构如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ClassFile &#123;</span><br><span class="line">    u4 magic;                                     <span class="comment">//魔数，固定值为0xCAFEBABE，用来判断当前文件是能被Java虚拟机处理的Class文件</span></span><br><span class="line">    u2 minor_version;                             <span class="comment">//副版本号</span></span><br><span class="line">    u2 major_version;                             <span class="comment">//主版本号</span></span><br><span class="line">    u2 constant_pool_count;                       <span class="comment">//常量池计数器</span></span><br><span class="line">    cp_info constant_pool[constant_pool_count-<span class="number">1</span>]; <span class="comment">//常量池</span></span><br><span class="line">    u2 access_flags;                              <span class="comment">//类和接口层次的访问标志</span></span><br><span class="line">    u2 this_class;                                <span class="comment">//类索引</span></span><br><span class="line">    u2 super_class;                               <span class="comment">//父类索引</span></span><br><span class="line">    u2 interfaces_count;                          <span class="comment">//接口计数器</span></span><br><span class="line">    u2 interfaces[interfaces_count];              <span class="comment">//接口表</span></span><br><span class="line">    u2 fields_count;                              <span class="comment">//字段计数器</span></span><br><span class="line">    field_info fields[fields_count];              <span class="comment">//字段表</span></span><br><span class="line">    u2 methods_count;                             <span class="comment">//方法计数器</span></span><br><span class="line">    method_info methods[methods_count];           <span class="comment">//方法表</span></span><br><span class="line">    u2 attributes_count;                          <span class="comment">//属性计数器</span></span><br><span class="line">    attribute_info attributes[attributes_count];  <span class="comment">//属性表</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="2-2-类加载器子系统"><a href="#2-2-类加载器子系统" class="headerlink" title="2.2 类加载器子系统"></a><strong>2.2 类加载器子系统</strong></h4><p>类加载器子系统通过多种类加载器来查找和加载Class文件到 Java 虚拟机中。Java虚拟机有两种类加载器：系统加载器和用户自定义加载器。其中系统加载器包括以下三种：<br><strong>Bootstrap ClassLoader（引导类加载器）</strong><br>用C/C++代码实现的加载器，用于加载指定的JDK的核心类库，比如java.lang.*、java.uti.*等这些系统类。它用来加载以下目录中的类库：</p>
+<ul>
+<li>$JAVA_HOME/jre/lib目录</li>
+<li>-Xbootclasspath参数指定的目录</li>
+</ul>
+<p>Java虚拟机的启动就是通过引导类加载器创建一个初始类来完成的。由于类加载器是使用平台相关的底层C/C++语言实现的， 所以该加载器不能被Java代码访问到。但是我们可以查询某个类是否被引导类加载器加载过。</p>
+<p><strong>Extensions ClassLoader（拓展类加载器）</strong><br>用于加载 Java 的拓展类 ，用来提供除了系统类之外的额外功能。它用来加载以下目录中的类库：</p>
+<ul>
+<li>加载$JAVA_HOME/jre/lib/ext目录</li>
+<li>系统属性java.ext.dir所指定的目录。</li>
+</ul>
+<p><strong>Application ClassLoader（应用程序类加载器）</strong></p>
+<p>又称作System ClassLoader(系统类加载器)，这是因为这个类加载器可以通过ClassLoader的getSystemClassLoader方法获取到。它用来加载以下目录中的类库：</p>
+<ul>
+<li>当前应用程序Classpath目录</li>
+<li>系统属性java.class.path指定的目录</li>
+</ul>
+<p>用户自定义加载器，则是通过继承 java.lang.ClassLoader类的方式来实现自己的类加载器。<br>类加载器子系统除了要加载Class文件类到 Java 虚拟机中，还必须负责验证被导入的Class类的正确性，为类变量分配并初始化内存，以及帮助解析符号引用。这些动作必须严格按以下顺序进行：</p>
+<p>1.加载：查找并加载Class文件。<br>2.链接：验证、准备、以及解析。</p>
+<ul>
+<li>验证：确保被导入类型的正确性。</li>
+<li>准备：为类的静态字段分配字段，并用默认值初始化这些字段。</li>
+<li>解析：根据运行时常量池的符号引用来动态决定具体值得过程。</li>
+</ul>
+<p>3.初始化：将类变量初始化为正确初始值。</p>
+<h4 id="2-3-数据类型"><a href="#2-3-数据类型" class="headerlink" title="2.3 数据类型"></a><strong>2.3 数据类型</strong></h4><p>Java虚拟机与Java语言的数据类型相似，可以分为两类：基本类型和引用类型。Java虚拟机希望编译器在编译期间尽可能的完成类型检查，使得虚拟机在运行期间无需进行类型检查操作。</p>
+<h4 id="2-4-运行时数据区域"><a href="#2-4-运行时数据区域" class="headerlink" title="2.4 运行时数据区域"></a><strong>2.4 运行时数据区域</strong></h4><p>很多人将Java的内存分为堆内存（heap）和栈内存（Stack），这种分发不够准确，Java的内存区域划分实际上远比这复杂。<br>Java虚拟机在执行Java程序的过程中会把它所管理的内存划分为不同的数据区域，根据《Java虚拟机规范（Java SE7版）》的规定，这些数据区域分别为程序计数器、Java虚拟机栈、本地方法栈、Java堆和方法区，下面我们来一一的对它们进行介绍。</p>
+<h5 id="2-4-1-程序计数器"><a href="#2-4-1-程序计数器" class="headerlink" title="2.4.1 程序计数器"></a><strong>2.4.1 程序计数器</strong></h5><p>为了保证程序能够连续地执行下去，处理器必须具有某些手段来确定下一条指令的地址，而程序计数器正是起到这种作用。<br>程序计数器（Program Counter Register）也叫做PC寄存器，是一块较小的内存空间。在虚拟机概念模型中，字节码解释器工作时就是通过改变程序计数器来选取下一条需要执行的字节码指令，Java虚拟机的多线程是通过轮流切换并分配处理器执行时间的方式来实现的，在一个确定的时刻只有一个处理器执行一条线程中的指令，为了在线程切换后能恢复到正确的执行位置，每个线程都会有一个独立的程序计数器，因此，程序计数器是线程私有的。如果线程执行的方法不是Native方法，则程序计数器保存正在执行的字节码指令地址，如果是Native方法则程序计数器的值则为空（Undefined）。程序计数器是Java虚拟机规范中唯一没有规定任何OutOfMemoryError情况的数据区域。</p>
+<h5 id="2-4-2-Java虚拟机栈"><a href="#2-4-2-Java虚拟机栈" class="headerlink" title="2.4.2 Java虚拟机栈"></a><strong>2.4.2 Java虚拟机栈</strong></h5><p>每一条Java虚拟机线程都有一个线程私有的Java虚拟机栈（Java Virtual Machine Stacks)。它的生命周期与线程相同，与线程是同时创建的。Java虚拟机栈存储线程中Java方法调用的状态，包括局部变量、参数、返回值以及运算的中间结果等。一个Java虚拟机栈包含了多个栈帧，一个栈帧用来存储局部变量表、操作数栈、动态链接、方法出口等信息。当线程调用一个Java方法时，虚拟机压入一个新的栈帧到该线程的Java栈中，当该方法执行完成，这个栈帧就从Java栈中弹出。我们平常所说的栈内存（Stack）指的就是Java虚拟机栈。<br>Java虚拟机规范中定义了两种异常情况：</p>
+<ul>
+<li>如果线程请求分配的栈容量超过Java虚拟机所允许的的最大容量，Java虚拟机会抛出StackOverflowError。</li>
+<li>如果Java虚拟机栈可以动态扩展（大部分Java虚拟机都可以动态扩展），但是扩展时无法申请到足够的内存，或者在创建新的线程时没有足够的内存去创建对应的Java虚拟机栈，则会抛出OutOfMemoryError异常。</li>
+</ul>
+<h5 id="2-4-3-本地方法栈"><a href="#2-4-3-本地方法栈" class="headerlink" title="2.4.3 本地方法栈"></a><strong>2.4.3 本地方法栈</strong></h5><p>Java虚拟机实现可能要用到C Stacks来支持Native语言，这个C Stacks就是本地方法栈（Native Method Stack）。它与Java虚拟机栈类似，只不过本地方法栈是用来支持Native方法服务。如果Java虚拟机不支持Native方法，并且也不依赖于C Stacks，可以无需支持本地方法栈。在Java虚拟机规范中对本地方法栈的语言和数据结构等没有强制规定，因此具体的Java虚拟机可以自由实现它，比如HotSpot VM将本地方法栈和Java虚拟机栈合二为一。<br>与Java虚拟机栈类似，本地方法栈也会抛出 StackOverflowError和OutOfMemoryError异常</p>
+<h5 id="2-4-4-Java堆"><a href="#2-4-4-Java堆" class="headerlink" title="2.4.4 Java堆"></a><strong>2.4.4 Java堆</strong></h5><p>Java堆（Java Heap）是被所有线程共享的运行时内存区域。Java堆用来存放对象实例，几乎所有的对象实例都在这里分配内存。Java堆存储的对象被垃圾收集器管理，这些受管理的对象无需也无法显示的销毁。从内存回收的角度，Java堆可以粗略的分为新生代和老年代。从内存分配的角度Java堆中可能划分出多个线程私有的分配缓冲区。不管如何划分，Java堆存储的内容是不变的，进行划分是为了能更快的回收或者分配内存。<br>Java堆的容量可以时固定的，也可以动态的扩展。Java堆的所使用的内存在物理上不需要连续，逻辑上连续即可。<br>Java虚拟机规范中定义了一种异常情况：</p>
+<ul>
+<li>如果在堆中没有足够的内存来完成实例分配，并且堆也无法进行扩展时，则会抛出OutOfMemoryError异常。</li>
+</ul>
+<h5 id="2-4-5-方法区"><a href="#2-4-5-方法区" class="headerlink" title="2.4.5 方法区"></a><strong>2.4.5 方法区</strong></h5><p>方法区（Method Area）是被所有线程共享的运行时内存区域。用来存储已经被Java虚拟机加载的类的结构信息，包括：<br>运行时常量池、字段和方法信息、静态变量等数据。方法区是Java堆的逻辑组成部分，它一样在物理上不需要连续，并且可以选择在方法区中不实现垃圾收集。方法区并不等同于永久代，只是因为HotSpot VM使用永久代来实现方法区，对于其他的Java虚拟机，比如J9和JRockit等，并不存在永久代概念。<br>Java虚拟机规范中定义了一种异常情况：</p>
+<ul>
+<li>如果方法区的内存空间不满足内存分配需求时，Java虚拟机会抛出OutOfMemoryError异常。</li>
+</ul>
+<p><strong>运行时常量池</strong><br>运行时常量池（Runtime Constant Pool）是方法区的一部分。在2.1 Class文件格式这一小节中我们得知，Class文件不仅包含了类的版本、接口、字段和方法等信息，还包含了常量池，它用来存放编译时期生成的字面量和符号引用，这些内容会在类加载后存放在方法区的运行时常量池中。运行时常量池可以理解为是类或接口的常量池的运行时表现形式。<br>Java虚拟机规范中定义了一种异常情况：<br>当创建类或接口时，如果构造运行时常量池所需的内存超过了方法区所能提供的最大值，Java虚拟机会抛出OutOfMemoryError异常。</p>
+<p>参考资料<br>《深入理解Java虚拟机 第二版》<br>《Java虚拟机规范（Java SE7版）》<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/lao-liang/p/5110710.html">理解Java虚拟机体系结构</a><br><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/29265430?sort=created">目前主流的 Java 虚拟机有哪些?-知乎</a><br><a target="_blank" rel="noopener" href="http://www.open-open.com/lib/view/open1383745340321.html">jvm运行时数据区域解析</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/column/details/jvm-principle.html">Java虚拟机原理图解</a><br><a target="_blank" rel="noopener" href="https://www.ibm.com/developerworks/cn/java/j-lo-classloader/">深入探讨 Java 类加载器</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/java/jvm/1-runtime-data-area.html">http://liuwangshu.cn/java/jvm/1-runtime-data-area.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Java/">Java</a><a class="post-meta__tags" href="/tags/Java%E8%99%9A%E6%8B%9F%E6%9C%BA/">Java虚拟机</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/component/2-service-start.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android深入四大组件（二）Service的启动过程</div></div></a></div><div class="next-post pull-right"><a href="/designpatterns/15-state.html"><img class="next-cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">设计模式（十五）状态模式</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/java/jvm/2-oop-kclass.html" title="Java虚拟机（二）对象的创建与OOP-Klass模型"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-04</div><div class="title">Java虚拟机（二）对象的创建与OOP-Klass模型</div></div></a></div><div><a href="/java/jvm/3-garbage-mark.html" title="Java虚拟机（三）垃圾标记算法与Java对象的生命周期"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-15</div><div class="title">Java虚拟机（三）垃圾标记算法与Java对象的生命周期</div></div></a></div><div><a href="/java/jvm/4-garbage-collection.html" title="Java虚拟机（四）垃圾收集算法"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-23</div><div class="title">Java虚拟机（四）垃圾收集算法</div></div></a></div><div><a href="/java/concurrent/2-synchronous.html" title="Java并发编程（二）同步"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-12-15</div><div class="title">Java并发编程（二）同步</div></div></a></div><div><a href="/java/concurrent/3-volatile.html" title="Java并发编程（三）volatile域"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-10-05</div><div class="title">Java并发编程（三）volatile域</div></div></a></div><div><a href="/java/concurrent/4-jmm.html" title="Java并发编程（四）Java内存模型"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-05-29</div><div class="title">Java并发编程（四）Java内存模型</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

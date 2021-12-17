@@ -1,0 +1,346 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>React Native组件（三）Text组件解析 | BATcoder - 刘望舒</title><meta name="description" content="相关文章React Native探索系列React Native组件系列 前言此前介绍了最基本的View组件，接下来就是最常用的Text组件，对于Text组件的一些常用属性，这篇文章会给出简单的例子以供学习。   1 概述Text组件对应于Android平台的TextView，用来显示文本。无论做什么应用几乎都要使用它，可以说是应用最频繁的组件之一。Text组件的内部使用的并不是flexbox布局"><meta name="keywords" content="React Native,React Native组件"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/rn/component/3-text.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="React Native组件（三）Text组件解析"><meta property="og:url" content="http://liuwangshu.cn/rn/component/3-text.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="相关文章React Native探索系列React Native组件系列 前言此前介绍了最基本的View组件，接下来就是最常用的Text组件，对于Text组件的一些常用属性，这篇文章会给出简单的例子以供学习。   1 概述Text组件对应于Android平台的TextView，用来显示文本。无论做什么应用几乎都要使用它，可以说是应用最频繁的组件之一。Text组件的内部使用的并不是flexbox布局"><meta property="og:image" content="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><meta property="article:published_time" content="2017-07-16T16:16:18.000Z"><meta property="article:modified_time" content="2019-05-31T20:47:11.811Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2019-06-01 04:47:11'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">1 概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Style%E5%B1%9E%E6%80%A7"><span class="toc-number">3.</span> <span class="toc-text">2 Style属性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-%E5%AD%97%E4%BD%93%E7%9B%B8%E5%85%B3-Style%E5%B1%9E%E6%80%A7"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 字体相关 Style属性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E9%98%B4%E5%BD%B1%E7%9B%B8%E5%85%B3-Style%E5%B1%9E%E6%80%A7"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 阴影相关 Style属性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-%E5%B9%B3%E5%8F%B0%E7%8B%AC%E6%9C%89%E7%9A%84Style%E5%B1%9E%E6%80%A7"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 平台独有的Style属性</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-%E5%85%B6%E4%BB%96Style%E5%B1%9E%E6%80%A7"><span class="toc-number">3.4.</span> <span class="toc-text">2.4 其他Style属性</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%B1%9E%E6%80%A7"><span class="toc-number">4.</span> <span class="toc-text">3 属性</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-ellipsizeMode"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 ellipsizeMode</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-onPress-onLongPress"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 onPress&#x2F;onLongPress</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-%E5%85%B6%E4%BB%96%E5%B1%9E%E6%80%A7"><span class="toc-number">4.3.</span> <span class="toc-text">3.3 其他属性</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/08/05/ecRaRO.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">React Native组件（三）Text组件解析</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-07-16T16:16:18.000Z" title="发表于 2017-07-17 00:16:18">2017-07-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2019-05-31T20:47:11.811Z" title="更新于 2019-06-01 04:47:11">2019-06-01</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/React-Native/">React Native</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p>相关文章<br><a href="http://liuwangshu.cn/tags/React-Native%E5%85%A5%E9%97%A8/">React Native探索系列</a><br><a href="http://liuwangshu.cn/tags/React-Native%E7%BB%84%E4%BB%B6/">React Native组件系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>此前介绍了最基本的View组件，接下来就是最常用的Text组件，对于Text组件的一些常用属性，这篇文章会给出简单的例子以供学习。</p>
+<a id="more"></a>
+
+<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1 概述"></a><strong>1 概述</strong></h3><p>Text组件对应于Android平台的TextView，用来显示文本。无论做什么应用几乎都要使用它，可以说是应用最频繁的组件之一。Text组件的内部使用的并不是flexbox布局，而是文本布局，因此想要使用flexbox设置文字居中是不可能的，解决方案就是在Text组件的外层套一层View，设置View的flexbox，具体的参考2.1节的例子代码。</p>
+<h3 id="2-Style属性"><a href="#2-Style属性" class="headerlink" title="2 Style属性"></a><strong>2 Style属性</strong></h3><p>Text组件支持View组件的所有的Style属性，不了解View组件的Style属性可以查看<a href="http://liuwangshu.cn/rn/component/2-view.html">React Native组件（二）View组件解析</a>这篇文章。</p>
+<h4 id="2-1-字体相关-Style属性"><a href="#2-1-字体相关-Style属性" class="headerlink" title="2.1 字体相关 Style属性"></a><strong>2.1 字体相关 Style属性</strong></h4><table>
+<thead>
+<tr>
+<th align="center">Style属性名</th>
+<th align="center">取值</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">fontFamily</td>
+<td align="center">enum(‘sans-serif’, ‘serif’,’monospace’,’sans-serif-light’,’sans-serif-thin’,’sans-serif-condensed’,’sans-serif-medium’)</td>
+<td align="center">英文字符串的样式</td>
+</tr>
+<tr>
+<td align="center">fontSize</td>
+<td align="center">number</td>
+<td align="center">字体大小</td>
+</tr>
+<tr>
+<td align="center">fontStyle</td>
+<td align="center">enum(‘normal’, ‘italic’)</td>
+<td align="center">字体风格是普通还是斜体</td>
+</tr>
+<tr>
+<td align="center">fontWeight</td>
+<td align="center">enum(‘normal’, ‘bold’, ‘100’, ‘200’, ‘300’, ‘400’, ‘500’, ‘600’, ‘700’, ‘800’, ‘900’)</td>
+<td align="center">字体粗细程度</td>
+</tr>
+</tbody></table>
+<p>举个简单的例子，如下所示。<br><strong>index.android.js</strong></p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123;Component&#125; <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;AppRegistry, StyleSheet, View, Text&#125; <span class="keyword">from</span> <span class="string">&#x27;react-native&#x27;</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TextApp</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View style=&#123;styles.viewStyle&#125;&gt;</span><br><span class="line">                &lt;Text style=&#123;styles.textStyle1&#125;&gt;itachi&lt;/Text&gt;</span><br><span class="line">                &lt;Text style=&#123;styles.textStyle2&#125;&gt;itachi&lt;/Text&gt;</span><br><span class="line">                &lt;Text style=&#123;styles.textStyle3&#125;&gt;itachi&lt;/Text&gt;</span><br><span class="line">            &lt;/View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> styles = StyleSheet.create(&#123;</span><br><span class="line">    viewStyle: &#123;</span><br><span class="line">        flex: <span class="number">1</span>,</span><br><span class="line">        justifyContent: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        alignItems: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        backgroundColor: <span class="string">&#x27;white&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle1: &#123;</span><br><span class="line">        fontFamily: <span class="string">&#x27;monospace&#x27;</span>,</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        fontStyle: <span class="string">&#x27;normal&#x27;</span>,</span><br><span class="line">        fontWeight: <span class="string">&#x27;900&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle2: &#123;</span><br><span class="line">        fontFamily: <span class="string">&#x27;serif&#x27;</span>,</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        fontStyle: <span class="string">&#x27;normal&#x27;</span>,</span><br><span class="line">        fontWeight: <span class="string">&#x27;900&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle3: &#123;</span><br><span class="line">        fontFamily: <span class="string">&#x27;serif&#x27;</span>,</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        fontStyle: <span class="string">&#x27;italic&#x27;</span>,</span><br><span class="line">        fontWeight: <span class="string">&#x27;300&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">AppRegistry.registerComponent(<span class="string">&#x27;ViewSample&#x27;</span>, <span class="function">() =&gt;</span> TextApp);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>运行程序效果如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1tSL8.jpg" alt="V1tSL8.jpg"></p>
+<p>第一行和第二行对比，发现monospace（等宽）字体要比serif字体要宽大些，笔画更细一些。第二行和第三行做对比，可以明显看出第三行是斜体字并且字体更细一些。</p>
+<h4 id="2-2-阴影相关-Style属性"><a href="#2-2-阴影相关-Style属性" class="headerlink" title="2.2 阴影相关 Style属性"></a><strong>2.2 阴影相关 Style属性</strong></h4><table>
+<thead>
+<tr>
+<th align="center">Style属性名</th>
+<th align="center">取值</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">textShadowColor</td>
+<td align="center">color</td>
+<td align="center">阴影颜色</td>
+</tr>
+<tr>
+<td align="center">textShadowOffset</td>
+<td align="center">{width: number, height: number}</td>
+<td align="center">阴影效果</td>
+</tr>
+<tr>
+<td align="center">textShadowRadius</td>
+<td align="center">number</td>
+<td align="center">阴影圆角</td>
+</tr>
+</tbody></table>
+<p>改写2.1小节的例子中styles的代码，如下所示。</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> styles = StyleSheet.create(&#123;</span><br><span class="line">    viewStyle: &#123;</span><br><span class="line">        flex: <span class="number">1</span>,</span><br><span class="line">        justifyContent: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        alignItems: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        backgroundColor: <span class="string">&#x27;white&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle1: &#123;</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        textShadowColor: <span class="string">&#x27;blue&#x27;</span>,</span><br><span class="line">        textShadowOffset: &#123;<span class="attr">width</span>: <span class="number">5</span>, <span class="attr">height</span>: <span class="number">5</span>&#125;,</span><br><span class="line">        textShadowRadius: <span class="number">1</span></span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle2: &#123;</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        textShadowColor: <span class="string">&#x27;blue&#x27;</span>,</span><br><span class="line">        textShadowOffset: &#123;<span class="attr">width</span>: <span class="number">5</span>, <span class="attr">height</span>: <span class="number">5</span>&#125;,</span><br><span class="line">        textShadowRadius: <span class="number">5</span></span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle3: &#123;</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        textShadowColor: <span class="string">&#x27;blue&#x27;</span>,</span><br><span class="line">        textShadowOffset: &#123;<span class="attr">width</span>: <span class="number">2</span>, <span class="attr">height</span>: <span class="number">2</span>&#125;,</span><br><span class="line">        textShadowRadius: <span class="number">5</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>运行效果如下图所示。<br><img src="https://s2.ax1x.com/2019/06/01/V1Yzsf.jpg" alt="V1Yzsf.jpg"></p>
+<p>第一行和第二行对比，可以看到textShadowRadius的值越大，阴影就会越不精细。第二行和第三行对比，textShadowOffset的width和height值越大，阴影的偏移量就会越大。</p>
+<h4 id="2-3-平台独有的Style属性"><a href="#2-3-平台独有的Style属性" class="headerlink" title="2.3 平台独有的Style属性"></a><strong>2.3 平台独有的Style属性</strong></h4><table>
+<thead>
+<tr>
+<th align="center">Style属性名</th>
+<th align="center">取值</th>
+<th align="center">说明</th>
+<th align="center">平台</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">includeFontPadding</td>
+<td align="center">bool</td>
+<td align="center">默认值是true，显示文本时额外的字体填充</td>
+<td align="center">Android</td>
+</tr>
+<tr>
+<td align="center">textAlignVertical</td>
+<td align="center">enum(‘auto’, ‘top’, ‘bottom’, ‘center’)</td>
+<td align="center">垂直方向上文本对齐的方式</td>
+<td align="center">Android</td>
+</tr>
+<tr>
+<td align="center">letterSpacing</td>
+<td align="center">number</td>
+<td align="center">每个字符之间的空间</td>
+<td align="center">iOS</td>
+</tr>
+<tr>
+<td align="center">textDecorationColor</td>
+<td align="center">color</td>
+<td align="center">文本装饰线条的颜色</td>
+<td align="center">iOS</td>
+</tr>
+<tr>
+<td align="center">textDecorationStyle</td>
+<td align="center">enum(‘solid’, ‘double’, ‘dotted’, ‘dashed’)</td>
+<td align="center">文本装饰线条的风格</td>
+<td align="center">iOS</td>
+</tr>
+<tr>
+<td align="center">writingDirection</td>
+<td align="center">enum(‘auto’, ‘ltr’, ‘rtl’)</td>
+<td align="center">文本的书写方向</td>
+<td align="center">iOS</td>
+</tr>
+</tbody></table>
+<h4 id="2-4-其他Style属性"><a href="#2-4-其他Style属性" class="headerlink" title="2.4 其他Style属性"></a><strong>2.4 其他Style属性</strong></h4><table>
+<thead>
+<tr>
+<th align="center">Style属性名</th>
+<th align="center">取值</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">textAlign</td>
+<td align="center">enum(‘auto’, ‘left’, ‘right’, ‘center’, ‘justify’)</td>
+<td align="center">文本对齐方式，justify只在iOS平台有效，在Android平台等价于Left</td>
+</tr>
+<tr>
+<td align="center">textDecorationLine</td>
+<td align="center">enum(‘none’, ‘underline’, ‘line-through’, ‘underline line-through’)</td>
+<td align="center">横线相关设置</td>
+</tr>
+<tr>
+<td align="center">lineHeight</td>
+<td align="center">number</td>
+<td align="center">行的高度</td>
+</tr>
+</tbody></table>
+<p>我们设置不同的textDecorationLine的值，改写2.1小节的例子中styles的代码：</p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> styles = StyleSheet.create(&#123;</span><br><span class="line">    viewStyle: &#123;</span><br><span class="line">        flex: <span class="number">1</span>,</span><br><span class="line">        justifyContent: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        alignItems: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        backgroundColor: <span class="string">&#x27;white&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle1: &#123;</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        textDecorationLine: <span class="string">&#x27;underline&#x27;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle2: &#123;</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        textDecorationLine: <span class="string">&#x27;line-through&#x27;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle3: &#123;</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        textDecorationLine: <span class="string">&#x27;underline line-through&#x27;</span>,</span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>运行效果为：<br><img src="https://s2.ax1x.com/2019/06/01/V1Yjzt.jpg" alt="V1Yjzt.jpg"></p>
+<h3 id="3-属性"><a href="#3-属性" class="headerlink" title="3 属性"></a><strong>3 属性</strong></h3><h4 id="3-1-ellipsizeMode"><a href="#3-1-ellipsizeMode" class="headerlink" title="3.1 ellipsizeMode"></a><strong>3.1 ellipsizeMode</strong></h4><p>ellipsizeMode的取值为enum(‘head’, ‘middle’, ‘tail’, ‘clip’) ,用来设定当文本显示不下全部内容时，文本应该如何被截断，需要注意的是，它必须和numberOfLines（文本显示的行数）搭配使用，才会发挥作用。</p>
+<ul>
+<li>head：从文本的开头进行截断，并在文本的开头添加省略号，例如：…xyz。</li>
+<li>middle ：从文本的中间进行截断，并在文本的中间添加省略号，例如：ab…yz。</li>
+<li>tail：从文本的末尾进行截断，并在文本的末尾添加省略号，例如：abcd…。</li>
+<li>clip ：文本的末尾显示不下的内容会被截断，并且不添加省略号，clip只适用于iOS平台。</li>
+</ul>
+<p><strong>index.android.js</strong></p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123;Component&#125; <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;AppRegistry, StyleSheet, View, Text&#125; <span class="keyword">from</span> <span class="string">&#x27;react-native&#x27;</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TextApp</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">let</span> str = <span class="string">&#x27;宇智波鼬的终极忍术是伊邪那美。&#x27;</span>;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View style=&#123;styles.viewStyle&#125;&gt;</span><br><span class="line">                &lt;Text style=&#123;styles.textStyle&#125; ellipsizeMode=<span class="string">&#x27;head&#x27;</span> numberOfLines=&#123;<span class="number">1</span>&#125;&gt;&#123;str&#125;&lt;/Text&gt;</span><br><span class="line">                &lt;Text style=&#123;styles.textStyle&#125; ellipsizeMode=<span class="string">&#x27;middle&#x27;</span> numberOfLines=&#123;<span class="number">1</span>&#125;&gt;&#123;str&#125;&lt;/Text&gt;</span><br><span class="line">                &lt;Text style=&#123;styles.textStyle&#125; ellipsizeMode=<span class="string">&#x27;tail&#x27;</span> numberOfLines=&#123;<span class="number">1</span>&#125;&gt;&#123;str&#125;&lt;/Text&gt;</span><br><span class="line">            &lt;/View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> styles = StyleSheet.create(&#123;</span><br><span class="line">    viewStyle: &#123;</span><br><span class="line">        flex: <span class="number">1</span>,</span><br><span class="line">        justifyContent: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        alignItems: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        backgroundColor: <span class="string">&#x27;white&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">    textStyle: &#123;</span><br><span class="line">        fontSize: <span class="number">20</span>,</span><br><span class="line">        width: <span class="number">150</span>,</span><br><span class="line">        padding: <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;);</span><br><span class="line">AppRegistry.registerComponent(<span class="string">&#x27;ViewSample&#x27;</span>, <span class="function">() =&gt;</span> TextApp);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>分别设置ellipsizeMode的值为head、middle和tail。效果如下所示。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1YxQP.jpg" alt="V1YxQP.jpg"></p>
+<h4 id="3-2-onPress-onLongPress"><a href="#3-2-onPress-onLongPress" class="headerlink" title="3.2 onPress/onLongPress"></a><strong>3.2 onPress/onLongPress</strong></h4><p>当文本被点击以后会调用onPress回调函数，类似的还有onLongPress，当文本被长按时会调用onLongPress回调函数。<br><strong>index.android.js</strong></p>
+<figure class="highlight js"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123;Component&#125; <span class="keyword">from</span> <span class="string">&#x27;react&#x27;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;AppRegistry, StyleSheet, View, Text, Alert&#125; <span class="keyword">from</span> <span class="string">&#x27;react-native&#x27;</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TextApp</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">    render() &#123;</span><br><span class="line">        <span class="keyword">return</span> (</span><br><span class="line">            &lt;View style=&#123;styles.viewStyle&#125;&gt;</span><br><span class="line">                &lt;Text onPress=&#123;onTextPress&#125;&gt;点击文本&lt;/Text&gt;</span><br><span class="line">                &lt;Text onLongPress=&#123;onLongTextPress&#125;&gt;长按文本&lt;/Text&gt;</span><br><span class="line">            &lt;/View&gt;</span><br><span class="line">        );</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> onTextPress = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    Alert.alert(<span class="string">&#x27;点击文本弹出&#x27;</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">const</span> onLongTextPress = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">    Alert.alert(<span class="string">&#x27;长按文本弹出&#x27;</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">const</span> styles = StyleSheet.create(&#123;</span><br><span class="line">    viewStyle: &#123;</span><br><span class="line">        flex: <span class="number">1</span>,</span><br><span class="line">        justifyContent: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        alignItems: <span class="string">&#x27;center&#x27;</span>,</span><br><span class="line">        backgroundColor: <span class="string">&#x27;white&#x27;</span></span><br><span class="line">    &#125;,</span><br><span class="line">&#125;);</span><br><span class="line">AppRegistry.registerComponent(<span class="string">&#x27;ViewSample&#x27;</span>, <span class="function">() =&gt;</span> TextApp);</span><br></pre></td></tr></table></figure>
+<p>当我们点击第一个Text时，会弹出标题为“点击文本弹出”的Alert。长按第二个Text时，会弹出标题为“长按文本弹出”的Alert。</p>
+<h4 id="3-3-其他属性"><a href="#3-3-其他属性" class="headerlink" title="3.3 其他属性"></a><strong>3.3 其他属性</strong></h4><table>
+<thead>
+<tr>
+<th align="center">属性名</th>
+<th align="center">取值</th>
+<th align="center">说明</th>
+<th align="center">平台</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">numberOfLines</td>
+<td align="center">number</td>
+<td align="center">文本显示的行数</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">selectable</td>
+<td align="center">bool</td>
+<td align="center">默认值为false，为true时可以被选择并复制到系统剪切板中</td>
+<td align="center"></td>
+</tr>
+<tr>
+<td align="center">selectionColor</td>
+<td align="center">color</td>
+<td align="center">文本被选择时的高亮颜色</td>
+<td align="center">Android</td>
+</tr>
+<tr>
+<td align="center">adjustsFontSizeToFit</td>
+<td align="center">bool</td>
+<td align="center">默认值为false，为true时字体会自动缩小，以适应给定的样式约束</td>
+<td align="center">iOS</td>
+</tr>
+<tr>
+<td align="center">minimumFontScale</td>
+<td align="center">number</td>
+<td align="center">adjustsFontSizeToFit属性为true时，设置字体的最小缩放比例，取值范围为0.01~1.0</td>
+<td align="center">iOS</td>
+</tr>
+</tbody></table>
+<p>还有一些属性这里没有提到，比如方便失能人士使用手机而提供的相关属性等等，具体的属性请查看<a target="_blank" rel="noopener" href="http://facebook.github.io/react-native/docs/text.html">官方文档</a>。</p>
+<p>参考资料<br><a target="_blank" rel="noopener" href="http://facebook.github.io/react-native/docs/text.html">官方文档</a><br>《React Native跨平台移动应用开发》第二版</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/rn/component/3-text.html">http://liuwangshu.cn/rn/component/3-text.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/React-Native/">React Native</a><a class="post-meta__tags" href="/tags/React-Native%E7%BB%84%E4%BB%B6/">React Native组件</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/ams/1-ams.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android解析ActivityManagerService（一）AMS启动流程和AMS家族</div></div></a></div><div class="next-post pull-right"><a href="/application/performance/ram-4-memory-tools.html"><img class="next-cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android内存优化（四）解析Memory Monitor、Allocation Tracker和Heap Dump</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/rn/component/1-lifecycle.html" title="React Native组件（一）组件的生命周期"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-16</div><div class="title">React Native组件（一）组件的生命周期</div></div></a></div><div><a href="/rn/component/2-view.html" title="React Native组件（二）View组件解析"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-27</div><div class="title">React Native组件（二）View组件解析</div></div></a></div><div><a href="/rn/component/4-textinput.html" title="React Native组件（四）TextInput组件解析"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-08-21</div><div class="title">React Native组件（四）TextInput组件解析</div></div></a></div><div><a href="/rn/primer/1-helloworld.html" title="React Native探索（一）环境搭建与Hello World（Windows/Mac）"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-02</div><div class="title">React Native探索（一）环境搭建与Hello World（Windows/Mac）</div></div></a></div><div><a href="/rn/primer/2-atom-nuclide.html" title="React Native探索（二）Atom+Nuclide安装、配置和调试"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-08</div><div class="title">React Native探索（二）Atom+Nuclide安装、配置和调试</div></div></a></div><div><a href="/rn/primer/3-props-state.html" title="React Native探索（三）组件的Props(属性)和State(状态)"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-05-17</div><div class="title">React Native探索（三）组件的Props(属性)和State(状态)</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

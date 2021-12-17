@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title> Android Binder原理（六）Java Binder的初始化 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」   前言在Android Binder原理（一）学习Binder前必须要了解的知识点这篇文章中，我根据Android系统的分层，将Binder机制分为了三层：  Java Binder (对应Framework层的Binder) Native Binder(对应Native层的Binder) Kernel Binder(对应Kernel层的Binder)  在"><meta name="keywords" content="Binder原理"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/framework/binder/6-java-binder-initialize.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content=" Android Binder原理（六）Java Binder的初始化"><meta property="og:url" content="http://liuwangshu.cn/framework/binder/6-java-binder-initialize.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」   前言在Android Binder原理（一）学习Binder前必须要了解的知识点这篇文章中，我根据Android系统的分层，将Binder机制分为了三层：  Java Binder (对应Framework层的Binder) Native Binder(对应Native层的Binder) Kernel Binder(对应Kernel层的Binder)  在"><meta property="og:image" content="https://s2.ax1x.com/2019/11/23/MbATrq.jpg"><meta property="article:published_time" content="2019-11-21T16:18:00.000Z"><meta property="article:modified_time" content="2020-09-16T13:42:38.126Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-16 21:42:38'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Java-Binder%E7%9A%84JNI%E6%B3%A8%E5%86%8C"><span class="toc-number">2.</span> <span class="toc-text">1.Java Binder的JNI注册</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-Binder%E7%B1%BB%E7%9A%84%E6%B3%A8%E5%86%8C"><span class="toc-number">3.</span> <span class="toc-text">1.1 Binder类的注册</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-BinderInternal%E7%B1%BB%E7%9A%84%E6%B3%A8%E5%86%8C"><span class="toc-number">4.</span> <span class="toc-text">1.2 BinderInternal类的注册</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/23/MbATrq.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle"> Android Binder原理（六）Java Binder的初始化</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-11-21T16:18:00.000Z" title="发表于 2019-11-22 00:18:00">2019-11-22</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-16T13:42:38.126Z" title="更新于 2020-09-16 21:42:38">2020-09-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<a id="more"></a>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>在<a href="http://liuwangshu.cn/framework/binder/1-intro.html">Android Binder原理（一）学习Binder前必须要了解的知识点</a>这篇文章中，我根据Android系统的分层，将Binder机制分为了三层：</p>
+<ol>
+<li>Java Binder (对应Framework层的Binder)</li>
+<li>Native Binder(对应Native层的Binder)</li>
+<li>Kernel Binder(对应Kernel层的Binder)</li>
+</ol>
+<p>在此前的文章中，我一直都在介绍Native Binder和Kernel Binder的内容，它们的架构简单总结为下图。</p>
+<p><img src="https://s2.ax1x.com/2019/11/19/MgRMbF.png" alt="MgRMbF.png"></p>
+<p>在<a href="http://liuwangshu.cn/framework/binder/2-servicemanager-binder.html">Android Binder原理（二）ServiceManager中的Binder机制</a>这篇文章中，我讲过BpBinder是Client端与Server交互的代理类，而BBinder则代表了Server端，那么上图就可以改为：<br><img src="https://s2.ax1x.com/2019/11/19/MgWuRI.png" alt="MgWuRI.png"><br>从上图可以看到，Native Binder实际是基于C/S架构，Bpinder是Client端，BBinder是Server端，在<a href="http://liuwangshu.cn/framework/binder/4-servicemanager-start.html">Android Binder原理（四）ServiceManager的启动过程</a>这篇文章中，我们得知Native Binder通过ioctl函数和Binder驱动进行数据交互。<br>Java Binder是需要借助Native Binder来进行工作的，因此Java Binder在设计上也是一个C/S架构，可以说Java Binder是Native Binder的一个镜像，所以在学习Java Binder前，最好先要学习此前文章讲解的Native Binder的内容。本篇文章先来讲解Java Binder是如何初始化的，即Java Binder的JNI注册。</p>
+<h3 id="1-Java-Binder的JNI注册"><a href="#1-Java-Binder的JNI注册" class="headerlink" title="1.Java Binder的JNI注册"></a><strong>1.Java Binder的JNI注册</strong></h3><p>Java Binder要想和Native Binder进行通信，需要通过JNI，JNI的注册是在Zygote进程启动过程中注册的，代码如下所示。<br><strong>frameworks/base/core/jni/AndroidRuntime.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">AndroidRuntime::start</span><span class="params">(<span class="keyword">const</span> <span class="keyword">char</span>* className, <span class="keyword">const</span> Vector&lt;String8&gt;&amp; options, <span class="keyword">bool</span> zygote)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ...</span><br><span class="line">    JniInvocation jni_invocation;</span><br><span class="line">    jni_invocation.Init(<span class="literal">NULL</span>);</span><br><span class="line">    JNIEnv* env;</span><br><span class="line">    <span class="keyword">if</span> (startVm(&amp;mJavaVM, &amp;env, zygote) != <span class="number">0</span>) &#123;<span class="comment">//1</span></span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    onVmCreated(env);</span><br><span class="line">    <span class="keyword">if</span> (startReg(env) &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        ALOGE(<span class="string">&quot;Unable to register all android natives\n&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处用于启动Java虚拟机，注释2处startReg函数用于完成虚拟机的JNI注册，关于AndroidRuntime的start函数的具体分析见<a href="http://liuwangshu.cn/framework/booting/2-zygote.html">Android系统启动流程（二）解析Zygote进程启动过程</a>这篇文章。<br>startReg函数如下所示。<br><strong>frameworks/base/core/jni/AndroidRuntime.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*static*/</span> <span class="function"><span class="keyword">int</span> <span class="title">AndroidRuntime::startReg</span><span class="params">(JNIEnv* env)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    ATRACE_NAME(<span class="string">&quot;RegisterAndroidNatives&quot;</span>);</span><br><span class="line">    androidSetCreateThreadFunc((android_create_thread_fn) javaCreateThreadEtc);</span><br><span class="line"></span><br><span class="line">    ALOGV(<span class="string">&quot;--- registering native functions ---\n&quot;</span>);</span><br><span class="line">    env-&gt;PushLocalFrame(<span class="number">200</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (register_jni_procs(gRegJNI, NELEM(gRegJNI), env) &lt; <span class="number">0</span>) &#123;<span class="comment">//1</span></span><br><span class="line">        env-&gt;PopLocalFrame(<span class="literal">NULL</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    env-&gt;PopLocalFrame(<span class="literal">NULL</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处的register_jni_procs函数的作用就是循环调用gRegJNI数组的成员所对应的方法，如下所示。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">register_jni_procs</span><span class="params">(<span class="keyword">const</span> RegJNIRec <span class="built_in">array</span>[], <span class="keyword">size_t</span> count, JNIEnv* env)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">array</span>[i].mProc(env) &lt; <span class="number">0</span>) &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">ifndef</span> NDEBUG</span></span><br><span class="line">            ALOGD(<span class="string">&quot;----------!!! %s failed to load\n&quot;</span>, <span class="built_in">array</span>[i].mName);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>gRegJNI数组中有100多个成员变量：</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> RegJNIRec gRegJNI[] = &#123;</span><br><span class="line">    REG_JNI(register_com_android_internal_os_RuntimeInit),</span><br><span class="line">    REG_JNI(register_com_android_internal_os_ZygoteInit_nativeZygoteInit),</span><br><span class="line">    REG_JNI(register_android_os_SystemClock),</span><br><span class="line">    ...</span><br><span class="line">    REG_JNI(register_android_os_Binder),<span class="comment">//1</span></span><br><span class="line">   ...</span><br><span class="line">&#125;;    </span><br></pre></td></tr></table></figure>
+<p>其中REG_JNI是一个宏定义：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">#define REG_JNI(name)      &#123; name &#125;</span><br><span class="line">struct RegJNIRec &#123;</span><br><span class="line">    int (*mProc)(JNIEnv*);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>实际上就是调用参数名所对应的函数。负责Java Binder和Native Binder通信的函数为注释1处的register_android_os_Binder，代码如下所示。<br><strong>frameworks/base/core/jni/android_util_Binder.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">register_android_os_Binder</span><span class="params">(JNIEnv* env)</span></span></span><br><span class="line"><span class="function"></span>&#123;   </span><br><span class="line">    <span class="comment">//注册Binder类</span></span><br><span class="line">    <span class="keyword">if</span> (int_register_android_os_Binder(env) &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="comment">//注册BinderInternal类        </span></span><br><span class="line">    <span class="keyword">if</span> (int_register_android_os_BinderInternal(env) &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    <span class="comment">//注册BinderProxy类          </span></span><br><span class="line">    <span class="keyword">if</span> (int_register_android_os_BinderProxy(env) &lt; <span class="number">0</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    ...</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>register_android_os_Binder函数做了三件事，分别是:<br>1.注册Binder类<br>2.注册BinderInternal类<br>3.注册BinderProxy类 </p>
+<p>它们是Java Binder关联类的一小部分，它们的关系如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/11/22/MTmhzd.png" alt="MTmhzd.png"></p>
+<ul>
+<li>IBinder接口中定义了很多整型的变量，其中定义一个叫做<code>FLAG_ONEWAY</code>的整形变量。客户端发起调用时，客户端一般会阻塞，直到服务端返回结果。设置<code>FLAG_ONEWAY</code>后，客户端只需要把请求发送到服务端就可以立即返回，而不需要等待服务端的结果，这是一种非阻塞方式。</li>
+<li>Binder和BinderProxy实现了IBinder接口，Binder是服务端的代表，而BinderProxy是客户端的代表。</li>
+<li>BinderInternal只是在Binder框架中被使用，其内部类GcWatcher用于处理和Binder的垃圾回收。</li>
+<li>Parcel是一个数据包装器，它可以在进程间进行传递，Parcel既可以传递基本数据类型也可以传递Binder对象，Binder通信就是通过Parcel来进行客户端与服务端数据交互。Parcel的实现既有Java部分，也有Native部分，具体实现在Native部分中。</li>
+</ul>
+<p>下面分别对Binder、BinderInternal这两个类的注册进行分析。</p>
+<h3 id="1-1-Binder类的注册"><a href="#1-1-Binder类的注册" class="headerlink" title="1.1 Binder类的注册"></a><strong>1.1 Binder类的注册</strong></h3><p>调用int_register_android_os_Binder函数来完成Binder类的注册，代码如下所示。<br><strong>frameworks/base/core/jni/android_util_Binder.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> JNINativeMethod gBinderMethods[] = &#123;</span><br><span class="line">     <span class="comment">/* name, signature, funcPtr */</span></span><br><span class="line">    &#123; <span class="string">&quot;getCallingPid&quot;</span>, <span class="string">&quot;()I&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_getCallingPid &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;getCallingUid&quot;</span>, <span class="string">&quot;()I&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_getCallingUid &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;clearCallingIdentity&quot;</span>, <span class="string">&quot;()J&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_clearCallingIdentity &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;restoreCallingIdentity&quot;</span>, <span class="string">&quot;(J)V&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_restoreCallingIdentity &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;setThreadStrictModePolicy&quot;</span>, <span class="string">&quot;(I)V&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_setThreadStrictModePolicy &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;getThreadStrictModePolicy&quot;</span>, <span class="string">&quot;()I&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_getThreadStrictModePolicy &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;flushPendingCommands&quot;</span>, <span class="string">&quot;()V&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_flushPendingCommands &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;getNativeBBinderHolder&quot;</span>, <span class="string">&quot;()J&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_getNativeBBinderHolder &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;getNativeFinalizer&quot;</span>, <span class="string">&quot;()J&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_getNativeFinalizer &#125;,</span><br><span class="line">    &#123; <span class="string">&quot;blockUntilThreadAvailable&quot;</span>, <span class="string">&quot;()V&quot;</span>, (<span class="keyword">void</span>*)android_os_Binder_blockUntilThreadAvailable &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="keyword">const</span> kBinderPathName = <span class="string">&quot;android/os/Binder&quot;</span>;<span class="comment">//1</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">int_register_android_os_Binder</span><span class="params">(JNIEnv* env)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    jclass clazz = FindClassOrDie(env, kBinderPathName);<span class="comment">//2</span></span><br><span class="line"></span><br><span class="line">    gBinderOffsets.mClass = MakeGlobalRefOrDie(env, clazz);<span class="comment">//3</span></span><br><span class="line">    gBinderOffsets.mExecTransact = GetMethodIDOrDie(env, clazz, <span class="string">&quot;execTransact&quot;</span>, <span class="string">&quot;(IJJI)Z&quot;</span>);<span class="comment">//4</span></span><br><span class="line">    gBinderOffsets.mObject = GetFieldIDOrDie(env, clazz, <span class="string">&quot;mObject&quot;</span>, <span class="string">&quot;J&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> RegisterMethodsOrDie(</span><br><span class="line">        env, kBinderPathName,</span><br><span class="line">        gBinderMethods, NELEM(gBinderMethods));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处的kBinderPathName的值为”android/os/Binder”，这是Binder在Java Binder中的全路径名。<br>注释2处根据这个路径名获取Binder的Class对象，并赋值给jclass类型的变量clazz，clazz是Java层Binder在JNI层的代表。<br>注释3处通过MakeGlobalRefOrDie函数将本地引用clazz转变为全局引用并赋值给gBinderOffsets.mClass。<br>注释4处用于找到Java层的Binder的成员方法execTransact并赋值给gBinderOffsets.mExecTransact。<br>注释5处用于找到Java层的Binder的成员变量mObject并赋值给gBinderOffsets.mObject。<br>最后一行通过RegisterMethodsOrDie函数注册gBinderMethods中定义的函数，其中gBinderMethods是JNINativeMethod类型的数组，里面存储的是Binder的Native方法（Java层）与JNI层函数的对应关系。</p>
+<p>gBinderMethods的定义如下所示。</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">bindernative_offsets_t</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    jclass mClass;</span><br><span class="line">    jmethodID mExecTransact;</span><br><span class="line">    jfieldID mObject;</span><br><span class="line"></span><br><span class="line">&#125; gBinderOffsets;</span><br></pre></td></tr></table></figure>
+<p>使用gBinderMethods来保存变量和方法有两个原因：<br>1.为了效率考虑，如果每次调用相关的方法时都需要查询方法和变量，显然效率比较低。<br>2.这些成员变量和方法都是本地引用，在int int_register_android_os_Binder函数返回时，这些本地引用会被自动释放，因此用gBinderOffsets来保存，以便于后续使用。</p>
+<p>对于JNI不大熟悉的同学可以看<a href="http://liuwangshu.cn/framework/jni/2-signature-jnienv">Android深入理解JNI（二）类型转换、方法签名和JNIEnv</a>这篇文章。</p>
+<h3 id="1-2-BinderInternal类的注册"><a href="#1-2-BinderInternal类的注册" class="headerlink" title="1.2 BinderInternal类的注册"></a><strong>1.2 BinderInternal类的注册</strong></h3><p>调用int_register_android_os_BinderInternal函数来完成BinderInternal类的注册，代码如下所示。<br><strong>frameworks/base/core/jni/android_util_Binder.cpp</strong></p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="keyword">char</span>* <span class="keyword">const</span> kBinderInternalPathName = <span class="string">&quot;com/android/internal/os/BinderInternal&quot;</span>;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">int_register_android_os_BinderInternal</span><span class="params">(JNIEnv* env)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    jclass clazz = FindClassOrDie(env, kBinderInternalPathName);</span><br><span class="line"></span><br><span class="line">    gBinderInternalOffsets.mClass = MakeGlobalRefOrDie(env, clazz);</span><br><span class="line">    gBinderInternalOffsets.mForceGc = GetStaticMethodIDOrDie(env, clazz, <span class="string">&quot;forceBinderGc&quot;</span>, <span class="string">&quot;()V&quot;</span>);</span><br><span class="line">    gBinderInternalOffsets.mProxyLimitCallback = GetStaticMethodIDOrDie(env, clazz, <span class="string">&quot;binderProxyLimitCallbackFromNative&quot;</span>, <span class="string">&quot;(I)V&quot;</span>);</span><br><span class="line"></span><br><span class="line">    jclass SparseIntArrayClass = FindClassOrDie(env, <span class="string">&quot;android/util/SparseIntArray&quot;</span>);</span><br><span class="line">    gSparseIntArrayOffsets.classObject = MakeGlobalRefOrDie(env, SparseIntArrayClass);</span><br><span class="line">    gSparseIntArrayOffsets.constructor = GetMethodIDOrDie(env, gSparseIntArrayOffsets.classObject,</span><br><span class="line">                                                           <span class="string">&quot;&lt;init&gt;&quot;</span>, <span class="string">&quot;()V&quot;</span>);</span><br><span class="line">    gSparseIntArrayOffsets.put = GetMethodIDOrDie(env, gSparseIntArrayOffsets.classObject, <span class="string">&quot;put&quot;</span>,</span><br><span class="line">                                                   <span class="string">&quot;(II)V&quot;</span>);</span><br><span class="line"></span><br><span class="line">    BpBinder::setLimitCallback(android_os_BinderInternal_proxyLimitcallback);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> RegisterMethodsOrDie(</span><br><span class="line">        env, kBinderInternalPathName,</span><br><span class="line">        gBinderInternalMethods, NELEM(gBinderInternalMethods));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>和int_register_android_os_Binder函数的实现类似，主要做了三件事：<br>1.获取BinderInternal在JNI层的代表clazz。<br>2.将BinderInternal类中有用的成员变量和方法存储到gBinderInternalOffsets中。<br>3.注册BinderInternal类的Native方法对应的JNI函数。</p>
+<p>还有一个BinderProxy类的注册，它和Binder、BinderInternal的注册过程差不多，这里就不再赘述了，有兴趣的读者可以自行去看源码。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/framework/binder/6-java-binder-initialize.html">http://liuwangshu.cn/framework/binder/6-java-binder-initialize.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Binder%E5%8E%9F%E7%90%86/">Binder原理</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/23/MbATrq.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/binder/7-javabinder-addservice.html"><img class="prev-cover" src="https://pic.superbed.cn/item/5e02594376085c3289aeb21b.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info"> Android Binder原理（七）Java Binder中系统服务的注册过程</div></div></a></div><div class="next-post pull-right"><a href="/framework/binder/5-getservice.html"><img class="next-cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android Binder原理（五）系统服务的获取过程</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/framework/binder/1-intro.html" title="Android Binder原理（一）学习Binder前必须要了解的知识点"><img class="cover" src="https://s2.ax1x.com/2019/09/22/uSwYHU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-09-21</div><div class="title">Android Binder原理（一）学习Binder前必须要了解的知识点</div></div></a></div><div><a href="/framework/binder/3-addservice.html" title="Android Binder原理（三）系统服务的注册过程"><img class="cover" src="https://s2.ax1x.com/2019/10/25/Ka5Uds.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-10-24</div><div class="title">Android Binder原理（三）系统服务的注册过程</div></div></a></div><div><a href="/framework/binder/5-getservice.html" title="Android Binder原理（五）系统服务的获取过程"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-11-16</div><div class="title">Android Binder原理（五）系统服务的获取过程</div></div></a></div><div><a href="/framework/binder/7-javabinder-addservice.html" title=" Android Binder原理（七）Java Binder中系统服务的注册过程"><img class="cover" src="https://pic.superbed.cn/item/5e02594376085c3289aeb21b.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-12-03</div><div class="title"> Android Binder原理（七）Java Binder中系统服务的注册过程</div></div></a></div><div><a href="/framework/binder/2-servicemanager-binder.html" title="Android Binder原理（二）ServiceManager中的Binder机制"><img class="cover" src="https://s2.ax1x.com/2019/10/09/u4pmfs.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-10-08</div><div class="title">Android Binder原理（二）ServiceManager中的Binder机制</div></div></a></div><div><a href="/framework/binder/4-servicemanager-start.html" title="Android Binder原理（四）ServiceManager的启动过程"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-11-10</div><div class="title">Android Binder原理（四）ServiceManager的启动过程</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Swift快速入门（五）集合 | BATcoder - 刘望舒</title><meta name="description" content="相关文章Swift快速入门系列 前言Swift提供了数组和字典两种集合类型来存储数据，Swift的数组用来存储顺序相同类型相同的类型，字典则采用kay-value的形式存储数据。  1.数组数组用来存储同一个数据类型的多个数据，通常可通过数组元素的索引来访问数组元素。 声明数组声明数组有两种语法：  使用泛型语法。格式为：Array&lt;类型&gt; 使用简化语法。格式为：[类型]  &#x2F;&#x2F; 使用"><meta name="keywords" content="Swift"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/swift/5-set.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Swift快速入门（五）集合"><meta property="og:url" content="http://liuwangshu.cn/swift/5-set.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="相关文章Swift快速入门系列 前言Swift提供了数组和字典两种集合类型来存储数据，Swift的数组用来存储顺序相同类型相同的类型，字典则采用kay-value的形式存储数据。  1.数组数组用来存储同一个数据类型的多个数据，通常可通过数组元素的索引来访问数组元素。 声明数组声明数组有两种语法：  使用泛型语法。格式为：Array&lt;类型&gt; 使用简化语法。格式为：[类型]  &#x2F;&#x2F; 使用"><meta property="og:image" content="https://p.pstatp.com/origin/ff850001720b5e8178e7"><meta property="article:published_time" content="2016-03-08T16:17:06.000Z"><meta property="article:modified_time" content="2017-06-10T13:37:11.843Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2017-06-10 21:37:11'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%95%B0%E7%BB%84"><span class="toc-number">2.</span> <span class="toc-text">1.数组</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A3%B0%E6%98%8E%E6%95%B0%E7%BB%84"><span class="toc-number">2.1.</span> <span class="toc-text">声明数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E6%95%B0%E7%BB%84"><span class="toc-number">2.2.</span> <span class="toc-text">创建数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%81%8D%E5%8E%86%E6%95%B0%E7%BB%84"><span class="toc-number">2.3.</span> <span class="toc-text">遍历数组</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E6%95%B0%E7%BB%84"><span class="toc-number">2.4.</span> <span class="toc-text">修改数组</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%AD%97%E5%85%B8"><span class="toc-number">3.</span> <span class="toc-text">2.字典</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A3%B0%E6%98%8E%E5%AD%97%E5%85%B8"><span class="toc-number">3.1.</span> <span class="toc-text">声明字典</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%88%9B%E5%BB%BA%E5%AD%97%E5%85%B8"><span class="toc-number">3.2.</span> <span class="toc-text">创建字典</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%AD%97%E5%85%B8"><span class="toc-number">3.3.</span> <span class="toc-text">使用字典</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%97%E5%85%B8%E7%9A%84key%E9%9B%86%E5%92%8Cvalue%E9%9B%86"><span class="toc-number">3.4.</span> <span class="toc-text">字典的key集和value集</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BF%AE%E6%94%B9%E5%AD%97%E5%85%B8"><span class="toc-number">3.5.</span> <span class="toc-text">修改字典</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://p.pstatp.com/origin/ff850001720b5e8178e7)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Swift快速入门（五）集合</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2016-03-08T16:17:06.000Z" title="发表于 2016-03-09 00:17:06">2016-03-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2017-06-10T13:37:11.843Z" title="更新于 2017-06-10 21:37:11">2017-06-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Swift/">Swift</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><p>相关文章<br><a href="http://liuwangshu.cn/tags/Swift/">Swift快速入门系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>Swift提供了数组和字典两种集合类型来存储数据，Swift的数组用来存储顺序相同类型相同的类型，字典则采用kay-value的形式存储数据。</p>
+<a id="more"></a>
+<h3 id="1-数组"><a href="#1-数组" class="headerlink" title="1.数组"></a><strong>1.数组</strong></h3><p>数组用来存储同一个数据类型的多个数据，通常可通过数组元素的索引来访问数组元素。</p>
+<h4 id="声明数组"><a href="#声明数组" class="headerlink" title="声明数组"></a><strong>声明数组</strong></h4><p>声明数组有两种语法：</p>
+<ol>
+<li>使用泛型语法。格式为：Array&lt;类型&gt;</li>
+<li>使用简化语法。格式为：[类型]</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 使用泛型语法声明数组</span></span><br><span class="line"><span class="keyword">var</span> arr : <span class="type">Array</span>&lt;<span class="type">String</span>&gt;</span><br><span class="line"><span class="comment">// 使用简化语法声明数组</span></span><br><span class="line"><span class="keyword">var</span> names : [<span class="type">String</span>]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="创建数组"><a href="#创建数组" class="headerlink" title="创建数组"></a><strong>创建数组</strong></h4><p>创建数组也有两种方式：</p>
+<ol>
+<li>使用Array的构造器创建数组</li>
+<li>使用简化语法创建数组</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 创建一个空数组，并将该空数组赋值给myArr变量</span></span><br><span class="line">arr= <span class="type">Array</span>&lt;<span class="type">String</span>&gt;()</span><br><span class="line"><span class="comment">// 创建一个包含10个&quot;moon&quot;元素的数组，并将该数组赋值给names变量</span></span><br><span class="line">names = <span class="type">Array</span>&lt;<span class="type">String</span>&gt;(<span class="built_in">count</span>: <span class="number">10</span>, repeatedValue: <span class="string">&quot;moon&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 使用简化语法创建数组，并将数组赋值给values变量</span></span><br><span class="line"><span class="keyword">var</span> values = [<span class="string">&quot;2&quot;</span> , <span class="string">&quot;3&quot;</span> , <span class="string">&quot;3&quot;</span> , <span class="string">&quot;4&quot;</span> , <span class="string">&quot;5&quot;</span> , <span class="string">&quot;6&quot;</span>]	</span><br></pre></td></tr></table></figure>
+
+<h4 id="遍历数组"><a href="#遍历数组" class="headerlink" title="遍历数组"></a><strong>遍历数组</strong></h4><p>普通的循环遍历数组：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> <span class="keyword">var</span> i = <span class="number">0</span>; i &lt; values .<span class="built_in">count</span> ; i++</span><br><span class="line">&#123;</span><br><span class="line">	<span class="built_in">print</span>(values[i])</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>for-in循环遍历数组：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> value <span class="keyword">in</span> values&#123;</span><br><span class="line"><span class="comment">//会报错&quot;canot assign to value:&#x27;value&#x27; is a &#x27;let&#x27;...</span></span><br><span class="line"><span class="comment">//value=&quot;5&quot;</span></span><br><span class="line"><span class="built_in">print</span>(value)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是，在使用for-in循环遍历是，不允许对循环常量进行赋值，因为for-in循环隐式的用let来声明了该常量。</p>
+<h4 id="修改数组"><a href="#修改数组" class="headerlink" title="修改数组"></a><strong>修改数组</strong></h4><p>Array提供了append()方法来添加元素：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 使用var定义一个可变数组</span></span><br><span class="line"><span class="keyword">var</span> languages = [<span class="string">&quot;Swift&quot;</span>]</span><br><span class="line"><span class="comment">// 添加元素,输出为[&quot;Swift&quot;,&quot;Java&quot;]</span></span><br><span class="line">languages.append(<span class="string">&quot;Java&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>还可以用”+“来进行数组的的加法运算：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">//输出为[&quot;Swift&quot;,&quot;Java&quot;,&quot;Ruby&quot;]</span></span><br><span class="line">languages=languages+[<span class="string">&quot;Ruby&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+
+<p>Array提供了insert()方法来添加元素：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 插入元素，这时数组第一个元素为&quot;Go&quot;</span></span><br><span class="line">languages.insert(<span class="string">&quot;Go&quot;</span> , atIndex:<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<p>Array支持在”[]”中使用Range，这样可以一次性获取和赋值多个数组元素：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> languages = [<span class="string">&quot;Swift&quot;</span>, <span class="string">&quot;OC&quot;</span>, <span class="string">&quot;PHP&quot;</span>, <span class="string">&quot;Perl&quot;</span> , <span class="string">&quot;Ruby&quot;</span> , <span class="string">&quot;Go&quot;</span>]</span><br><span class="line"><span class="comment">// 获取languages中数组中索引为1~4的元素</span></span><br><span class="line"><span class="keyword">let</span> subRange = languages[<span class="number">1</span>..&lt;<span class="number">4</span>]</span><br><span class="line"><span class="built_in">print</span>(subRange)  <span class="comment">// 输出[OC, PHP, Perl]</span></span><br><span class="line"><span class="comment">// 将languages中数组中索引为2~4的元素替换成&quot;C/C++&quot; , &quot;Python&quot;</span></span><br><span class="line">languages[<span class="number">2</span>...<span class="number">4</span>] = [<span class="string">&quot;C/C++&quot;</span> , <span class="string">&quot;Python&quot;</span>]</span><br><span class="line"><span class="built_in">print</span>(languages)  <span class="comment">// 输出[Swift, OC, C/C++, Python, Go]</span></span><br><span class="line"><span class="comment">// 清空数组</span></span><br><span class="line">languages[<span class="number">0</span>..&lt;languages.<span class="built_in">count</span>] = []</span><br><span class="line"><span class="built_in">print</span>(languages)  <span class="comment">// 输出[]</span></span><br></pre></td></tr></table></figure>
+
+<p>Array提供了removeAtIndex()、removeLast()和removeAll()方法来进行删除：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> languages = [<span class="string">&quot;Swift&quot;</span>, <span class="string">&quot;OC&quot;</span>, <span class="string">&quot;PHP&quot;</span>, <span class="string">&quot;Perl&quot;</span> , <span class="string">&quot;Ruby&quot;</span> , <span class="string">&quot;Go&quot;</span>]</span><br><span class="line"><span class="comment">// 删除索引为2的元素，删除&quot;PHP&quot;</span></span><br><span class="line">languages.removeAtIndex(<span class="number">2</span>)</span><br><span class="line"><span class="built_in">print</span>(languages)  <span class="comment">// 输出[Swift,Perl,OC, Ruby, Go]</span></span><br><span class="line"><span class="comment">// 删除最后一个元素，删除&quot;Go&quot;</span></span><br><span class="line">languages.removeLast()</span><br><span class="line"><span class="built_in">print</span>(languages)  <span class="comment">// 输出[Swift, Perl,OC, Ruby]</span></span><br><span class="line"><span class="comment">// 删除所有元素</span></span><br><span class="line">languages.removeAll()</span><br><span class="line"><span class="built_in">print</span>(languages)  <span class="comment">// 输出[]</span></span><br><span class="line"><span class="built_in">print</span>(languages.<span class="built_in">count</span>)  <span class="comment">// 输出0</span></span><br></pre></td></tr></table></figure>
+
+
+<h3 id="2-字典"><a href="#2-字典" class="headerlink" title="2.字典"></a><strong>2.字典</strong></h3><p>字典用于保存具有映射关系的数据，key和value都可以是任何数据类型的的数据，其中字典的key不允许重复。</p>
+<h4 id="声明字典"><a href="#声明字典" class="headerlink" title="声明字典"></a><strong>声明字典</strong></h4><p>声明字典有两种语法：</p>
+<ol>
+<li>使用泛型语法，格式为：Dictionary&lt;key,value&gt;</li>
+<li>使用简化语法，格式为：[key:value]</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 使用泛型语法声明字典</span></span><br><span class="line"><span class="keyword">var</span> dict : <span class="type">Dictionary</span>&lt;<span class="type">String</span>, <span class="type">String</span>&gt;</span><br><span class="line"><span class="comment">// 使用简化语法声明字典</span></span><br><span class="line"><span class="keyword">var</span> scores : [<span class="type">String</span>:<span class="type">Int</span>]</span><br></pre></td></tr></table></figure>
+
+<h4 id="创建字典"><a href="#创建字典" class="headerlink" title="创建字典"></a><strong>创建字典</strong></h4><p>同样的创建字典也有两种方式：</p>
+<ol>
+<li>使用Dictionary的构造器</li>
+<li>使用简化语法</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 创建一个Dictionary结构体，使用默认的参数</span></span><br><span class="line">dict = <span class="type">Dictionary</span>&lt;<span class="type">String</span>, <span class="type">String</span>&gt;()</span><br><span class="line"><span class="comment">// minimumCapacity至少包含键值对的个数，默认值为2</span></span><br><span class="line">scores = <span class="type">Dictionary</span>&lt;<span class="type">String</span>, <span class="type">Int</span>&gt;(minimumCapacity:<span class="number">5</span>)</span><br><span class="line"><span class="comment">// 使用简化语法创建字典</span></span><br><span class="line"><span class="keyword">var</span> health = [<span class="string">&quot;身高&quot;</span>:<span class="string">&quot;178&quot;</span> , <span class="string">&quot;体重&quot;</span>:<span class="string">&quot;75&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<h4 id="使用字典"><a href="#使用字典" class="headerlink" title="使用字典"></a><strong>使用字典</strong></h4><p>访问字典的value需要在字典变量后紧跟一个方括号”[]”就可以了，方括号里是字典value对应的key值。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">//将key值赋值给height </span></span><br><span class="line"><span class="keyword">var</span> height = health[<span class="string">&quot;身高&quot;</span>]</span><br><span class="line"><span class="built_in">print</span>(height) <span class="comment">// 输出Optional(&quot;178&quot;)</span></span><br><span class="line"><span class="comment">// 访问并不存在的key对应的value时，将会返回nil</span></span><br><span class="line"><span class="keyword">var</span> energy = health[<span class="string">&quot;能量&quot;</span>]</span><br><span class="line"><span class="built_in">print</span>(energy)  <span class="comment">// 输出nil</span></span><br></pre></td></tr></table></figure>
+<p>从上面的代码可以看出，根据key值访问字典对应的value时，返回的是包含value值的可选类型，因为字典不确定是否这个键值对存在，当键值对存在时则返回key对应的value，否则就返回nil。这时我们可以通过强制解析来解决这个问题：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">//height的类型是String?,而不是String</span></span><br><span class="line"><span class="keyword">var</span> height : <span class="type">String?</span> = health[<span class="string">&quot;身高&quot;</span>]</span><br><span class="line"><span class="keyword">if</span> height != <span class="literal">nil</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">// 使用!执行强制解析，输出为178</span></span><br><span class="line">	<span class="built_in">print</span>(height!)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>for-in循环同样可以用来遍历字典：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span> heal <span class="keyword">in</span> health</span><br><span class="line">&#123;</span><br><span class="line"> <span class="built_in">print</span>(heal) <span class="comment">//输出 (&quot;身高&quot;,178) (&quot;体重&quot;,75)</span></span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="字典的key集和value集"><a href="#字典的key集和value集" class="headerlink" title="字典的key集和value集"></a><strong>字典的key集和value集</strong></h4><p>如果程序只需要访问字典的key集和value集，只需要访问字典的keys属性或者values属性。</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> healths = [<span class="string">&quot;身高&quot;</span>:<span class="string">&quot;178&quot;</span> , <span class="string">&quot;体重&quot;</span>:<span class="string">&quot;75&quot;</span>]</span><br><span class="line"><span class="keyword">var</span> keys=<span class="type">Array</span>(healths.keys)</span><br><span class="line"><span class="keyword">var</span> values=<span class="type">Array</span>(healths.values)</span><br><span class="line"><span class="built_in">print</span>(keys) <span class="comment">//输出[&quot;身高&quot;,&quot;体重&quot;] </span></span><br><span class="line"><span class="built_in">print</span>(values)<span class="comment">//输出[&quot;178&quot;,&quot;75&quot;] </span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4 id="修改字典"><a href="#修改字典" class="headerlink" title="修改字典"></a><strong>修改字典</strong></h4><p>字典提供了updataValue()方法来修改字典的value值，该方法会返回一个Sting?类型的值，如果key值存在则修改成功，如果key值不存在则返回nil，但会新增一个key-value值</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> healths = [<span class="string">&quot;身高&quot;</span>:<span class="string">&quot;178&quot;</span> , <span class="string">&quot;体重&quot;</span>:<span class="string">&quot;75&quot;</span>]</span><br><span class="line"><span class="keyword">var</span> result=healths.updateValue(<span class="string">&quot;68&quot;</span>,forKey:<span class="string">&quot;体重&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(result) <span class="comment">// 输出Optional(&quot;75&quot;)</span></span><br><span class="line"><span class="built_in">print</span>(health) <span class="comment">// 输出[&quot;身高&quot;:&quot;178&quot; , &quot;体重&quot;:&quot;68&quot;]</span></span><br><span class="line"><span class="keyword">var</span> result=healths.updateValue(<span class="string">&quot;A&quot;</span>,forKey:<span class="string">&quot;血型&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(health) <span class="comment">// 输出[&quot;血型&quot;:&quot;A&quot;,&quot;身高&quot;:&quot;178&quot; , &quot;体重&quot;:&quot;68&quot;]</span></span><br></pre></td></tr></table></figure>
+
+<p>字典还提供了如下的方法来删除元素：</p>
+<ol>
+<li>removeValueForKey：删除指定key对应的value</li>
+<li>removeAll：清空字典</li>
+</ol>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="keyword">var</span> languages = [<span class="string">&quot;Swift&quot;</span>:<span class="number">9000</span>, <span class="string">&quot;OC&quot;</span>:<span class="number">8600</span>, <span class="string">&quot;PHP&quot;</span>:<span class="number">3400</span>, </span><br><span class="line">	<span class="string">&quot;Perl&quot;</span>:<span class="number">4300</span> , <span class="string">&quot;Ruby&quot;</span>:<span class="number">5600</span> , <span class="string">&quot;Go&quot;</span>: <span class="number">5600</span>]</span><br><span class="line"><span class="comment">// 删除key为&quot;PHP&quot;的key-value对</span></span><br><span class="line">languages.removeValueForKey(<span class="string">&quot;PHP&quot;</span>)</span><br><span class="line"><span class="comment">// 删除key为&quot;Perl&quot;的key-value对</span></span><br><span class="line">languages.removeValueForKey(<span class="string">&quot;Perl&quot;</span>)</span><br><span class="line"><span class="comment">// 下面输出：[Go: 5600, OC: 8600, Ruby: 5600, Swift: 9000]</span></span><br><span class="line"><span class="built_in">print</span>(languages)</span><br><span class="line"><span class="built_in">print</span>(languages.<span class="built_in">count</span>)  <span class="comment">// 输出4</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>还可以将Key对应的Value值赋值为nil来删除该key-value对：</p>
+<figure class="highlight swift"><table><tr><td class="code"><pre><span class="line"><span class="comment">// 删除key为&quot;Go&quot;的key-value对</span></span><br><span class="line">languages[<span class="string">&quot;Go&quot;</span>] = <span class="literal">nil</span></span><br><span class="line"><span class="built_in">print</span>(languages)  <span class="comment">// 输出[OC: 8600, Ruby: 5600, Swift: 9000]</span></span><br><span class="line"><span class="comment">// 删除所有元素</span></span><br><span class="line">languages.removeAll()</span><br><span class="line"><span class="built_in">print</span>(languages)  <span class="comment">// 输出[:]</span></span><br><span class="line"><span class="built_in">print</span>(languages.<span class="built_in">count</span>)  <span class="comment">// 输出0</span></span><br></pre></td></tr></table></figure></div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/swift/5-set.html">http://liuwangshu.cn/swift/5-set.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Swift/">Swift</a></div><div class="post_share"><div class="social-share" data-image="https://p.pstatp.com/origin/ff850001720b5e8178e7" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/view/5-dispatchingevents.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android View体系（五）从源码解析View的事件分发机制</div></div></a></div><div class="next-post pull-right"><a href="/application/view/4-scroller-sourcecode.html"><img class="next-cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android View体系（四）从源码解析Scroller</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/swift/1-helloworld.html" title="Swift快速入门（一）第一个Swift程序"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-01-23</div><div class="title">Swift快速入门（一）第一个Swift程序</div></div></a></div><div><a href="/swift/2-constant-variable.html" title="Swift快速入门（二）基本数据类型"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-02-01</div><div class="title">Swift快速入门（二）基本数据类型</div></div></a></div><div><a href="/swift/3-operator.html" title="Swift快速入门（三）运算符"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-02-06</div><div class="title">Swift快速入门（三）运算符</div></div></a></div><div><a href="/swift/4-process-control.html" title="Swift快速入门（四）流程控制"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-02-08</div><div class="title">Swift快速入门（四）流程控制</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

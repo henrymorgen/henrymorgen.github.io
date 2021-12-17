@@ -1,0 +1,189 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android AOSP基础（四）Source Insight和Android Studio导入系统源码 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  关联系列Android AOSP基础系列Android系统启动系列   前言在上一篇文章Android AOSP基础（三）Android系统源码的整编和单编中，我们对系统源码进行了编译，这篇文章我们接着来学习如何将系统源码导入到编辑器中，以便于查看和调试源码。关于查看源码，可以使用Android Studio、Eclipse、Sublime、Source I"><meta name="keywords" content="AOSP基础"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/framework/aosp/4-import-aosp.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android AOSP基础（四）Source Insight和Android Studio导入系统源码"><meta property="og:url" content="http://liuwangshu.cn/framework/aosp/4-import-aosp.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  关联系列Android AOSP基础系列Android系统启动系列   前言在上一篇文章Android AOSP基础（三）Android系统源码的整编和单编中，我们对系统源码进行了编译，这篇文章我们接着来学习如何将系统源码导入到编辑器中，以便于查看和调试源码。关于查看源码，可以使用Android Studio、Eclipse、Sublime、Source I"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><meta property="article:published_time" content="2019-04-02T16:18:00.000Z"><meta property="article:modified_time" content="2020-09-16T14:39:10.829Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-16 22:39:10'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Source-Insight%E5%AF%BC%E5%85%A5%E7%B3%BB%E7%BB%9F%E6%BA%90%E7%A0%81"><span class="toc-number">2.</span> <span class="toc-text">1. Source Insight导入系统源码</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%96%B0%E5%BB%BA%E6%BA%90%E7%A0%81%E9%A1%B9%E7%9B%AE"><span class="toc-number">2.1.</span> <span class="toc-text">新建源码项目</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AE%9A%E4%BD%8D%E6%96%87%E4%BB%B6"><span class="toc-number">2.2.</span> <span class="toc-text">定位文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%85%A8%E5%B1%80%E6%90%9C%E7%B4%A2"><span class="toc-number">2.3.</span> <span class="toc-text">全局搜索</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Android-Studio%E5%AF%BC%E5%85%A5%E7%B3%BB%E7%BB%9F%E6%BA%90%E7%A0%81"><span class="toc-number">3.</span> <span class="toc-text">2. Android Studio导入系统源码</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%94%9F%E6%88%90AS%E7%9A%84%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">3.1.</span> <span class="toc-text">生成AS的项目配置文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEAS%E7%9A%84%E9%A1%B9%E7%9B%AE%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">3.2.</span> <span class="toc-text">配置AS的项目配置文件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AF%BC%E5%85%A5%E7%B3%BB%E7%BB%9F%E6%BA%90%E4%BB%A3%E7%A0%81%E5%88%B0AS%E4%B8%AD"><span class="toc-number">3.3.</span> <span class="toc-text">导入系统源代码到AS中</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E9%A1%B9%E7%9B%AE%E7%9A%84JDK%E3%80%81SDK"><span class="toc-number">3.4.</span> <span class="toc-text">配置项目的JDK、SDK</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Exclude%E4%B8%8D%E9%9C%80%E8%A6%81%E7%9A%84%E4%BB%A3%E7%A0%81%E7%9B%AE%E5%BD%95"><span class="toc-number">3.5.</span> <span class="toc-text">Exclude不需要的代码目录</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">4.</span> <span class="toc-text">总结</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZWhn0.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android AOSP基础（四）Source Insight和Android Studio导入系统源码</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-04-02T16:18:00.000Z" title="发表于 2019-04-03 00:18:00">2019-04-03</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-16T14:39:10.829Z" title="更新于 2020-09-16 22:39:10">2020-09-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>关联系列<br><a href="http://liuwangshu.cn/tags/AOSP%E5%9F%BA%E7%A1%80/">Android AOSP基础系列</a><br><a href="http://liuwangshu.cn/tags/Android%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/">Android系统启动系列</a></p>
+<a id="more"></a>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>在上一篇文章<a href="http://liuwangshu.cn/framework/aosp/3-compiling-aosp.html">Android AOSP基础（三）Android系统源码的整编和单编</a>中，我们对系统源码进行了编译，这篇文章我们接着来学习如何将系统源码导入到编辑器中，以便于查看和调试源码。关于查看源码，可以使用Android Studio、Eclipse、Sublime、Source Insight等软件，这里我推荐使用Source Insight，但是有的同学可能不是很习惯，而且Source Insight是Windows平台的软件，Mac平台用不了，那么使用Android Studio是一个不错的选择，而且使用Android Studio还可以调试源码。</p>
+<h3 id="1-Source-Insight导入系统源码"><a href="#1-Source-Insight导入系统源码" class="headerlink" title="1. Source Insight导入系统源码"></a><strong>1. Source Insight导入系统源码</strong></h3><p>在《Android进阶解密》的第一章，我讲解了Source Insight如何导入系统源码，可能有的同学没有买这本书，这里再来讲一遍。<br>Source Insight只能查看源码，不能调试源码，如果只想在Source Insight中查看源码，可以直接从百度网盘：<a target="_blank" rel="noopener" href="https://pan.baidu.com/s/1ngsZs">https://pan.baidu.com/s/1ngsZs</a> 将源码下载下来。如果想在Android Studio中查看源码，那么最好还是在Linux环境下将AOSP源码下载下来。</p>
+<h4 id="新建源码项目"><a href="#新建源码项目" class="headerlink" title="新建源码项目"></a><strong>新建源码项目</strong></h4><p> 安装软件后，首先要新建源码项目。通过菜单项Project→New Project会弹出提示框。<br><img src="https://s2.ax1x.com/2019/05/27/VZWD78.png"><br>这里我们指定源码项目的名称为Android_8.0.0，然后点击OK按钮进入“New Project Settings”界面。<br><img src="https://s2.ax1x.com/2019/05/27/VZWsAS.png"></p>
+<p>上图箭头指向的Browse按钮来选择本地系统源码所在的路径，比如我的系统源码路径为：D:/Android/android-8.0.0_r1 。选择好加载路径后点击OK按钮会进入“Add and Remove Project Files”界面，在这个界面可以向项目中添加整个Android系统源码，也可以只把源码部分目录添加到项目中，以后再根据需要添加其他目录。如果向项目添加整个Android系统源码加载时会非常慢，这里我们只添加如下源码目录：frameworks/、libcore/、packages/、system/、art/和libnativehelper/，这几个目录基本上可以满足日常的系统源码阅读了，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/27/VZWB0f.png"><br>点击Add Tree按钮就会将选择的目录源码加载到Android_8.0.0项目中，这个时候会弹出加载进度条，加载完毕后点击窗口的关闭按钮就可以了。</p>
+<h4 id="定位文件"><a href="#定位文件" class="headerlink" title="定位文件"></a><strong>定位文件</strong></h4><p>  Source Insight的定位文件功能十分强大，我们只需要知道源码文件名就可以轻松找到它，比如我们要找MediaPlayer.java，只要在文件搜索框输入MediaPlayer.java即可：</p>
+<p><img src="https://s2.ax1x.com/2019/05/27/VZW6hQ.png"></p>
+<h4 id="全局搜索"><a href="#全局搜索" class="headerlink" title="全局搜索"></a><strong>全局搜索</strong></h4><p>Source Insight另一个好用的功能就是全局搜索，默认快捷键为：CTRL+/，或者点击最上面工具栏类似R的图标。在Search in的输入选项中我们可以自定义搜索的范围，比如我们想查找所有Java文件中引用MediaPlayer类的情况，就可以像下图一样进行操作。<br><img src="https://s2.ax1x.com/2019/05/27/VZW0nP.png"></p>
+<p>当然，Source Insights的功能远不只以上几种，相信随着使用次数的增多，你就会熟练掌握它的大部分功能，这里就不过多介绍了。</p>
+<h3 id="2-Android-Studio导入系统源码"><a href="#2-Android-Studio导入系统源码" class="headerlink" title="2. Android Studio导入系统源码"></a><strong>2. Android Studio导入系统源码</strong></h3><p>Source Insight导入源码不需要对源码进行编译，但是Android Studio导入整个系统源码需要对源码进行编译，生成AS的项目配置文件。</p>
+<h4 id="生成AS的项目配置文件"><a href="#生成AS的项目配置文件" class="headerlink" title="生成AS的项目配置文件"></a><strong>生成AS的项目配置文件</strong></h4><p>如果你整编过源码，查看out/host/linux-x86/framework/idegen.jar是否存在，如果不存在，进入源码根目录执行如下的命令：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">source build/envsetup.sh</span><br><span class="line">lunch [选择整编时选择的参数或者数字]</span><br><span class="line">mmm development/tools/idegen/</span><br></pre></td></tr></table></figure>
+
+
+<p>如果没整编过源码，可以直接执行如下命令单编idegen模块：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">source build/ensetup.sh  </span><br><span class="line">make idegen</span><br></pre></td></tr></table></figure>
+<p>关于Android系统源码的编译可以查看<a href="http://liuwangshu.cn/framework/aosp/3-compiling-aosp.html">Android AOSP基础（三）Android系统源码的整编和单编</a>这篇文章。</p>
+<p>idegen模块编译成功后，会在 out/host/linux-x86/framework目录下生成idegen.jar，执行如下命令：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo development&#x2F;tools&#x2F;idegen&#x2F;idegen.sh</span><br></pre></td></tr></table></figure>
+<p>这时会在源码根目录生成android.iml 和 android.ipr 两个文件，这两个文件一般是只读模式，这里建议改成可读可写，否则，在更改一些项目配置的时候可能会出现无法保存的情况。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">sudo chmod 777 android.iml</span><br><span class="line">sudo chmod 777 android.ipr</span><br></pre></td></tr></table></figure>
+<h4 id="配置AS的项目配置文件"><a href="#配置AS的项目配置文件" class="headerlink" title="配置AS的项目配置文件"></a><strong>配置AS的项目配置文件</strong></h4><p>由于要将所有源码导入AS会导致第一次加载很慢，可以在android.iml中修改excludeFolder配置，将不需要看的源码排除掉。等源码项目加载完成后，还可以通过AS对Exclude的Module进行调整。如果你的电脑的性能很好，可以不用进行配置。<br>在android.iml中搜索excludeFolder，在下面加入这些配置。</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/bionic&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/bootable&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/build&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/cts&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/dalvik&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/developers&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/development&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/device&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/docs&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/external&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/hardware&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/kernel&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/out&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/pdk&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/platform_testing&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/prebuilts&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/sdk&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/system&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/test&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/toolchain&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/tools&quot;</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">excludeFolder</span> <span class="attr">url</span>=<span class="string">&quot;file://$MODULE_DIR$/.repo&quot;</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="导入系统源代码到AS中"><a href="#导入系统源代码到AS中" class="headerlink" title="导入系统源代码到AS中"></a><strong>导入系统源代码到AS中</strong></h4><p>在AS安装目录的bin目录下，打开studio64.vmoptions文件，根据自己电脑的实际情况进行设置，这里修改为如下数值：</p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">-Xms1024m</span><br><span class="line">-Xmx1024m</span><br></pre></td></tr></table></figure>
+
+<p>如果你是在VirtualBox中下载的系统源码，那么将VirtualBox中的系统源码拷贝到共享文件夹中，这样源码就会自动到Windows或者Mac上，如果你不知道如何设置VirtualBox共享文件夹，可以查看<a href="http://liuwangshu.cn/framework/aosp/1-install-ubuntu.html">Android AOSP基础（一）VirtualBox 安装 Ubuntu</a>这篇文章。<br>通过AS的Open an existing Android Studio project选项选择android.ipr 就可以导入源码，这里我用了大概7分钟就导入完毕。导入后工程目录切换为Project选项就可以查看源码。<br><img src="https://s2.ax1x.com/2019/05/27/VZW21s.png"></p>
+<h4 id="配置项目的JDK、SDK"><a href="#配置项目的JDK、SDK" class="headerlink" title="配置项目的JDK、SDK"></a><strong>配置项目的JDK、SDK</strong></h4><p>由于我们下载的是9.0的AOSP源码，SDK版本也应该对应为API 28，如果没有就去SDK Manager下载即可。<br>点击File -&gt; Project Structure–&gt;SDKs配置项目的JDK、SDK。<br>创建一个新的JDK,这里取名为1.8(No Libraries)，删除其中classpath标签页下面的所有jar文件。<br><img src="https://s2.ax1x.com/2019/05/27/VZWytg.png"></p>
+<p>接着设置将Android SDK的Java SDK设置为1.8(No Libraries)，这样Android源码使用的Java就是Android源码中的。<br><img src="https://s2.ax1x.com/2019/05/27/VZWgpj.png"></p>
+<p>确保的项目的SDK为源码对应的SDK。<br><img src="https://s2.ax1x.com/2019/05/27/VZWRcn.png"></p>
+<h4 id="Exclude不需要的代码目录"><a href="#Exclude不需要的代码目录" class="headerlink" title="Exclude不需要的代码目录"></a><strong>Exclude不需要的代码目录</strong></h4><p>File -&gt; Project Structure -&gt; Modules中可以通过Excluded来筛选代码目录，比如我们选择bionic目录，点击Excluded，bionic目录会变为橙色，bionic字段会出现在右侧视图中，说明该目录已经被Excluded掉，通俗来讲就是被排除在工程之外。如果不希望bionic目录被Excluded掉，再次点击Excluded，bionic目录会变为灰色。</p>
+<p><img src="https://s2.ax1x.com/2019/05/27/VZWWXq.png"></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><p>这篇我们学习了Source Insight和Android Studio导入系统源码的方法，但是具体的查看源码的方式没有讲解，这些需要读者在使用中逐步去掌握，下一篇我们会学习如何使用Android Studio去调试系统源码。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/framework/aosp/4-import-aosp.html">http://liuwangshu.cn/framework/aosp/4-import-aosp.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AOSP%E5%9F%BA%E7%A1%80/">AOSP基础</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/aosp/5-debug-aosp.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZhKZ6.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android AOSP基础（五）Android Studio调试系统源码的三种方式</div></div></a></div><div class="next-post pull-right"><a href="/application/android-gradle/1-gradle-plug-in.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VepHcn.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android Gradle （一）Gradle的Android插件入门</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/framework/aosp/1-install-ubuntu.html" title="Android AOSP基础（一）VirtualBox 安装 Ubuntu"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZg6h9.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-03-02</div><div class="title">Android AOSP基础（一）VirtualBox 安装 Ubuntu</div></div></a></div><div><a href="/framework/aosp/2-download-aosp.html" title="Android AOSP基础（二）AOSP源码和内核源码下载"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZRBi4.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-03-09</div><div class="title">Android AOSP基础（二）AOSP源码和内核源码下载</div></div></a></div><div><a href="/framework/aosp/3-compiling-aosp.html" title="Android AOSP基础（三）Android系统源码的整编和单编"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-03-17</div><div class="title">Android AOSP基础（三）Android系统源码的整编和单编</div></div></a></div><div><a href="/framework/aosp/5-debug-aosp.html" title="Android AOSP基础（五）Android Studio调试系统源码的三种方式"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZhKZ6.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-04-08</div><div class="title">Android AOSP基础（五）Android Studio调试系统源码的三种方式</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

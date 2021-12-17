@@ -1,0 +1,205 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>设计模式（十四）中介者模式 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  相关文章设计模式系列 前言写了很多篇设计模式的文章，才发现没有讲关于设计模式的分类，那么这一篇就补上这一内容，顺便带来中介者模式的讲解。并与此前讲过的代理模式和外观模式做对比。  1.设计模式的分类GoF提出的设计模式总共有23种，根据目的准则分类分为三大类：  创建型模式，共五种：单例模式、工厂方法模式、抽象工厂模式、建造者模式、原型模式。 结构型模式，共"><meta name="keywords" content="设计模式,行为型模式"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/designpatterns/14-mediator.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="设计模式（十四）中介者模式"><meta property="og:url" content="http://liuwangshu.cn/designpatterns/14-mediator.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  相关文章设计模式系列 前言写了很多篇设计模式的文章，才发现没有讲关于设计模式的分类，那么这一篇就补上这一内容，顺便带来中介者模式的讲解。并与此前讲过的代理模式和外观模式做对比。  1.设计模式的分类GoF提出的设计模式总共有23种，根据目的准则分类分为三大类：  创建型模式，共五种：单例模式、工厂方法模式、抽象工厂模式、建造者模式、原型模式。 结构型模式，共"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><meta property="article:published_time" content="2017-03-06T04:31:00.000Z"><meta property="article:modified_time" content="2020-01-12T07:39:16.998Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 15:39:16'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%88%86%E7%B1%BB"><span class="toc-number">2.</span> <span class="toc-text">1.设计模式的分类</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">2.中介者模式</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F%E5%AE%9A%E4%B9%89"><span class="toc-number">3.1.</span> <span class="toc-text">2.1 中介者模式定义</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F%E7%AE%80%E5%8D%95%E5%AE%9E%E7%8E%B0"><span class="toc-number">3.2.</span> <span class="toc-text">2.2 中介者模式简单实现</span></a><ol class="toc-child"><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8A%BD%E8%B1%A1%E4%B8%AD%E4%BB%8B%E8%80%85%E8%A7%92%E8%89%B2"><span class="toc-number">3.2.1.</span> <span class="toc-text">抽象中介者角色</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E6%8A%BD%E8%B1%A1%E5%90%8C%E4%BA%8B%E8%A7%92%E8%89%B2"><span class="toc-number">3.2.2.</span> <span class="toc-text">抽象同事角色</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E5%90%8C%E4%BA%8B%E8%A7%92%E8%89%B2"><span class="toc-number">3.2.3.</span> <span class="toc-text">具体同事角色</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%85%B7%E4%BD%93%E4%B8%AD%E4%BB%8B%E8%80%85%E8%A7%92%E8%89%B2"><span class="toc-number">3.2.4.</span> <span class="toc-text">具体中介者角色</span></a></li><li class="toc-item toc-level-5"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%B0%83%E7%94%A8"><span class="toc-number">3.2.5.</span> <span class="toc-text">客户端调用</span></a></li></ol></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9%E5%92%8C%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF"><span class="toc-number">3.3.</span> <span class="toc-text">2.3 中介者模式的优缺点和使用场景</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E3%80%81%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F%E5%92%8C%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F%E5%AF%B9%E6%AF%94"><span class="toc-number">4.</span> <span class="toc-text">3.代理模式、外观模式和中介者模式对比</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E4%BB%A3%E7%90%86%E6%A8%A1%E5%BC%8F%E5%92%8C%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 代理模式和中介者模式</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E5%A4%96%E8%A7%82%E6%A8%A1%E5%BC%8F%E5%92%8C%E4%B8%AD%E4%BB%8B%E8%80%85%E6%A8%A1%E5%BC%8F"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 外观模式和中介者模式</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZWhn0.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">设计模式（十四）中介者模式</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-03-06T04:31:00.000Z" title="发表于 2017-03-06 12:31:00">2017-03-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T07:39:16.998Z" title="更新于 2020-01-12 15:39:16">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>相关文章<br><a href="http://liuwangshu.cn/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>写了很多篇设计模式的文章，才发现没有讲关于设计模式的分类，那么这一篇就补上这一内容，顺便带来中介者模式的讲解。并与此前讲过的代理模式和外观模式做对比。</p>
+<a id="more"></a>
+<h3 id="1-设计模式的分类"><a href="#1-设计模式的分类" class="headerlink" title="1.设计模式的分类"></a><strong>1.设计模式的分类</strong></h3><p>GoF提出的设计模式总共有23种，根据目的准则分类分为三大类：</p>
+<ul>
+<li>创建型模式，共五种：单例模式、工厂方法模式、抽象工厂模式、建造者模式、原型模式。</li>
+<li>结构型模式，共七种：适配器模式、装饰模式、代理模式、外观模式、桥接模式、组合模式、享元模式。</li>
+<li>行为型模式，共十一种：策略模式、模板方法模式、观察者模式、迭代器模式、责任链模式、命令模式、备忘录模式、状态模式、访问者模式、中介者模式、解释器模式。</li>
+</ul>
+<p>另外随着设计模式的发展也涌现出很多新的设计模式：它们分别是规格模式、对象池模式、雇工模式、黑板模式和空对象模式等。</p>
+<h3 id="2-中介者模式"><a href="#2-中介者模式" class="headerlink" title="2.中介者模式"></a><strong>2.中介者模式</strong></h3><p>从前面讲到的设计模式的分类中，我们应该得知中介者模式是行为型模式的一种，旨在处理类或对象如何交互及如何分配职责。<br>中介者模式又叫做调停者模式，名字跟出国留学中介和房产中介是类似的。拿房产中介来说，现在房子买家和房子卖家非常多，如果任由房子买家和房子卖家自由交易，则会导致不同的买家和卖家之间有很多交互，一个买家会和多个卖家进行交涉，同样的一个卖家也会和多个买家进行交涉。如果在买房的过程中出现纠纷问题，则很难进行解决。就如下图所示一样。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1YCCR.png" alt="V1YCCR.png"></p>
+<p>可以看出房子买家和卖家进行了很多错综复杂的交互，并且买家A和卖家B，买家D和卖家D还产生了纠纷，一看到这个图我们就觉得的晕，当然比我们晕的还有房子买家和卖家。我们在<a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85/article/details/50491657"> 设计模式（一）设计六大原则</a>这篇文章讲过迪米特原则，这个原则所说的就是要尽量减少对象之间的交互，如果两个对象之间不必彼此直接通信，那么这两个对象就不应当发生任何直接的相互作用，如果其中的一个对象需要调用另一个对象的某一个方法的话，可以通过第三者转发这个调用。迪米特原则同样适用于本场景，我们可以引入第三者也就是房产中介。它的出现不需要买家和卖家进行直接交涉，而是通过房产中介而进行交涉。并且也不容易出现买卖家之间纠纷，因为有中介者房产中介进行第三方监督。如下图所示。<br><img src="https://s2.ax1x.com/2019/06/01/V1YP81.png" alt="V1YP81.png"></p>
+<p>图中的关系清晰了很多。回到我们软件开发中，我们为了减少对象之间的交互和耦合，符合迪米特原则，那么就可以使用中介者模式，先来学习下中介者模式的定义。</p>
+<h4 id="2-1-中介者模式定义"><a href="#2-1-中介者模式定义" class="headerlink" title="2.1 中介者模式定义"></a><strong>2.1 中介者模式定义</strong></h4><p><strong>定义：用一个中介者对象来封装一系列的对象交互。中介者使得各对象不需要显式地相互引用，从而使其松散耦合，而且可以独立地改变它们之间的交互。</strong></p>
+<p>中介者模式结构图如下图所示。 </p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1YSUJ.png" alt="V1YSUJ.png"><br>在中介者模式中有如下角色： </p>
+<ul>
+<li>Mediator：抽象中介者角色，定义了同事对象到中介者对象的接口。</li>
+<li>ConcreteMediator：具体中介者角色，它从具体的同事对象接收消息，向具体同事发出命令。</li>
+<li>Colleague：抽象同事角色，定义了中介者对象接口，它只知道中介者而不知道其他同事对象。</li>
+<li>ConcreteColleague：具体同事角色，每个具体同事类都知道自己在小范围内的行为，而不知道它在大范围内的目的。</li>
+</ul>
+<h4 id="2-2-中介者模式简单实现"><a href="#2-2-中介者模式简单实现" class="headerlink" title="2.2 中介者模式简单实现"></a><strong>2.2 中介者模式简单实现</strong></h4><p>中介者模式可以拿武侠来举例，江湖中门派众多，门派之前因为想法不同会有很多的利益冲突，这样就会带来无休止的纷争。为了江湖的安宁，大家推举出了一个大家都认可的武林盟主来对江湖纷争进行调停。<br>前段时间武当派和峨眉派的的弟子被大力金刚指所杀，大力金刚指是少林派的绝学，因为事情重大，而且少林派实力强大，武当派和峨眉派不能够直接去少林派去问罪，只能上报武林盟主由武林盟主出面进行调停，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/06/01/V1JzE4.png" alt="V1JzE4.png"></p>
+<h5 id="抽象中介者角色"><a href="#抽象中介者角色" class="headerlink" title="抽象中介者角色"></a><strong>抽象中介者角色</strong></h5><p>首先我们创建抽象中介者类，在这个例子中，它是一个武林联盟类，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">WulinAlliance</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">notice</span><span class="params">(String message, United united)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>notice方法用于向门派发送通知，其中United为抽象同事类也就是门派类，接下来我们来创建它。</p>
+<h5 id="抽象同事角色"><a href="#抽象同事角色" class="headerlink" title="抽象同事角色"></a><strong>抽象同事角色</strong></h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">United</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> WulinAlliance wulinAlliance;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">United</span><span class="params">(WulinAlliance wulinAlliance)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.wulinAlliance=wulinAlliance;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>门派类（抽象同事类）会在构造方法中得到武林联盟类（抽象中介者类）。</p>
+<h5 id="具体同事角色"><a href="#具体同事角色" class="headerlink" title="具体同事角色"></a><strong>具体同事角色</strong></h5><p>具体同事类包括武当派、峨眉派和少林派，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体同事类（武当）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Wudang</span> <span class="keyword">extends</span> <span class="title">United</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Wudang</span><span class="params">(WulinAlliance wulinAlliance)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(wulinAlliance);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendAlliance</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        wulinAlliance.notice(message, <span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getNotice</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;武当收到消息：&quot;</span> + message);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体同事类（峨眉派）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Emei</span> <span class="keyword">extends</span> <span class="title">United</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Emei</span><span class="params">(WulinAlliance wulinAlliance)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(wulinAlliance);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendAlliance</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        wulinAlliance.notice(message, Emei.<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getNotice</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;峨眉收到消息：&quot;</span> + message);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 具体同事类（少林派）</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Shaolin</span> <span class="keyword">extends</span> <span class="title">United</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Shaolin</span><span class="params">(WulinAlliance wulinAlliance)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(wulinAlliance);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sendAlliance</span><span class="params">(String message)</span></span>&#123;</span><br><span class="line">        wulinAlliance.notice(message,Shaolin.<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getNotice</span><span class="params">(String message)</span></span>&#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;少林收到消息：&quot;</span>+message);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>武当、峨眉和少林类都有两个方法，其中getNotice方法是自有方法，对于其他的门派（同事类）和武林联盟（中介者）没有依赖，只是用来接收武林盟主的通知。sendAlliance方法则是依赖方法，它必须通过武林盟主才能完成行为。</p>
+<h5 id="具体中介者角色"><a href="#具体中介者角色" class="headerlink" title="具体中介者角色"></a><strong>具体中介者角色</strong></h5><p>具体中介者类则是武林盟主类，如下所示</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Champions</span> <span class="keyword">extends</span> <span class="title">WulinAlliance</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> Wudang wudang;</span><br><span class="line">    <span class="keyword">private</span> Shaolin shaolin;</span><br><span class="line">    <span class="keyword">private</span> Emei emei;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setWudang</span><span class="params">(Wudang wudang)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.wudang = wudang;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setEmei</span><span class="params">(Emei emei)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.emei = emei;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setShaolin</span><span class="params">(Shaolin shaolin)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.shaolin = shaolin;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">notice</span><span class="params">(String message, United united)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (united == wudang) &#123;</span><br><span class="line">            shaolin.getNotice(message);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (united == emei) &#123;</span><br><span class="line">            shaolin.getNotice(message);</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (united == shaolin) &#123;</span><br><span class="line">            wudang.getNotice(message);</span><br><span class="line">            emei.getNotice(message);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>武林盟主需要了解所有的门派，所以需要用setter来持有武当、峨眉和少林的引用。notice方法会根据不同门派发来的消息，转而通知给其他的门派。比如武当发来的消息，武林盟主就会将消息通知给少林。</p>
+<h5 id="客户端调用"><a href="#客户端调用" class="headerlink" title="客户端调用"></a><strong>客户端调用</strong></h5><figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[]args)</span> </span>&#123;</span><br><span class="line">        Champions champions=<span class="keyword">new</span> Champions();</span><br><span class="line">        Wudang wudang=<span class="keyword">new</span> Wudang(champions);</span><br><span class="line">        Shaolin shaolin=<span class="keyword">new</span> Shaolin(champions);</span><br><span class="line">        Emei emei=<span class="keyword">new</span> Emei(champions);</span><br><span class="line">        champions.setWudang(wudang);</span><br><span class="line">        champions.setShaolin(shaolin);</span><br><span class="line">        champions.setEmei(emei);</span><br><span class="line">        wudang.sendAlliance(<span class="string">&quot;武当弟子被少林大力金刚指所杀&quot;</span>);</span><br><span class="line">        emei.sendAlliance(<span class="string">&quot;峨眉弟子被少林大力金刚指所杀&quot;</span>);</span><br><span class="line">        shaolin.sendAlliance(<span class="string">&quot;少林弟子绝不会做出这种事情&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先创建武林盟主类Champions 并传入到各个门派类，接着调用武林盟主类的setter方法传入各个门派类，最后调用各个门派的sendAlliance方法通过武林盟主类向其他门派发送消息。</p>
+<p>输出结果为：<br>少林收到消息：武当弟子被少林大力金刚指所杀<br>少林收到消息：峨眉弟子被少林大力金刚指所杀<br>武当收到消息：少林弟子绝不会做出这种事情<br>峨眉收到消息：少林弟子绝不会做出这种事情</p>
+<p>接下来给出这个例子的UML图，如下所示。<br><img src="https://s2.ax1x.com/2019/06/01/V1Yp59.png" alt="V1Yp59.png"></p>
+<h4 id="2-3-中介者模式的优缺点和使用场景"><a href="#2-3-中介者模式的优缺点和使用场景" class="headerlink" title="2.3 中介者模式的优缺点和使用场景"></a><strong>2.3 中介者模式的优缺点和使用场景</strong></h4><p><strong>优点</strong><br>符合迪米特原则，将原有的一对多的依赖变成了一对一的依赖，降低类间的耦合。</p>
+<p><strong>缺点</strong><br>中介者会变得庞大且复杂，原本多个对象直接的相互依赖变成了中介者和多个同事类的依赖关系，同事类越多，中介者的逻辑就越复杂。</p>
+<p><strong>使用场景</strong><br>中介者模式很容易实现呢，但是也容易误用，不要着急使用，先要思考你的设计是否合理。<br>当对象之间的交互变多时，为了防止一个类会涉及修改其他类的行为，可以使用中介者模式，将系统从网状结构变为以中介者为中心的星型结构。</p>
+<h3 id="3-代理模式、外观模式和中介者模式对比"><a href="#3-代理模式、外观模式和中介者模式对比" class="headerlink" title="3.代理模式、外观模式和中介者模式对比"></a><strong>3.代理模式、外观模式和中介者模式对比</strong></h3><p>当我们学完中介者模式是不是会觉得和此前讲过的代理模式和外观模式有些类似呢？现在我们一一来将它们进行对比。</p>
+<h4 id="3-1-代理模式和中介者模式"><a href="#3-1-代理模式和中介者模式" class="headerlink" title="3.1 代理模式和中介者模式"></a><strong>3.1 代理模式和中介者模式</strong></h4><p>代理模式是结构型设计模式，它有很多种类型，主要是在访问对象时引入一定程度的间接性，由于有间接性，就可以附加多种的用途，比如进行权限控制。中介者模式则是为了减少对象之间的相互耦合。虽然网上有很多代理模式和中介者模式的对比，但是在我看来这两者实际上并没有可比性，只是看起来有些类似罢了。</p>
+<h4 id="3-2-外观模式和中介者模式"><a href="#3-2-外观模式和中介者模式" class="headerlink" title="3.2 外观模式和中介者模式"></a><strong>3.2 外观模式和中介者模式</strong></h4><p>外观模式主要是以封装和隔离为主要任务，中介者则是调停同事类之间的关系，因此，中介者具有部分业务的逻辑控制。他们之间的主要区别为：</p>
+<ul>
+<li>外观模式的子系统如果脱离外观模式还是可以运行的，而中介者模式增加了业务逻辑，同事类不能脱离中介者而独自存在。</li>
+<li>外观模式中，子系统是不知道外观类的存在的，而中介者模式中，每个同事类都知道中介者。</li>
+<li>外观模式将子系统的逻辑隐藏，用户不知道子系统的存在，而中介者模式中，用户知道同事类的存在。</li>
+</ul>
+<p><a target="_blank" rel="noopener" href="https://github.com/henrymorgen/BlogSamples/tree/master/designpattern/mediatorpattern"><font size=5>github源码</a></p>
+<p>参考资料<br>《大话设计模式》<br>《设计模式之禅》<br>《Android源码设计模式》</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/designpatterns/14-mediator.html">http://liuwangshu.cn/designpatterns/14-mediator.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a><a class="post-meta__tags" href="/tags/%E8%A1%8C%E4%B8%BA%E5%9E%8B%E6%A8%A1%E5%BC%8F/">行为型模式</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/performance/draw-1-performance.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android绘制优化（一）绘制性能分析</div></div></a></div><div class="next-post pull-right"><a href="/algorithm/3-select-bubble.html"><img class="next-cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">算法（三）初等排序后篇[选择和冒泡排序]</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/designpatterns/11-strategy.html" title="设计模式（十一）策略模式"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-09-16</div><div class="title">设计模式（十一）策略模式</div></div></a></div><div><a href="/designpatterns/15-state.html" title="设计模式（十五）状态模式"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-04-16</div><div class="title">设计模式（十五）状态模式</div></div></a></div><div><a href="/designpatterns/5-observer.html" title="设计模式（五）观察者模式"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-03-02</div><div class="title">设计模式（五）观察者模式</div></div></a></div><div><a href="/designpatterns/9-templatemethod .html" title="设计模式（九）模版方法模式"><img class="cover" src="https://s2.ax1x.com/2019/11/17/MDe3eU.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-08-19</div><div class="title">设计模式（九）模版方法模式</div></div></a></div><div><a href="/designpatterns/1-principle.html" title="设计模式（一）设计六大原则"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-01-10</div><div class="title">设计模式（一）设计六大原则</div></div></a></div><div><a href="/designpatterns/10-factorymethod.html" title="设计模式（十）工厂方法模式"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-08-27</div><div class="title">设计模式（十）工厂方法模式</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

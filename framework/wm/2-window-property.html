@@ -1,0 +1,262 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android解析WindowManager（二）Window的属性 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」   关联系列Android系统启动系列Android深入四大组件系列Android解析WindowManager系列 前言在上一篇文章我们学习了WindowManager体系，了解了Window和WindowManager之间的关系，这一篇我们接着来学习Window的属性。  1.概述上一篇文章中我们讲过了Window、WindowManager和WMS之间的"><meta name="keywords" content="Android框架层,Android系统服务,WindowManager"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/framework/wm/2-window-property.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android解析WindowManager（二）Window的属性"><meta property="og:url" content="http://liuwangshu.cn/framework/wm/2-window-property.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」   关联系列Android系统启动系列Android深入四大组件系列Android解析WindowManager系列 前言在上一篇文章我们学习了WindowManager体系，了解了Window和WindowManager之间的关系，这一篇我们接着来学习Window的属性。  1.概述上一篇文章中我们讲过了Window、WindowManager和WMS之间的"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><meta property="article:published_time" content="2017-09-11T16:16:00.000Z"><meta property="article:modified_time" content="2020-01-12T07:50:47.601Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 15:50:47'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%A6%82%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">1.概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Window%E7%9A%84%E7%B1%BB%E5%9E%8B%E5%92%8C%E6%98%BE%E7%A4%BA%E6%AC%A1%E5%BA%8F"><span class="toc-number">3.</span> <span class="toc-text">2.Window的类型和显示次序</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E7%AA%97%E5%8F%A3"><span class="toc-number">3.1.</span> <span class="toc-text">应用程序窗口</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%AD%90%E7%AA%97%E5%8F%A3"><span class="toc-number">3.2.</span> <span class="toc-text">子窗口</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%B3%BB%E7%BB%9F%E7%AA%97%E5%8F%A3"><span class="toc-number">3.3.</span> <span class="toc-text">系统窗口</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E7%AA%97%E5%8F%A3%E6%98%BE%E7%A4%BA%E6%AC%A1%E5%BA%8F"><span class="toc-number">3.4.</span> <span class="toc-text">窗口显示次序</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Window%E7%9A%84%E6%A0%87%E5%BF%97"><span class="toc-number">4.</span> <span class="toc-text">3.Window的标志</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%BD%AF%E9%94%AE%E7%9B%98%E7%9B%B8%E5%85%B3%E6%A8%A1%E5%BC%8F"><span class="toc-number">5.</span> <span class="toc-text">4.软键盘相关模式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E8%AF%AD"><span class="toc-number">6.</span> <span class="toc-text">结语</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZWhn0.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android解析WindowManager（二）Window的属性</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-09-11T16:16:00.000Z" title="发表于 2017-09-12 00:16:00">2017-09-12</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T07:50:47.601Z" title="更新于 2020-01-12 15:50:47">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p><img src="http://upload-images.jianshu.io/upload_images/1417629-0f9e994887a015ab.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240"></p>
+<p>关联系列<br><a href="http://liuwangshu.cn/tags/Android%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/">Android系统启动系列</a><br><a href="http://liuwangshu.cn/tags/Android%E6%B7%B1%E5%85%A5%E5%9B%9B%E5%A4%A7%E7%BB%84%E4%BB%B6/">Android深入四大组件系列</a><br><a href="http://liuwangshu.cn/tags/WindowManager/">Android解析WindowManager系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>在上一篇文章我们学习了WindowManager体系，了解了Window和WindowManager之间的关系，这一篇我们接着来学习Window的属性。</p>
+<a id="more"></a>
+<h3 id="1-概述"><a href="#1-概述" class="headerlink" title="1.概述"></a><strong>1.概述</strong></h3><p>上一篇文章中我们讲过了Window、WindowManager和WMS之间的关系，WMS是Window的最终管理者，Window好比是员工，WMS是老板，为了方便老板管理员工则需要定义一些“协议”，这些“协议”就是Window的属性，被定义在WindowManager的内部类LayoutParams中，了解Window的属性能够更好的理解WMS的内部原理。<br>Window的属性有很多种，与应用开发最密切的有三种，它们分别是Type(Window的类型)、Flag(Window的标志)和SoftInputMode（软键盘相关模式），下面分别介绍这三种Window的属性。</p>
+<h3 id="2-Window的类型和显示次序"><a href="#2-Window的类型和显示次序" class="headerlink" title="2.Window的类型和显示次序"></a><strong>2.Window的类型和显示次序</strong></h3><p>Window的类型有很多种，比如应用程序窗口、系统错误窗口、输入法窗口、PopupWindow、Toast、Dialog等等。总来来说分为三大类分别是：Application Window（应用程序窗口）、Sub Windwow（子窗口）、System Window（系统窗口），每个大类又包含了很多种类型，它们都定义在WindowManager的静态内部类LayoutParams中，接下来我们分别对这三大类进行讲解。</p>
+<h4 id="应用程序窗口"><a href="#应用程序窗口" class="headerlink" title="应用程序窗口"></a><strong>应用程序窗口</strong></h4><p>Activity就是一个典型的应用程序窗口，应用程序窗口包含的类型如下所示。<br><strong>frameworks/base/core/java/android/view/WindowManager.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> FIRST_APPLICATION_WINDOW = <span class="number">1</span>;<span class="comment">//1</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_BASE_APPLICATION   = <span class="number">1</span>;<span class="comment">//窗口的基础值，其他的窗口值要大于这个值</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_APPLICATION        = <span class="number">2</span>;<span class="comment">//普通的应用程序窗口类型</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_APPLICATION_STARTING = <span class="number">3</span>;<span class="comment">//应用程序启动窗口类型，用于系统在应用程序窗口启动前显示的窗口。</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_DRAWN_APPLICATION = <span class="number">4</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> LAST_APPLICATION_WINDOW = <span class="number">99</span>;<span class="comment">//2</span></span><br></pre></td></tr></table></figure>
+<p>应用程序窗口共包含了以上几种Type值，其中注释1处的Type表示应用程序窗口类型初始值，注释2处的Type表示应用程序窗口类型结束值，也就是说应用程序窗口的Type值范围为1到99，这个数值的大小涉及到窗口的层级，后面会讲到。</p>
+<h4 id="子窗口"><a href="#子窗口" class="headerlink" title="子窗口"></a><strong>子窗口</strong></h4><p>子窗口，顾名思义，它不能独立的存在，需要附着在其他窗口才可以，PopupWindow就属于子窗口。子窗口的类型定义如下所示：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> FIRST_SUB_WINDOW = <span class="number">1000</span>;<span class="comment">//子窗口类型初始值</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_APPLICATION_PANEL = FIRST_SUB_WINDOW;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_APPLICATION_MEDIA = FIRST_SUB_WINDOW + <span class="number">1</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_APPLICATION_SUB_PANEL = FIRST_SUB_WINDOW + <span class="number">2</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_APPLICATION_ATTACHED_DIALOG = FIRST_SUB_WINDOW + <span class="number">3</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_APPLICATION_MEDIA_OVERLAY  = FIRST_SUB_WINDOW + <span class="number">4</span>; </span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_APPLICATION_ABOVE_SUB_PANEL = FIRST_SUB_WINDOW + <span class="number">5</span>;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> LAST_SUB_WINDOW = <span class="number">1999</span>;<span class="comment">//子窗口类型结束值</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>子窗口的Type值范围为1000到1999。</p>
+<h4 id="系统窗口"><a href="#系统窗口" class="headerlink" title="系统窗口"></a><strong>系统窗口</strong></h4><p>Toast、输入法窗口、系统音量条窗口、系统错误窗口都属于系统窗口。系统窗口的类型定义如下所示：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> FIRST_SYSTEM_WINDOW     = <span class="number">2000</span>;<span class="comment">//系统窗口类型初始值</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_STATUS_BAR         = FIRST_SYSTEM_WINDOW;<span class="comment">//系统状态栏窗口</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_SEARCH_BAR         = FIRST_SYSTEM_WINDOW+<span class="number">1</span>;<span class="comment">//搜索条窗口</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_PHONE              = FIRST_SYSTEM_WINDOW+<span class="number">2</span>;<span class="comment">//通话窗口</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_SYSTEM_ALERT       = FIRST_SYSTEM_WINDOW+<span class="number">3</span>;<span class="comment">//系统ALERT窗口</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_KEYGUARD           = FIRST_SYSTEM_WINDOW+<span class="number">4</span>;<span class="comment">//锁屏窗口</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> TYPE_TOAST              = FIRST_SYSTEM_WINDOW+<span class="number">5</span>;<span class="comment">//TOAST窗口</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> LAST_SYSTEM_WINDOW      = <span class="number">2999</span>;<span class="comment">//系统窗口类型结束值</span></span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+<p>系统窗口的类型值有接近40个，这里只列出了一小部分， 系统窗口的Type值范围为2000到2999。</p>
+<h4 id="窗口显示次序"><a href="#窗口显示次序" class="headerlink" title="窗口显示次序"></a><strong>窗口显示次序</strong></h4><p>当一个进程向WMS申请一个窗口时，WMS会为窗口确定显示次序。为了方便窗口显示次序的管理，手机屏幕可以虚拟的用X、Y、Z轴来表示，其中Z轴垂直于屏幕，从屏幕内指向屏幕外，这样确定窗口显示次序也就是确定窗口在Z轴上的次序，这个次序称为Z-Oder。Type值是Z-Oder排序的依据，我们知道应用程序窗口的Type值范围为1到99，子窗口1000到1999 ，系统窗口 2000到2999，，一般情况下，Type值越大则Z-Oder排序越靠前，就越靠近用户。当然窗口显示次序的逻辑不会这么简单，情况会比较多，举个常见的情况：当多个窗口的Type值都是TYPE_APPLICATION，这时WMS会结合各种情况给出最终的Z-Oder，这个逻辑不在本文的讨论范围，这里我们只需要知道窗口显示次序的基本规则就好。       </p>
+<h3 id="3-Window的标志"><a href="#3-Window的标志" class="headerlink" title="3.Window的标志"></a><strong>3.Window的标志</strong></h3><p>Window的标志也就是Flag，用于控制Window的显示，同样被定义在WindowManager的内部类LayoutParams中，一共有20多个，这里我们给出几个比较常用。 </p>
+<table>
+<thead>
+<tr>
+<th align="center">Flag</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">FLAG_ALLOW_LOCK_WHILE_SCREEN_ON</td>
+<td align="center">只要窗口可见，就允许在开启状态的屏幕上锁屏</td>
+</tr>
+<tr>
+<td align="center">FLAG_NOT_FOCUSABLE</td>
+<td align="center">窗口不能获得输入焦点，设置该标志的同时，FLAG_NOT_TOUCH_MODAL也会被设置</td>
+</tr>
+<tr>
+<td align="center">FLAG_NOT_TOUCHABLE</td>
+<td align="center">窗口不接收任何触摸事件</td>
+</tr>
+<tr>
+<td align="center">FLAG_NOT_TOUCH_MODAL</td>
+<td align="center">在该窗口区域外的触摸事件传递给其他的Window,而自己只会处理窗口区域内的触摸事件</td>
+</tr>
+<tr>
+<td align="center">FLAG_KEEP_SCREEN_ON</td>
+<td align="center">只要窗口可见，屏幕就会一直亮着</td>
+</tr>
+<tr>
+<td align="center">FLAG_LAYOUT_NO_LIMITS</td>
+<td align="center">允许窗口超过屏幕之外</td>
+</tr>
+<tr>
+<td align="center">FLAG_FULLSCREEN</td>
+<td align="center">隐藏所有的屏幕装饰窗口，比如在游戏、播放器中的全屏显示</td>
+</tr>
+<tr>
+<td align="center">FLAG_SHOW_WHEN_LOCKED</td>
+<td align="center">窗口可以在锁屏的窗口之上显示</td>
+</tr>
+<tr>
+<td align="center">FLAG_IGNORE_CHEEK_PRESSES</td>
+<td align="center">当用户的脸贴近屏幕时（比如打电话），不会去响应此事件</td>
+</tr>
+<tr>
+<td align="center">FLAG_TURN_SCREEN_ON</td>
+<td align="center">窗口显示时将屏幕点亮</td>
+</tr>
+</tbody></table>
+<p>设置Window的Flag有三种方法，第一种是通过Window的addFlags方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Window mWindow =getWindow(); </span><br><span class="line">mWindow.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);</span><br></pre></td></tr></table></figure>
+<p>第二种通过Window的setFlags方法:</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Window mWindow =getWindow();            </span><br><span class="line">mWindow.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN</span><br><span class="line">,WindowManager.LayoutParams.FLAG_FULLSCREEN);</span><br></pre></td></tr></table></figure>
+<p>其实Window的addFlags方法内部会调用setFlags方法，因此这两种方法区别不大。<br>第三种则是给LayoutParams设置Flag，并通过WindowManager的addView方法进行添加，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">WindowManager.LayoutParams mWindowLayoutParams =</span><br><span class="line">              <span class="keyword">new</span> WindowManager.LayoutParams();</span><br><span class="line">      mWindowLayoutParams.flags=WindowManager.LayoutParams.FLAG_FULLSCREEN;</span><br><span class="line">      WindowManager mWindowManager =(WindowManager) getSystemService(Context.WINDOW_SERVICE);  </span><br><span class="line">      TextView mTextView=<span class="keyword">new</span> TextView(<span class="keyword">this</span>);</span><br><span class="line">      mWindowManager.addView(mTextView,mWindowLayoutParams);</span><br><span class="line">                                                                                                                     </span><br></pre></td></tr></table></figure>
+
+<h3 id="4-软键盘相关模式"><a href="#4-软键盘相关模式" class="headerlink" title="4.软键盘相关模式"></a><strong>4.软键盘相关模式</strong></h3><p>窗口和窗口的叠加是非常常见的场景，但如果其中的窗口是软键盘窗口，可能就会出现一些问题，比如典型的用户登录界面，默认的情况弹出的软键盘窗口可能会盖住输入框下方的按钮，这样用户体验会非常糟糕。<br>为了使得软键盘窗口能够按照期望来显示，WindowManager的静态内部类LayoutParams中定义了软键盘相关模式，这里给出常用的几个：</p>
+<table>
+<thead>
+<tr>
+<th align="center">SoftInputMode</th>
+<th align="center">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">SOFT_INPUT_STATE_UNSPECIFIED</td>
+<td align="center">没有指定状态,系统会选择一个合适的状态或依赖于主题的设置</td>
+</tr>
+<tr>
+<td align="center">SOFT_INPUT_STATE_UNCHANGED</td>
+<td align="center">不会改变软键盘状态</td>
+</tr>
+<tr>
+<td align="center">SOFT_INPUT_STATE_HIDDEN</td>
+<td align="center">当用户进入该窗口时，软键盘默认隐藏</td>
+</tr>
+<tr>
+<td align="center">SOFT_INPUT_STATE_ALWAYS_HIDDEN</td>
+<td align="center">当窗口获取焦点时，软键盘总是被隐藏</td>
+</tr>
+<tr>
+<td align="center">SOFT_INPUT_ADJUST_RESIZE</td>
+<td align="center">当软键盘弹出时，窗口会调整大小</td>
+</tr>
+<tr>
+<td align="center">SOFT_INPUT_ADJUST_PAN</td>
+<td align="center">当软键盘弹出时，窗口不需要调整大小，要确保输入焦点是可见的</td>
+</tr>
+</tbody></table>
+<p>从上面给出的SoftInputMode ，可以发现，它们与AndroidManifest中Activity的属性android:windowSoftInputMode是对应的。因此，除了在AndroidMainfest中为Activity设置android:windowSoftInputMode以外还可以在Java代码中为Window设置SoftInputMode：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);</span><br></pre></td></tr></table></figure>
+
+<h3 id="结语"><a href="#结语" class="headerlink" title="结语"></a><strong>结语</strong></h3><p>好了，就讲到这里，本篇文章讲了Window的属性，分别是Type(Window的类型)、Flag(Window的标志)和SoftInputMode（软键盘相关模式），这些知识会为后续的介绍WMS的系列文章打下基础。本系列的下一篇会介绍WindowManager添加Window的过程，敬请期待。</p>
+<p>参考资料<br>《深入理解Android 卷3》<br>《深入理解Android内核设计思想》第二版<br>《Android开发艺术探索》</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/framework/wm/2-window-property.html">http://liuwangshu.cn/framework/wm/2-window-property.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a><a class="post-meta__tags" href="/tags/Android%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/">Android系统服务</a><a class="post-meta__tags" href="/tags/WindowManager/">WindowManager</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/wm/3-add-window.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/28/Vez4mV.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android解析WindowManager（三）Window的添加过程</div></div></a></div><div class="next-post pull-right"><a href="/framework/wm/1-windowmanager.html"><img class="next-cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android解析WindowManager（一）WindowManager体系</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/framework/wm/1-windowmanager.html" title="Android解析WindowManager（一）WindowManager体系"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-09-08</div><div class="title">Android解析WindowManager（一）WindowManager体系</div></div></a></div><div><a href="/framework/wm/3-add-window.html" title="Android解析WindowManager（三）Window的添加过程"><img class="cover" src="https://s2.ax1x.com/2019/05/28/Vez4mV.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-09-19</div><div class="title">Android解析WindowManager（三）Window的添加过程</div></div></a></div><div><a href="/framework/ams/2-activitytask.html" title="Android解析ActivityManagerService（二）ActivityTask和Activity栈管理"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-08-25</div><div class="title">Android解析ActivityManagerService（二）ActivityTask和Activity栈管理</div></div></a></div><div><a href="/framework/wms/3-wms-remove.html" title="Android解析WindowManagerService（三）Window的删除过程"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-01-23</div><div class="title">Android解析WindowManagerService（三）Window的删除过程</div></div></a></div><div><a href="/framework/ams/1-ams.html" title="Android解析ActivityManagerService（一）AMS启动流程和AMS家族"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-07-31</div><div class="title">Android解析ActivityManagerService（一）AMS启动流程和AMS家族</div></div></a></div><div><a href="/framework/wms/2-wms-member.html" title="Android解析WindowManagerService（二）WMS的重要成员和Window的添加过程"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-10-23</div><div class="title">Android解析WindowManagerService（二）WMS的重要成员和Window的添加过程</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

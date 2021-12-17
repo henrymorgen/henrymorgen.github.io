@@ -1,0 +1,183 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android解析WindowManager（一）WindowManager体系 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  关联系列Android系统启动系列Android深入四大组件 前言WindowManagerService（WMS）和AMS一样，都是Android开发需要掌握的知识点，同样的，WMS也很复杂，需要多篇文章来进行讲解，为何更好的理解WMS，首先要了解WindowManager，这一篇我们来学习WindowManager体系。  1.Window、Window"><meta name="keywords" content="Android框架层,Android系统服务,WindowManager"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/framework/wm/1-windowmanager.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android解析WindowManager（一）WindowManager体系"><meta property="og:url" content="http://liuwangshu.cn/framework/wm/1-windowmanager.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  关联系列Android系统启动系列Android深入四大组件 前言WindowManagerService（WMS）和AMS一样，都是Android开发需要掌握的知识点，同样的，WMS也很复杂，需要多篇文章来进行讲解，为何更好的理解WMS，首先要了解WindowManager，这一篇我们来学习WindowManager体系。  1.Window、Window"><meta property="og:image" content="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><meta property="article:published_time" content="2017-09-07T16:16:00.000Z"><meta property="article:modified_time" content="2020-01-12T07:50:28.029Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 15:50:28'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Window%E3%80%81WindowManager%E5%92%8CWMS"><span class="toc-number">2.</span> <span class="toc-text">1.Window、WindowManager和WMS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-WindowManager%E4%BD%93%E7%B3%BB"><span class="toc-number">3.</span> <span class="toc-text">2.WindowManager体系</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/11/MMSseK.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android解析WindowManager（一）WindowManager体系</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-09-07T16:16:00.000Z" title="发表于 2017-09-08 00:16:00">2017-09-08</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T07:50:28.029Z" title="更新于 2020-01-12 15:50:28">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>关联系列<br><a href="http://liuwangshu.cn/tags/Android%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/">Android系统启动系列</a><br><a href="http://liuwangshu.cn/tags/Android%E6%B7%B1%E5%85%A5%E5%9B%9B%E5%A4%A7%E7%BB%84%E4%BB%B6/">Android深入四大组件</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>WindowManagerService（WMS）和AMS一样，都是Android开发需要掌握的知识点，同样的，WMS也很复杂，需要多篇文章来进行讲解，为何更好的理解WMS，首先要了解WindowManager，这一篇我们来学习WindowManager体系。</p>
+<a id="more"></a>
+<h3 id="1-Window、WindowManager和WMS"><a href="#1-Window、WindowManager和WMS" class="headerlink" title="1.Window、WindowManager和WMS"></a><strong>1.Window、WindowManager和WMS</strong></h3><p>Window我们应该很熟悉，它是一个抽象类，具体的实现类为PhoneWindow，它对View进行管理。 WindowManager是一个接口类，继承自接口ViewManager，从名称就知道它是用来管理Window的，它的实现类为WindowManagerImpl。如果我们想要对Window进行添加和删除就可以使用WindowManager，具体的工作都是由WMS来处理的，WindowManager和WMS通过Binder来进行跨进程通信，WMS作为系统服务有很多API是不会暴露给WindowManager的，这一点与ActivityManager和AMS的关系有些类似。<br>关于WMS的功能，会在后续文章进行介绍，这里我们只需要知道它的主要功能包括Window管理和输入系统就可以了。这一系列文章的重点是WindowManager。<br>Window、WindowManager和WMS的关系可以简略的用下图来表示。<br><img src="https://s2.ax1x.com/2019/05/28/VeznzR.png" alt="VeznzR.png"></p>
+<p>Window包含了View并对View进行管理，Window用虚线来表示是因为Window是一个抽象概念，并不是真实存在，Window的实体其实也是View。WindowManager用来管理Window，而WindowManager所提供的功能最终会由WMS来进行处理。</p>
+<h3 id="2-WindowManager体系"><a href="#2-WindowManager体系" class="headerlink" title="2.WindowManager体系"></a><strong>2.WindowManager体系</strong></h3><p>接下来我们从源码角度来分析WindowManager体系以及Window和WindowManager的关系。<br>WindowManager是一个接口类，继承自接口ViewManager，ViewManager中定义了三个方法，分别用来添加、更新和删除View：<br><strong>frameworks/base/core/java/android/view/ViewManager.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ViewManager</span></span></span><br><span class="line"><span class="class"></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addView</span><span class="params">(View view, ViewGroup.LayoutParams params)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">updateViewLayout</span><span class="params">(View view, ViewGroup.LayoutParams params)</span></span>;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">removeView</span><span class="params">(View view)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>WindowManager也继承了这些方法，而这些方法传入的参数都是View，说明WindowManager具体管理的是以View形式存在的Window。WindowManager在继承ViewManager的同时，又加入很多功能，包括Window的类型和层级相关的常量、内部类以及一些方法，其中有两个方法是根据Window的特性加入的，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> Display <span class="title">getDefaultDisplay</span><span class="params">()</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">removeViewImmediate</span><span class="params">(View view)</span></span>;</span><br></pre></td></tr></table></figure>
+<p>getDefaultDisplay方法会得知这个WindowManager实例将Window添加到哪个屏幕上了，换句话说，就是得到WindowManager所管理的屏幕（Display）。removeViewImmediate方法则规定在这个方法返回前要立即执行<code>View.onDetachedFromWindow()</code>，来完成传入的View相关的销毁工作。关于Window的类型和层级会在本系列后续的文章进行介绍。<br>Window是一个抽象类，它的具体实现类为PhoneWindow。在Activity启动过程中会调用ActivityThread的performLaunchActivity方法，performLaunchActivity方法中又会调用Activity的attach方法，如果不了解这些请查看<a href="http://liuwangshu.cn/framework/component/1-activity-start-2.html">Android深入四大组件（一）应用程序启动过程（后篇）</a>这篇文章。<br>我们从Activity的attach方法开始入手，如下所示。<br><strong>frameworks/base/core/java/android/app/Activity.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">final</span> <span class="keyword">void</span> <span class="title">attach</span><span class="params">(Context context, ActivityThread aThread,</span></span></span><br><span class="line"><span class="function"><span class="params">            Instrumentation instr, IBinder token, <span class="keyword">int</span> ident,</span></span></span><br><span class="line"><span class="function"><span class="params">            Application application, Intent intent, ActivityInfo info,</span></span></span><br><span class="line"><span class="function"><span class="params">            CharSequence title, Activity parent, String id,</span></span></span><br><span class="line"><span class="function"><span class="params">            NonConfigurationInstances lastNonConfigurationInstances,</span></span></span><br><span class="line"><span class="function"><span class="params">            Configuration config, String referrer, IVoiceInteractor voiceInteractor,</span></span></span><br><span class="line"><span class="function"><span class="params">            Window window)</span> </span>&#123;</span><br><span class="line">        attachBaseContext(context);</span><br><span class="line">        mFragments.attachHost(<span class="keyword">null</span> <span class="comment">/*parent*/</span>);</span><br><span class="line">        mWindow = <span class="keyword">new</span> PhoneWindow(<span class="keyword">this</span>, window);<span class="comment">//1</span></span><br><span class="line">        ...</span><br><span class="line">         <span class="comment">/**</span></span><br><span class="line"><span class="comment">         *2</span></span><br><span class="line"><span class="comment">         */</span></span><br><span class="line">        mWindow.setWindowManager(</span><br><span class="line">                (WindowManager)context.getSystemService(Context.WINDOW_SERVICE),</span><br><span class="line">                mToken, mComponent.flattenToString(),</span><br><span class="line">                (info.flags &amp; ActivityInfo.FLAG_HARDWARE_ACCELERATED) != <span class="number">0</span>);</span><br><span class="line">      ...</span><br></pre></td></tr></table></figure>
+<p>注释1处创建了PhoneWindow，在注释2处调用了PhoneWindow的setWindowManager方法，这个方法的具体的实现在PhoneWindow的父类Window中。<br><strong>frameworks/base/core/java/android/view/Window.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setWindowManager</span><span class="params">(WindowManager wm, IBinder appToken, String appName,</span></span></span><br><span class="line"><span class="function"><span class="params">        <span class="keyword">boolean</span> hardwareAccelerated)</span> </span>&#123;</span><br><span class="line">    mAppToken = appToken;</span><br><span class="line">    mAppName = appName;</span><br><span class="line">    mHardwareAccelerated = hardwareAccelerated</span><br><span class="line">            || SystemProperties.getBoolean(PROPERTY_HARDWARE_UI, <span class="keyword">false</span>);</span><br><span class="line">    <span class="keyword">if</span> (wm == <span class="keyword">null</span>) &#123;</span><br><span class="line">        wm = (WindowManager)mContext.getSystemService(Context.WINDOW_SERVICE);<span class="comment">//1</span></span><br><span class="line">    &#125;</span><br><span class="line">    mWindowManager = ((WindowManagerImpl)wm).createLocalWindowManager(<span class="keyword">this</span>);<span class="comment">//2</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果传入的WindowManager为null，就会在注释1处调用Context的getSystemService方法，并传入服务的名称Context.WINDOW_SERVICE（”window”），具体的实现在ContextImpl中，如下所示。<br><strong>frameworks/base/core/java/android/app/ContextImpl.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> Object <span class="title">getSystemService</span><span class="params">(String name)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> SystemServiceRegistry.getSystemService(<span class="keyword">this</span>, name);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> String <span class="title">getSystemServiceName</span><span class="params">(Class&lt;?&gt; serviceClass)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> SystemServiceRegistry.getSystemServiceName(serviceClass);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>最终会调用SystemServiceRegistry的getSystemServiceName方法。<br><strong>frameworks/base/core/java/android/app/SystemServiceRegistry.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">getSystemServiceName</span><span class="params">(Class&lt;?&gt; serviceClass)</span> </span>&#123;</span><br><span class="line">      <span class="keyword">return</span> SYSTEM_SERVICE_NAMES.get(serviceClass);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>SYSTEM_SERVICE_NAMES是一个HashMap类型的数据，它用来存储服务的名称，那么传入的Context.WINDOW_SERVICE到底对应着什么？我们接着往下看。<br><strong>frameworks/base/core/java/android/app/SystemServiceRegistry.java</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">SystemServiceRegistry</span> </span>&#123;</span><br><span class="line">...</span><br><span class="line"> <span class="function"><span class="keyword">private</span> <span class="title">SystemServiceRegistry</span><span class="params">()</span> </span>&#123; &#125;</span><br><span class="line"> <span class="keyword">static</span> &#123;</span><br><span class="line"> ...</span><br><span class="line">   registerService(Context.WINDOW_SERVICE, WindowManager.class,</span><br><span class="line">                <span class="keyword">new</span> CachedServiceFetcher&lt;WindowManager&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> WindowManager <span class="title">createService</span><span class="params">(ContextImpl ctx)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> WindowManagerImpl(ctx);</span><br><span class="line">            &#125;&#125;);</span><br><span class="line">...</span><br><span class="line"> &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>SystemServiceRegistry 的静态代码块中会调用多个registerService方法，这里只列举了和本文有关的一个。registerService方法会将传入的服务的名称存入到SYSTEM_SERVICE_NAMES中。从上面代码可以看出，传入的Context.WINDOW_SERVICE对应的就是WindowManagerImpl实例，因此得出结论，Context的getSystemService方法得到的是WindowManagerImpl实例。我们再回到Window的setWindowManager方法，在注释1处得到WindowManagerImpl实例后转为WindowManager类型，在注释2处调用了WindowManagerImpl的createLocalWindowManager方法：</p>
+<p><strong>frameworks/base/core/java/android/view/WindowManagerImpl</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> WindowManagerImpl <span class="title">createLocalWindowManager</span><span class="params">(Window parentWindow)</span> </span>&#123;</span><br><span class="line">       <span class="keyword">return</span> <span class="keyword">new</span> WindowManagerImpl(mContext, parentWindow);</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<p>createLocalWindowManager方法同样也是创建WindowManagerImpl，不同的是这次创建WindowManagerImpl时将创建它的Window作为参数传了进来，这样WindowManagerImpl就持有了Window的引用，就可以对Window进行操作，比如<br>在Window中添加View，来查看WindowManagerImpl的addView方法：<br><strong>frameworks/base/core/java/android/view/WindowManagerImpl</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addView</span><span class="params">(<span class="meta">@NonNull</span> View view, <span class="meta">@NonNull</span> ViewGroup.LayoutParams params)</span> </span>&#123;</span><br><span class="line">     applyDefaultToken(params);</span><br><span class="line">     mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);<span class="comment">//1</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处调用了WindowManagerGlobal的addView方法，其中最后一个参数mParentWindow就是Window，可以看出WindowManagerImpl虽然是WindowManager的实现类，但是却没有实现什么功能，而是将功能实现委托给了WindowManagerGlobal，这里用到的是桥接模式。关于在Window中添加View，本系列后续的文章会详细介绍。<br>我们来查看WindowManagerImpl中如何定义的WindowManagerGlobal：<br><strong>frameworks/base/core/java/android/view/WindowManagerImpl</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">WindowManagerImpl</span> <span class="keyword">implements</span> <span class="title">WindowManager</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Context mContext;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Window mParentWindow;<span class="comment">//1</span></span><br><span class="line">...</span><br><span class="line">  <span class="function"><span class="keyword">private</span> <span class="title">WindowManagerImpl</span><span class="params">(Context context, Window parentWindow)</span> </span>&#123;</span><br><span class="line">        mContext = context;</span><br><span class="line">        mParentWindow = parentWindow;</span><br><span class="line">    &#125;</span><br><span class="line"> ...   </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出WindowManagerGlobal是一个单例，说明在一个进程中只有一个WindowManagerGlobal实例。注释1处说明WindowManagerImpl可能会实现多个Window，也就是说在一个进程中WindowManagerImpl可能会有多个实例。</p>
+<p>通过如上的源码分析，Window和WindowManager的关系如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/28/Vm9PsI.png" alt="Vm9PsI.png"></p>
+<p>PhoneWindow继承自Window，Window通过setWindowManager方法与WindowManager发生关联。WindowManager继承自接口ViewManager，WindowManagerImpl是WindowManager接口的实现类，但是具体的功能都会委托给WindowManagerGlobal来实现。</p>
+<p>参考资料<br>《深入理解Android 卷1》<br>《深入理解Android 卷3》<br>《深入理解Android内核设计思想》第二版<br>《Android开发艺术探索》</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/framework/wm/1-windowmanager.html">http://liuwangshu.cn/framework/wm/1-windowmanager.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a><a class="post-meta__tags" href="/tags/Android%E7%B3%BB%E7%BB%9F%E6%9C%8D%E5%8A%A1/">Android系统服务</a><a class="post-meta__tags" href="/tags/WindowManager/">WindowManager</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/wm/2-window-property.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android解析WindowManager（二）Window的属性</div></div></a></div><div class="next-post pull-right"><a href="/application/performance/ram-6-leakcanary.html"><img class="next-cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android内存优化（六）LeakCanary使用详解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/framework/wm/3-add-window.html" title="Android解析WindowManager（三）Window的添加过程"><img class="cover" src="https://s2.ax1x.com/2019/05/28/Vez4mV.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-09-19</div><div class="title">Android解析WindowManager（三）Window的添加过程</div></div></a></div><div><a href="/framework/wm/2-window-property.html" title="Android解析WindowManager（二）Window的属性"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-09-12</div><div class="title">Android解析WindowManager（二）Window的属性</div></div></a></div><div><a href="/framework/ams/2-activitytask.html" title="Android解析ActivityManagerService（二）ActivityTask和Activity栈管理"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-08-25</div><div class="title">Android解析ActivityManagerService（二）ActivityTask和Activity栈管理</div></div></a></div><div><a href="/framework/wms/3-wms-remove.html" title="Android解析WindowManagerService（三）Window的删除过程"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-01-23</div><div class="title">Android解析WindowManagerService（三）Window的删除过程</div></div></a></div><div><a href="/framework/ams/1-ams.html" title="Android解析ActivityManagerService（一）AMS启动流程和AMS家族"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-07-31</div><div class="title">Android解析ActivityManagerService（一）AMS启动流程和AMS家族</div></div></a></div><div><a href="/framework/wms/2-wms-member.html" title="Android解析WindowManagerService（二）WMS的重要成员和Window的添加过程"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-10-23</div><div class="title">Android解析WindowManagerService（二）WMS的重要成员和Window的添加过程</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

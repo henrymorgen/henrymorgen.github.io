@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BATcoder - 刘望舒 - Android进阶三部曲番外篇</title><meta name="description" content="Android进阶三部曲系列图书作者腾讯云最具价值专家TVP 公众号：「刘望舒」"><meta name="keywords" content="刘望舒, 刘望舒的博客，刘望舒学堂，BATcoder，刘望舒课堂，望舒学院，望舒课堂，Android进阶三部曲，Android进阶三部曲番外篇，liuwangshu, Android, Java, Android开发，Android进阶之光，设计模式，Android网络编程，Android源码分析，热修复，插件化，进阶之光，刘望舒，Android进阶，知识体系，性能优化，JNI，包管理机制，四大组件启动过程，AMS，PMS，WMS，Binder，进阶三部曲，Android进阶解密，Android进阶之光，Android进阶指北"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="website"><meta property="og:title" content="BATcoder - 刘望舒"><meta property="og:url" content="http://liuwangshu.cn/"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="Android进阶三部曲系列图书作者腾讯云最具价值专家TVP 公众号：「刘望舒」"><meta property="og:image" content="http://liuwangshu.cn/img/my.jpg"><meta property="article:published_time" content="2021-12-17T12:18:37.095Z"><meta property="article:modified_time" content="2021-12-17T12:18:37.095Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: false,
+  isHome: true,
+  isHighlightShrink: false,
+  isSidebar: false,
+  postUpdate: '2021-12-17 20:18:37'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(https://pic.imgdb.cn/item/5f5fa816160a154a67fe5c0d.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="site-info"><h1 id="site_title">BATcoder - 刘望舒</h1><div id="site_subtitle"><span id="subtitle"></span></div><div id="site_social_icons"><a class="social-icon" href="https://github.com/henrymorgen" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div><div id="scroll_down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout_page" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="post_cover left_radius"><a href="/system.html" title="Android最强原创知识体系（更新至2021.3.7）">     <img class="post_bg" src="https://pic.imgdb.cn/item/5e1a733a7f9a96fec1a27661.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android最强原创知识体系（更新至2021.3.7）"></a></div><div class="recent-post-info"><a class="article-title" href="/system.html" title="Android最强原创知识体系（更新至2021.3.7）">Android最强原创知识体系（更新至2021.3.7）</a><div class="article-meta-wrap"><span class="article-meta"><i class="fas fa-thumbtack article-meta__icon sticky"></i><span class="sticky">置顶</span><span class="article-meta__separator">|</span></span><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2016-01-11T16:16:16.000Z" title="发表于 2016-01-12 00:16:16">2016-01-12</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E7%9F%A5%E8%AF%86%E4%BD%93%E7%B3%BB/">知识体系</a></span></div><div class="content">为了方便大家的阅读以及自己的知识体系的建立，特意来写出这个引导文章。以前我是遇到什么写什么，想到什么写什么，从2016年开始我将围绕这个知识体系来写文章，从点到面来逐步建立并完善自己的知识体系。对于Android应用开发知识体系的建立，我这里貌似是最早的，后面有很多人开始模仿，也算是带了个好头。
+很多人都有一个误区，就是喜欢搞个思维导图，思维导图本身并没有问题，但是弄个思维导图，然后每个分支总结下，或者找几篇文章看看甚至看都不看就列在分支下面，然后看着思维导图有了满满的成就感，以为自己掌握了，其实只是知道而已，真正的掌握是去实现每个例子，去跟踪每段源码… 然后经过思考用自己的话写出来，未经自己思考的知识不是知识。而本体系就是告诉你，应该如何做，才会把知识变为你自己的。
+欢迎关注我的公众号 「刘望舒」，你会收获更多查看展开版本请移步我的github:  https://github.com/henrymorgen/android-knowledge-system
+BATcoder技术视频(基于Android 11.0）一个视频帮你突破系统底层学习瓶颈！是时候安装Ubuntu，开始研究系统 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/life/android-advanced-guide.html" title="知识体系建立，Android进阶三部曲第三部《Android进阶指北》已出版">     <img class="post_bg" src="https://pic.imgdb.cn/item/5f68fca0160a154a67e0c559.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="知识体系建立，Android进阶三部曲第三部《Android进阶指北》已出版"></a></div><div class="recent-post-info"><a class="article-title" href="/life/android-advanced-guide.html" title="知识体系建立，Android进阶三部曲第三部《Android进阶指北》已出版">知识体系建立，Android进阶三部曲第三部《Android进阶指北》已出版</a><div class="article-meta-wrap"><span class="article-meta"><i class="fas fa-thumbtack article-meta__icon sticky"></i><span class="sticky">置顶</span><span class="article-meta__separator">|</span></span><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-09-20T16:16:16.000Z" title="发表于 2020-09-21 00:16:16">2020-09-21</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/">程序人生</a></span></div><div class="content">大家久等了，这本书的出版简直是太艰辛了，从2018年6月开始写，2020年1月完稿，直到2020年9月才出版，从开始写到出版耗时2年多啊，具体原因不想说了，都是泪啊，要不今年4月就出版了。这本书是Android进阶三部曲的第三部，书名叫《Android进阶指北》，内容算是对前两本的补充。其实我一直想在书中建立一个知识体系，但是凭借进阶之光和进阶解密是形成不了成规模的知识体系的，而进阶指北的出版将会打破这一点，三本书初步形成了知识体系，即Android进阶三部曲知识体系。我在进阶指北中的开头加入了序章，就叫：进阶三部曲知识体系，可以说是这三本书全部知识点的索引，因此书名顺理成章的叫“进阶指北”。可以看出，《Android进阶指北》并不是“单兵作战”，而是“集体作战”。所以在这里我就不单独介绍《Android进阶指北》的章节了，直接上Android进阶三部曲知识体系。
+1.Android进阶三部曲知识体系Android进阶三部曲知识体系分为三个部分，分别是Android应用开发、Android系统源码、Java和跨平台基础，现在以思维导图的形式对每个部分进行整理，也可以当做是对三本书内容的 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！">     <img class="post_bg" src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="进阶三部曲第一部《Android进阶之光》第2版出版！"></a></div><div class="recent-post-info"><a class="article-title" href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！">进阶三部曲第一部《Android进阶之光》第2版出版！</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-04-03T16:16:16.000Z" title="发表于 2021-04-04 00:16:16">2021-04-04</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/">程序人生</a></span></div><div class="content">
+其实不打算出《Android进阶之光》第二版的，起初觉得意义不大，但是看到现在仍旧有很多人看《Android进阶之光》第一版，而里面的内容又有点过时了。还有一个原因是Android进阶三部曲摆在书架上，《Android进阶之光》就显得特别的突兀，也有很多读者也跟我一样的感觉，说强迫症犯了，一看摆在书架上的书高低不同就很难受。因此《Android进阶之光》第二版为了解决这两个痛点就诞生了！
+1.《Android进阶之光》第2版更新内容1.开头加入Android进阶三部曲知识体系2.第一章新特新更新到Android 103.升级了部分第三方框架版本，比如OkHttp 4和RxJava 34.修订第1版的细节多达400余处。5.全书大小变为和《Android进阶解密》一样大，页数由原来的529页
+其实我一直想在书中建立一个知识体系，但是凭借一本书是形成不了成规模的知识体系的，而Android进阶三部曲的全部出版打破了这一点。
+这三本书初步形成了知识体系，即Android进阶三部曲知识体系。我在《Android进阶之光》第2版加入了序章，就叫：进阶三部曲知识体系，可以说是这三本书全部知识点的 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！">     <img class="post_bg" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"></a></div><div class="recent-post-info"><a class="article-title" href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！">『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-03-06T16:16:16.000Z" title="发表于 2021-03-07 00:16:16">2021-03-07</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/BATcoder/">BATcoder</a></span></div><div class="content">
+视频版本更多细节和内容见视频：B站地址： https://www.bilibili.com/video/BV1VU4y1s7xF
+ 
+
+前言我们顺利的将AOSP下载了下来后，很多时候我们不仅仅需要去查看源码，还有以下的几个需求：
+
+1.定制Android系统
+2.将最新版本的Android系统刷入到自己的Android设备中
+3.将整个系统源码导入到Android Studio中
+4.动态调试Android系统源码
+
+为了实现这些需求，就需要我们去编译系统源码。其中第三条和第四条也可以不用编译源码来实现，第三条只要有对应Android源码版本的android.iml 和 android.ipr 两个文件就可以将源码导入到Android Studio中，第四条动态调试系统源码不一定非要导入整个系统源码进行调试。关于第三条和第四条的具体内容，我会在以后的内容中进行讲解。
+1.编译系统概述了解以下一些概念，会对Android编译系统有大概的了解。MakefileAndroid平台的编译系统，其实就是用Makefile写出来的一个独立项目。它定义了编译的规则，实现了“自动化编译”，不仅把分散 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！">     <img class="post_bg" src="https://pic.imgdb.cn/item/5e02594376085c3289aeb21b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候下载Android11系统源码和内核源码了！"></a></div><div class="recent-post-info"><a class="article-title" href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！">『BATcoder』 是时候下载Android11系统源码和内核源码了！</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2021-01-14T16:16:16.000Z" title="发表于 2021-01-15 00:16:16">2021-01-15</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/BATcoder/">BATcoder</a></span></div><div class="content">
+视频版本更多细节和内容见视频：B站地址： https://www.bilibili.com/video/BV19f4y1r7E6
+ 
+
+
+1.关于AOSPAOSP(Android Open Source Project)是Google开放的Android 开源项目，中文官网为：https://source.android.google.cn/。AOSP通俗来讲就是一个Android系统源码项目，通过它可以定制 Android 操作系统，国内手机厂商都是在此基础上开发的定制系统。因为墙的缘故，如果无法连接谷歌服务器获取AOSP源码，可以从 清华大学镜像站或者  中科大镜像。本篇文章以清华大学镜像站为例。
+2. 下载 repo工具Android源码包含数百个git库，光是下载这么多的git库就是一项繁重的任务，所以Google开发了repo，它是用于管理Android版本库的一个工具，使用了Python对git进行了一定的封装，简化了对多个Git版本库的管理。安装 Git，在Ubuntu输入如下命令：
+sudo apt-get install git
+
+可能会报如下的错误：
+这个问题是有 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！">     <img class="post_bg" src="https://pic.imgdb.cn/item/5fdad1733ffa7d37b3289c28.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"></a></div><div class="recent-post-info"><a class="article-title" href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！">『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-12-16T16:16:16.000Z" title="发表于 2020-12-17 00:16:16">2020-12-17</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/BATcoder/">BATcoder</a></span></div><div class="content">在Android进阶三部曲第二部《Android进阶解密》的第一章，我介绍了两种阅读源码的方式，其中一种是从百度网盘：https://pan.baidu.com/s/1ngsZs 将源码下载下来，然后用SouceInsight来查看，这种方式很便捷，适合去阅读源码，但是有两个弊端，一个是无法获取最新的源码，另一个是不能够编译源码。因为后续我们要编译和调试源码，源码编译是需要在 Linux 环境下进行，很多同学的系统不是Ubuntu，但是我们可以在Windows和Mac上使用VirtualBox 来安装 Ubuntu（Mac上可以直接下载AOSP，但可能会污染系统）。因此在讲解下载系统源码前，我会先讲解Windows10环境下，VirtualBox来安装Ubuntu的过程，Mac环境也是大同小异。另外Windows 10下也可以在Microsoft Store中下载Ubuntu软件，大家可以去尝试下。
+视频版本B站地址： https://www.bilibili.com/video/BV19p4y1z7A2
+ 
+
+
+
+准备工作首先需要下载两个文件：
+
+VirtualBox：下载地址为：h ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！">     <img class="post_bg" src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"></a></div><div class="recent-post-info"><a class="article-title" href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！">『BATcoder』一个视频帮你突破系统底层学习瓶颈！</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-12-03T16:16:16.000Z" title="发表于 2020-12-04 00:16:16">2020-12-04</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/BATcoder/">BATcoder</a></span></div><div class="content">大家好，我是刘望舒，I’m back！最近分享了一些视频，都属于望舒杂谈，望舒杂谈会分享一些经验，什么都会聊。除了望舒杂谈还有另一个视频分支叫做BATcoder，什么是BATcoder呢？它是Android进阶三部曲的番外篇，会对Android进阶三部曲的内容进行拓展和升级，会以视频的形式分享给大家。至于为啥叫BATcoder，这是因为我希望大家看了我的技术视频能进入自己中意的大厂。这篇是BATcoder的第二个视频，来聊聊应用开发如何高效学习系统叠层源码，注意是给应用开发看的，如果你是系统开发、逆向安全开发，这个视频并不适用于你。
+本视频主要从三个方面来进行讲解，分别是：1.为何要阅读系统源码？2.如何阅读调试系统源码3.系统源码的知识体系
+1.为何要阅读系统源码？
+面试必备。无论是大公司还是中小公司，系统源码都是常问的部分。（便于筛选、得知潜力、解决难题）
+更好的掌握编写代码的规范和技巧。
+更好的理解设计模式。见《Android源码设计模式解析与实战》这本书。
+有效的提高应用开发能力，比如：自定义View、调试疑难问题、插桩
+更好的理解应用开发中涉及的原理，比如：热修复、插件化、A ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/batcoder/android_future.html" title="『BATcoder』寒冬已至！视频聊聊四面楚歌的Android工程师该何去何从？">     <img class="post_bg" src="https://pic1.imgdb.cn/item/5fc4287fd590d4788afbc2f8.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』寒冬已至！视频聊聊四面楚歌的Android工程师该何去何从？"></a></div><div class="recent-post-info"><a class="article-title" href="/batcoder/android_future.html" title="『BATcoder』寒冬已至！视频聊聊四面楚歌的Android工程师该何去何从？">『BATcoder』寒冬已至！视频聊聊四面楚歌的Android工程师该何去何从？</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-29T16:16:16.000Z" title="发表于 2020-11-30 00:16:16">2020-11-30</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/BATcoder/">BATcoder</a></span></div><div class="content">大家好，我是刘望舒，I’m back！最近分享了一些视频，都属于望舒杂谈，望舒杂谈会分享一些经验，什么都会聊。除了望舒杂谈还有另一个视频分支叫做BATcoder，什么是BATcoder呢？它是Android进阶三部曲的番外篇，会对Android进阶三部曲的内容进行拓展和升级，会以视频的形式分享给大家。至于为啥叫BATcoder，这是因为我希望大家看了我的技术视频能进入自己中意的大厂。这篇是BATcoder的第一个视频，不过这次不会分享技术，而是和大家聊聊Android工程师该何去何从。
+视频版本 
+
+也可以扫描下方二维码去B站观看，欢迎大家三连。
+今年的行情相对去年整体要差一些，很多同学发现很多公司招人，兴冲冲去面试了，结果面了几家都是等通知，实际上就是招聘的职位有限，面试的人很多。寒冬真的来了吗？我觉得未必，只是移动开发不热门了而已，竞争更激烈的而已，需求还是有的，移动端程序员和PC时代的程序员还是不同的，目前还没有出现能够替代手机的这种高频使用的物品。作为曾经炙手可热的Android工程师，现在面临着以下的问题：
+
+互联网整体环境不乐观
+Android开发人员众多但岗位减少，导致要 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/show/book-money.html" title="写一本技术书到底有多赚？实话告诉你200万轻轻松松！">     <img class="post_bg" src="https://pic.imgdb.cn/item/5fb79243b18d627113fa1369.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="写一本技术书到底有多赚？实话告诉你200万轻轻松松！"></a></div><div class="recent-post-info"><a class="article-title" href="/show/book-money.html" title="写一本技术书到底有多赚？实话告诉你200万轻轻松松！">写一本技术书到底有多赚？实话告诉你200万轻轻松松！</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T16:16:16.000Z" title="发表于 2020-11-05 00:16:16">2020-11-05</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E6%9C%9B%E8%88%92%E6%9D%82%E8%B0%88/">望舒杂谈</a></span></div><div class="content">视频版本视频版本，欢迎大家去B站三连~
+ 
+
+也可以扫描下方二维码观看：
+皇叔，听说你写了三本畅销书赚了几百万？哎？我怎么不知道我赚了这么多，不够你能给我补补？前年有粉丝得知我北京买房了，说你写书赚那么多啊，我心里纳闷，这房子2016年买的，第一本书是在2017年出版的，我又没有时光机。今年我又买了辆奔驰，又有群友说，大家赶紧买书啊，助力皇叔换玛莎拉蒂。嗯，助力我买个模型玛莎拉蒂还是可以的。最近联系了一个前同事，他在阿里上班，问我是不是全职写书呢？写一本赚了得有一百万吧。我要是全职写，坟头草估计都一人高了。看起来，很多人对写技术书是有误解的，认为只要是写书就赚钱。不少人一看书的定价，比如99元，就以为买了一本，作者赚了99，那卖1万本作者不就是赚百万了，作者真是乐死了，那叫出版社和印刷厂情何以堪？今天就和大家普及下写书到底赚多少，以及写书后会遇到什么，供后来者参考学习。
+写一本技术畅销书到底赚多少一般来说能卖到1万册的就算技术畅销书。什么？你说一万册卖的太少？现实是一万人买正版书，五万人看盗版pdf，你说“卖”的多不多呢？技术书不能跟大众所读的一些小说和励志图书相比，毕竟技术书的受众群 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/show/workplace-pit.html" title="皇叔和你聊聊程序员职场的一些深坑，看看你躲开了几个？">     <img class="post_bg" src="https://pic.imgdb.cn/item/5fa3fe431cd1bbb86b6e8c17.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="皇叔和你聊聊程序员职场的一些深坑，看看你躲开了几个？"></a></div><div class="recent-post-info"><a class="article-title" href="/show/workplace-pit.html" title="皇叔和你聊聊程序员职场的一些深坑，看看你躲开了几个？">皇叔和你聊聊程序员职场的一些深坑，看看你躲开了几个？</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-11-04T16:16:16.000Z" title="发表于 2020-11-05 00:16:16">2020-11-05</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E6%9C%9B%E8%88%92%E6%9D%82%E8%B0%88/">望舒杂谈</a></span></div><div class="content">视频版本视频版本，欢迎大家去B站点赞留言。
+ 
+
+也可以扫描下方二维码观看：
+今天就和大家聊聊程序员在技术生涯中常常容易进的深坑，很多人可能不知道，或者知道了不想改，在此我就想帮大家提个醒，希望能帮助到一些人。程序员的技术生涯到底是多久呢？这个我不好说，有的人干到30岁退休，还有的人干到40多，50多。通常意义上来讲，程序员的黄金年龄其实就是10年，因此在这10年里能够有效的避开一些深坑，就很关键，可以让你的职业生涯发展的更好，赚到更多的钱，我认为的深坑主要有以下几点。
+1.看哪个火学哪个，不断的变换技术方向这是很多人经常犯的错误，也是无奈的选择，因为一开始也不知道自己要干什么，一开始学Java，然后觉得移动端有前途，转了移动端，后来移动端发展平淡了，发现前端不错，转了前端。我身边就有不少这种不断变换方向的，不排除有混的好的，但是确实不多，为什么呢？现在的社会，技术分工越来越细，越细就意味着大部分企业（小作坊除外）需要专精的人才（最好是精通一门通多门）。你会发现身边脱颖而出的技术人大多都是靠一门技术，却很少看到会一堆技术却都不精通的冒出来。好比在武侠的世界，高手对决都在同一个时间段拿出 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/show/bilibili-show.html" title="刘望舒B站首秀，被网友喷死肥宅，这究竟是什么鬼？">     <img class="post_bg" src="https://pic.imgdb.cn/item/5f9ae3b81cd1bbb86bec9e21.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="刘望舒B站首秀，被网友喷死肥宅，这究竟是什么鬼？"></a></div><div class="recent-post-info"><a class="article-title" href="/show/bilibili-show.html" title="刘望舒B站首秀，被网友喷死肥宅，这究竟是什么鬼？">刘望舒B站首秀，被网友喷死肥宅，这究竟是什么鬼？</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-10-28T16:16:16.000Z" title="发表于 2020-10-29 00:16:16">2020-10-29</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E8%A7%86%E9%A2%91/">视频</a></span></div><div class="content">视频版本，欢迎大家去B站吐槽。
+ 
+
+也可以扫描下方二维码观看：
+大家好，我是刘望舒，江湖人称皇叔，简单介绍下自己，要不下面我逼叨，你可能会一脸懵逼。我出了三本技术畅销书，蝉联三届电子工业出版社年度优秀作者，前华为面试官，现在在一家大型互联网公司担任技术负责人，11年经验资深码农，谷歌开发者社区等技术大会的特邀讲师，还有一堆头衔懒得说了，说太多大家也记不住。总之，就是一个爱逼叨爱吹逼的中年码农。哎？你说为啥我不秃头，那不是我的错，我认识好多牛逼的程序员头发都很茂盛，秃头跟技术无关，跟基因有关，所以大家没事也别自黑了，省着叫外行看笑话，以为程序员牛逼的都秃头。
+这一年多都没见到我的身影，我都在干些什么呢？除了写书当然是上班了，可惜这家公司996，导致我没有时间维护公号，公号就交由朋友来管理了，整体的基调也从大前端变为了综合号。现在我宣布，我回来啦，告诉大家有以下几件事。
+第一件事，当然就是我的第三本书，Android进阶三部曲第三部《Android进阶指北》已经出版啦，走过路过，买过就是看过。开个玩笑，这本书买来还是有必要看一看的，绝壁是进阶和面试必备，在看之前，记得要结合《Androi ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/application/network/12-okhttp4-sourcecode.html" title="Android网络编程（十二）源码解析Okhttp4.x">     <img class="post_bg" src="https://pic.imgdb.cn/item/5e5ce13e98271cb2b8b89845.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android网络编程（十二）源码解析Okhttp4.x"></a></div><div class="recent-post-info"><a class="article-title" href="/application/network/12-okhttp4-sourcecode.html" title="Android网络编程（十二）源码解析Okhttp4.x">Android网络编程（十二）源码解析Okhttp4.x</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-03-02T04:04:00.000Z" title="发表于 2020-03-02 12:04:00">2020-03-02</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+前言Android网络编程系列是我从2016年开始写的，这个系列的总访问量在几十万，其中Android网络编程（六）OkHttp3用法全解析这篇文章在CSDN和本博客的阅读总量就有了14万的阅读量。随着时间的推移，有些内容不可避免的过时了，就OkHttp来说，最近几年经历了OkHttp2到OkHttp4。关于OkHttp4的用法和OkHttp3大同小异，本文来解析OkHttp4的源码，主要介绍OkHttp的网络请求流程和拦截器链。整体来说，OkHttp4在主要逻辑上和OkHttp3差别不大，主要的区别就是源码由Java实现变为了Kotlin实现。
+1.OkHttpClient的创建一般来说，我们项目的OkHttpClient是单例，创建OkHttpClient有两种方式，一种是new，一种是使用建造者模式为其设置一些参数，无论是哪一种都是使用建造者模式来完成OkHttpClient的初始化，OkHttpClient的构造器如下所示：okhttp/src/main/java/okhttp3/OkHttpClient.kt
+constructor ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/life/rip-kobe.html" title="难说再见！曼巴精神永存！">     <img class="post_bg" src="https://p.pstatp.com/origin/ff850001720b5e8178e7" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="难说再见！曼巴精神永存！"></a></div><div class="recent-post-info"><a class="article-title" href="/life/rip-kobe.html" title="难说再见！曼巴精神永存！">难说再见！曼巴精神永存！</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-01-26T16:16:16.000Z" title="发表于 2020-01-27 00:16:16">2020-01-27</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/">程序人生</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+今夜5点多我就起来了，想提前放松下，就打开腾讯视频想看会NBA比赛的回放，结果发现一条视频，是科比坠机去世了，这不闹呢嘛，然后我立即打开网页开始查，结果是真的，不是谣言。世事太无常了，作为一个NBA老球迷，一个资深的NBA2K玩家，仅以此文悼念这个陪伴我20年的老科，希望他的曼巴精神能够激励更多的人！实际上我并不完全算是科比的球迷，我是艾弗森的忠实球迷，作为艾弗森冠军路上的拦路人，艾弗森篮球生涯中的劲敌，我曾对科比真的是无感，大学时我经常因为艾弗森和科比谁更强而和宿舍的哥们辩论，但我打心底里佩服科比，被科比的精神和魅力打败了。很多不看NBA的人也会知道科比这个名字，最经典的是他的“你见过凌晨4点的洛杉矶吗？“这句话。不过从这句话中貌似学不到什么东西，而科比的曼巴精神却可以，这篇文章会告诉大家，科比的曼巴精神是什么？我们能从科比身上学到什么？
+1.科比的简介和身体天赋可能有的同学不知道科比的伟大，我举出一些数字，大家就知道了。科比生涯常规赛总得分为33643，是NBA历史第三高。他的单场得分纪录为81分，排在NBA历史第二位。5届NBA总冠军、 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/life/android-advanced-guide-.html" title="Android进阶三部曲 第三部《Android进阶指北》已完稿">     <img class="post_bg" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android进阶三部曲 第三部《Android进阶指北》已完稿"></a></div><div class="recent-post-info"><a class="article-title" href="/life/android-advanced-guide-.html" title="Android进阶三部曲 第三部《Android进阶指北》已完稿">Android进阶三部曲 第三部《Android进阶指北》已完稿</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2020-01-11T16:16:16.000Z" title="发表于 2020-01-12 00:16:16">2020-01-12</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/">程序人生</a></span></div><div class="content">耗时1年半，我的第三本书《进阶指北》终于在今天完稿了。
+
+其实我没想到自己能坚持写完三本书，感觉是受了刘慈欣的影响，我从初高中就开始看他的科幻小说，他的三体三部曲（地球往事三部曲）对我影响太大了。前两本书每本都是耗时1年左右，完成这本书的时间增加了些，主要还是自己懒癌犯了，这里跟大家说声抱歉，让大家久等了。稿件会在下周一交由出版社进行审核，后面的时间就不是我可控的了。
+电子工业出版社作为国内顶级的出版社，图书出版审核越来越严，如果三校三审不过的话，那么书就不能出版了，因此出版的时间也会拉长，不出意外的话，预计会在6月份和大家见面。至于
+第三本的内容算是对前两本的补充，内容这里就不透露了，都是进阶必备的，跟着学就好了。其实我一直想在书中建立一个知识体系，但是凭借进阶之光和进阶解密是形成不了成规模的知识体系的，而进阶指北的出版将会打破这一点，三本书初步形成了知识体系，即进阶三部曲知识体系。我在进阶指北中加入了序章，就叫：进阶三部曲知识体系，可以说是这三本书全部知识点的索引，所以书名才叫“指北”。
+书的封面还没有设计好，还是交由设计进阶解密封面的哥们操刀，设计理念是一个船舵加上夜空，颇有一种 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/binder/7-javabinder-addservice.html" title=" Android Binder原理（七）Java Binder中系统服务的注册过程">     <img class="post_bg" src="https://pic.superbed.cn/item/5e02594376085c3289aeb21b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt=" Android Binder原理（七）Java Binder中系统服务的注册过程"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/binder/7-javabinder-addservice.html" title=" Android Binder原理（七）Java Binder中系统服务的注册过程"> Android Binder原理（七）Java Binder中系统服务的注册过程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-12-02T16:18:00.000Z" title="发表于 2019-12-03 00:18:00">2019-12-03</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+前言在Android Binder原理（三）系统服务的注册过程这篇文章中，我介绍的是Native Binder中的系统服务的注册过程，这一过程的核心是ServiceManager，而在Java Binder中，也有一个ServiceManager，只不过这个ServiceManager是Java文件。既然要将系统服务注册到ServiceManager，那么需要选择一个系统服务为例，这里以常见的AMS为例。
+1.将AMS注册到ServiceManager在AMS的setSystemProcess方法中，会调用ServiceManager的addService方法，如下所示。frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java
+public void setSystemProcess() &#123;    try &#123;        ServiceManager.addService(Context.ACTIVITY_SER ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/framework/binder/6-java-binder-initialize.html" title=" Android Binder原理（六）Java Binder的初始化">     <img class="post_bg" src="https://s2.ax1x.com/2019/11/23/MbATrq.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt=" Android Binder原理（六）Java Binder的初始化"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/binder/6-java-binder-initialize.html" title=" Android Binder原理（六）Java Binder的初始化"> Android Binder原理（六）Java Binder的初始化</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-11-21T16:18:00.000Z" title="发表于 2019-11-22 00:18:00">2019-11-22</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+前言在Android Binder原理（一）学习Binder前必须要了解的知识点这篇文章中，我根据Android系统的分层，将Binder机制分为了三层：
+
+Java Binder (对应Framework层的Binder)
+Native Binder(对应Native层的Binder)
+Kernel Binder(对应Kernel层的Binder)
+
+在此前的文章中，我一直都在介绍Native Binder和Kernel Binder的内容，它们的架构简单总结为下图。
+
+在Android Binder原理（二）ServiceManager中的Binder机制这篇文章中，我讲过BpBinder是Client端与Server交互的代理类，而BBinder则代表了Server端，那么上图就可以改为：从上图可以看到，Native Binder实际是基于C/S架构，Bpinder是Client端，BBinder是Server端，在Android Binder原理（四）ServiceManager的启动过程这篇文章中，我们得知Native Binder通 ...</div></div></div><nav id="pagination"><div class="pagination"><span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/2/"><i class="fas fa-chevron-right fa-fw"></i></a></div></nav></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/my.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">刘望舒</div><div class="author-info__description">Android进阶三部曲系列图书作者<br>腾讯云最具价值专家TVP <br>公众号：「刘望舒」</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/henrymorgen" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div></div><div class="sticky_layout"><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">Android进阶三部曲第三部《Android进阶指北》已出版！</div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！"><img src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="进阶三部曲第一部《Android进阶之光》第2版出版！"/></a><div class="content"><a class="title" href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！">进阶三部曲第一部《Android进阶之光》第2版出版！</a><time datetime="2021-04-03T16:16:16.000Z" title="发表于 2021-04-04 00:16:16">2021-04-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"><img src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"/></a><div class="content"><a class="title" href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！">『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！</a><time datetime="2021-03-06T16:16:16.000Z" title="发表于 2021-03-07 00:16:16">2021-03-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！"><img src="https://pic.imgdb.cn/item/5e02594376085c3289aeb21b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候下载Android11系统源码和内核源码了！"/></a><div class="content"><a class="title" href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！">『BATcoder』 是时候下载Android11系统源码和内核源码了！</a><time datetime="2021-01-14T16:16:16.000Z" title="发表于 2021-01-15 00:16:16">2021-01-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"><img src="https://pic.imgdb.cn/item/5fdad1733ffa7d37b3289c28.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"/></a><div class="content"><a class="title" href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！">『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！</a><time datetime="2020-12-16T16:16:16.000Z" title="发表于 2020-12-17 00:16:16">2020-12-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"><img src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"/></a><div class="content"><a class="title" href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！">『BATcoder』一个视频帮你突破系统底层学习瓶颈！</a><time datetime="2020-12-03T16:16:16.000Z" title="发表于 2020-12-04 00:16:16">2020-12-04</time></div></div></div></div></div><div class="card-widget card-categories"><div class="card-content"><div class="item-headline"><i class="fas fa-folder-open"></i><span>分类</span></div><ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/"><span class="card-category-list-name">Android应用层</span><span class="card-category-list-count">67</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/"><span class="card-category-list-name">Android框架层</span><span class="card-category-list-count">49</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/BATcoder/"><span class="card-category-list-name">BATcoder</span><span class="card-category-list-count">5</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Flutter/"><span class="card-category-list-name">Flutter</span><span class="card-category-list-count">13</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Java/"><span class="card-category-list-name">Java</span><span class="card-category-list-count">11</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/React-Native/"><span class="card-category-list-name">React Native</span><span class="card-category-list-count">9</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Swift/"><span class="card-category-list-name">Swift</span><span class="card-category-list-count">5</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%9C%9B%E8%88%92%E6%9D%82%E8%B0%88/"><span class="card-category-list-name">望舒杂谈</span><span class="card-category-list-count">2</span></a></li>
+            <li class="card-category-list-item more is-center"><a class="card-category-list-link-more" href="/categories/">
+                <span>查看更多</span><i class="fas fa-angle-right"></i></a></li>
+            </ul></div></div><div class="card-widget card-archives"><div class="card-content"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/04/"><span class="card-archive-list-date">四月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/03/"><span class="card-archive-list-date">三月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/01/"><span class="card-archive-list-date">一月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/12/"><span class="card-archive-list-date">十二月 2020</span><span class="card-archive-list-count">2</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/11/"><span class="card-archive-list-date">十一月 2020</span><span class="card-archive-list-count">3</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/10/"><span class="card-archive-list-date">十月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/09/"><span class="card-archive-list-date">九月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/03/"><span class="card-archive-list-date">三月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item more is-center"><a class="card-archive-list-link-more" href="/archives/">
+              <span>查看更多</span><i class="fas fa-angle-right"  ></i></a></li></ul></div></div><div class="card-widget card-webinfo"><div class="card-content"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">197</div></div><div class="webinfo-item"><div class="item-name">已运行时间 :</div><div class="item-count" id="runtimeshow" data-publishDate="2017-04-12T16:00:00.000Z"></div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2021-12-17T12:18:36.212Z"></div></div></div></div></div></div></div></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function subtitleType () {
+  if (true) { 
+    var typed = new Typed("#subtitle", {
+      strings: "Android进阶三部曲番外篇".split(","),
+      startDelay: 300,
+      typeSpeed: 150,
+      loop: true,
+      backSpeed: 50
+    })
+  } else {
+    document.getElementById("subtitle").innerHTML = 'A'
+  }
+}
+
+if (true) {
+  if (typeof Typed === 'function') subtitleType()
+  else $.getScript('https://cdn.jsdelivr.net/npm/typed.js/lib/typed.min.js', subtitleType)
+} else {
+  subtitleType()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android事件总线（四）源码解析otto | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  前言上一篇文章中讲到了otto的用法，这一篇我们来讲一下otto的源码。可能有人觉得otto过时了，但是通过源码我们学习的是高手设计otto时的设计理念，这种设计理念是不过时的。  otto各个类的作用首先先来看一下otto的源码的各个类的作用，如下图所示。 如图所示，otto的源码并不多，主要的类的功能如下：  Produce、Subscribe：发布者和"><meta name="keywords" content="Android应用层,EventBus"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/eventbus/4-otto-sourcecode.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android事件总线（四）源码解析otto"><meta property="og:url" content="http://liuwangshu.cn/application/eventbus/4-otto-sourcecode.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  前言上一篇文章中讲到了otto的用法，这一篇我们来讲一下otto的源码。可能有人觉得otto过时了，但是通过源码我们学习的是高手设计otto时的设计理念，这种设计理念是不过时的。  otto各个类的作用首先先来看一下otto的源码的各个类的作用，如下图所示。 如图所示，otto的源码并不多，主要的类的功能如下：  Produce、Subscribe：发布者和"><meta property="og:image" content="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><meta property="article:published_time" content="2017-01-01T04:56:00.000Z"><meta property="article:modified_time" content="2020-01-12T06:45:57.942Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-01-12 14:45:57'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#otto%E5%90%84%E4%B8%AA%E7%B1%BB%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="toc-number">2.</span> <span class="toc-text">otto各个类的作用</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#otto%E6%9E%84%E9%80%A0%E5%87%BD%E6%95%B0"><span class="toc-number">3.</span> <span class="toc-text">otto构造函数</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%B3%A8%E5%86%8C"><span class="toc-number">4.</span> <span class="toc-text">注册</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%91%E9%80%81%E4%BA%8B%E4%BB%B6"><span class="toc-number">5.</span> <span class="toc-text">发送事件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8F%96%E6%B6%88%E6%B3%A8%E5%86%8C"><span class="toc-number">6.</span> <span class="toc-text">取消注册</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/11/11/MMSseK.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android事件总线（四）源码解析otto</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-01-01T04:56:00.000Z" title="发表于 2017-01-01 12:56:00">2017-01-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-01-12T06:45:57.942Z" title="更新于 2020-01-12 14:45:57">2020-01-12</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h4><p>上一篇文章中讲到了otto的用法，这一篇我们来讲一下otto的源码。可能有人觉得otto过时了，但是通过源码我们学习的是高手设计otto时的设计理念，这种设计理念是不过时的。</p>
+<a id="more"></a>
+<h4 id="otto各个类的作用"><a href="#otto各个类的作用" class="headerlink" title="otto各个类的作用"></a><strong>otto各个类的作用</strong></h4><p>首先先来看一下otto的源码的各个类的作用，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/29/VnQAyt.jpg"></p>
+<p>如图所示，otto的源码并不多，主要的类的功能如下：</p>
+<ul>
+<li>Produce、Subscribe：发布者和订阅者注解类。</li>
+<li>Bus：事件总线类，用来注册和取消注册，维护发布-订阅模型，并处理事件调度分发。</li>
+<li>HandlerFinder、AnnotatedHandlerFinder：用来查找发布者和订阅者。</li>
+<li>EventProducer、EventHandler：分别封装发布者和订阅者的数据结构。</li>
+</ul>
+<h4 id="otto构造函数"><a href="#otto构造函数" class="headerlink" title="otto构造函数"></a><strong>otto构造函数</strong></h4><p>在使用otto时，首先要创建Bus类，Bus类的构造函数如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Bus</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>(DEFAULT_IDENTIFIER);</span><br><span class="line">  &#125;</span><br></pre></td></tr></table></figure>
+<p>这个DEFAULT_IDENTIFIER是一个字符串”default”，this调用了Bus类的另一个构造函数：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Bus</span><span class="params">(String identifier)</span> </span>&#123;</span><br><span class="line">   <span class="keyword">this</span>(ThreadEnforcer.MAIN, identifier);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>ThreadEnforcer.MAIN意味着默认在主线程中调度事件，再往里看this又调用了什么，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">Bus</span><span class="params">(ThreadEnforcer enforcer, String identifier)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>(enforcer, identifier, HandlerFinder.ANNOTATED);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>第一个参数我们提到了，就是事件调度的简称，identifier为Bus的名称，默认为”default”。而identifier则是HandlerFinder，用于在register、unregister的时候寻找所有的subscriber和producer。再往里查看this又调用了什么，如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Bus(ThreadEnforcer enforcer, String identifier, HandlerFinder handlerFinder) &#123;</span><br><span class="line">  <span class="keyword">this</span>.enforcer =  enforcer;</span><br><span class="line">  <span class="keyword">this</span>.identifier = identifier;</span><br><span class="line">  <span class="keyword">this</span>.handlerFinder = handlerFinder;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个是最终调用的Bus的构造函数，在这里要首先记住handlerFinder 指的就是传进来的HandlerFinder.ANNOTATED，后面在注册时会用到handlerFinder这个属性。</p>
+<h4 id="注册"><a href="#注册" class="headerlink" title="注册"></a><strong>注册</strong></h4><p>生成bus类后，我们要调用它的register方法来进行注册。register方法如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">register</span><span class="params">(Object object)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (object == <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">&quot;Object to register must not be null.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    enforcer.enforce(<span class="keyword">this</span>);</span><br><span class="line">    Map&lt;Class&lt;?&gt;, EventProducer&gt; foundProducers = handlerFinder.findAllProducers(object);<span class="comment">//1</span></span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1出调用了handlerFinder的findAllProducers方法，此前讲到构造函数时，我们知道这个handlerFinder指的是HandlerFinder.ANNOTATED，ANNOTATED的代码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">HandlerFinder ANNOTATED = <span class="keyword">new</span> HandlerFinder() &#123;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="keyword">public</span> Map&lt;Class&lt;?&gt;, EventProducer&gt; findAllProducers(Object listener) &#123;</span><br><span class="line">     <span class="keyword">return</span> AnnotatedHandlerFinder.findAllProducers(listener);</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="meta">@Override</span></span><br><span class="line">   <span class="keyword">public</span> Map&lt;Class&lt;?&gt;, Set&lt;EventHandler&gt;&gt; findAllSubscribers(Object listener) &#123;</span><br><span class="line">     <span class="keyword">return</span> AnnotatedHandlerFinder.findAllSubscribers(listener);</span><br><span class="line">   &#125;</span><br><span class="line"> &#125;;</span><br></pre></td></tr></table></figure>
+<p>从上面的代码的findAllProducers方法和findAllSubscribers方法的返回值可以推断出一个注册类只能有一个发布者，却可以有多个订阅者。findAllProducers方法最终调用的是AnnotatedHandlerFinder的findAllProducers方法：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">static</span> Map&lt;Class&lt;?&gt;, EventProducer&gt; findAllProducers(Object listener) &#123;</span><br><span class="line">  <span class="keyword">final</span> Class&lt;?&gt; listenerClass = listener.getClass();</span><br><span class="line">  Map&lt;Class&lt;?&gt;, EventProducer&gt; handlersInMethod = <span class="keyword">new</span> HashMap&lt;Class&lt;?&gt;, EventProducer&gt;();</span><br><span class="line">  Map&lt;Class&lt;?&gt;, Method&gt; methods = PRODUCERS_CACHE.get(listenerClass);<span class="comment">//1</span></span><br><span class="line">  <span class="keyword">if</span> (<span class="keyword">null</span> == methods) &#123;</span><br><span class="line">    methods = <span class="keyword">new</span> HashMap&lt;Class&lt;?&gt;, Method&gt;();</span><br><span class="line">    loadAnnotatedProducerMethods(listenerClass, methods);<span class="comment">//2</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (!methods.isEmpty()) &#123;</span><br><span class="line">    <span class="keyword">for</span> (Map.Entry&lt;Class&lt;?&gt;, Method&gt; e : methods.entrySet()) &#123;<span class="comment">//3</span></span><br><span class="line">      EventProducer producer = <span class="keyword">new</span> EventProducer(listener, e.getValue());</span><br><span class="line">      handlersInMethod.put(e.getKey(), producer);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> handlersInMethod;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>PRODUCERS_CACHE是一个ConcurrentHashMap，它的key为bus.register()时传入的class，而value是一个map，这个map的key是事件的class，value是生产事件的方法。注释1处首先在PRODUCERS_CACHE根据传入的对象的类型查找是否有缓存的事件方法，如果没有就调用注释2处的代码利用反射去寻找所有使用了@Produce注解的方法，并且将结果缓存到PRODUCERS_CACHE中。接着在注释3处遍历这些事件方法，并为每个事件方法创建了EventProducer类，并将这些EventProducer类作为value存入handlersInMethod并返回。接下来我们返回register方法。如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">register</span><span class="params">(Object object)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (object == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">&quot;Object to register must not be null.&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  enforcer.enforce(<span class="keyword">this</span>);</span><br><span class="line">  Map&lt;Class&lt;?&gt;, EventProducer&gt; foundProducers = handlerFinder.findAllProducers(object);</span><br><span class="line">  <span class="keyword">for</span> (Class&lt;?&gt; type : foundProducers.keySet()) &#123;</span><br><span class="line">    <span class="keyword">final</span> EventProducer producer = foundProducers.get(type);</span><br><span class="line">    EventProducer previousProducer = producersByType.putIfAbsent(type, producer);<span class="comment">//1</span></span><br><span class="line">    <span class="keyword">if</span> (previousProducer != <span class="keyword">null</span>) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">&quot;Producer method for type &quot;</span> + type</span><br><span class="line">        + <span class="string">&quot; found on type &quot;</span> + producer.target.getClass()</span><br><span class="line">        + <span class="string">&quot;, but already registered by type &quot;</span> + previousProducer.target.getClass() + <span class="string">&quot;.&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    Set&lt;EventHandler&gt; handlers = handlersByType.get(type);</span><br><span class="line">    <span class="keyword">if</span> (handlers != <span class="keyword">null</span> &amp;&amp; !handlers.isEmpty()) &#123;</span><br><span class="line">      <span class="keyword">for</span> (EventHandler handler : handlers) &#123;</span><br><span class="line">        dispatchProducerResultToHandler(handler, producer);<span class="comment">//2</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>调用完findAllProducers方法后，会在注释1处检查是否有该类型的发布者已经存在，如果存在则抛出异常，不存在则调用注释2处的dispatchProducerResultToHandler方法来触发和发布者对应的订阅者来处理事件。接下来register方法的后一部分代码就不帖上来了，跟此前的流程大致一样就是调用findAllSubscribers方法来查找所有使用了@Subscribe注解的方法，跟此前不同的是一个注册类可以有多个订阅者，接下来判断是否有该类型的订阅者存在，也就是判断注册类是否已经注册，如果存在则抛出异常，不存在则查找是否有和这些订阅者对应的发布者，如果有的话，就会触发对应的订阅者处理事件。</p>
+<h4 id="发送事件"><a href="#发送事件" class="headerlink" title="发送事件"></a><strong>发送事件</strong></h4><p>我们会调用Bus的post方法来发送事件，它的代码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">post</span><span class="params">(Object event)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (event == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">&quot;Event to post must not be null.&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  enforcer.enforce(<span class="keyword">this</span>);</span><br><span class="line">  Set&lt;Class&lt;?&gt;&gt; dispatchTypes = flattenHierarchy(event.getClass());<span class="comment">//1</span></span><br><span class="line">  <span class="keyword">boolean</span> dispatched = <span class="keyword">false</span>;</span><br><span class="line">  <span class="keyword">for</span> (Class&lt;?&gt; eventType : dispatchTypes) &#123;</span><br><span class="line">    Set&lt;EventHandler&gt; wrappers = getHandlersForEventType(eventType);</span><br><span class="line">    <span class="keyword">if</span> (wrappers != <span class="keyword">null</span> &amp;&amp; !wrappers.isEmpty()) &#123;</span><br><span class="line">      dispatched = <span class="keyword">true</span>;</span><br><span class="line">      <span class="keyword">for</span> (EventHandler wrapper : wrappers) &#123;</span><br><span class="line">        enqueueEvent(event, wrapper);<span class="comment">//2</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (!dispatched &amp;&amp; !(event <span class="keyword">instanceof</span> DeadEvent)) &#123;</span><br><span class="line">    post(<span class="keyword">new</span> DeadEvent(<span class="keyword">this</span>, event));</span><br><span class="line">  &#125;</span><br><span class="line">  dispatchQueuedEvents();<span class="comment">//3</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注释1处的flattenHierarchy方法首先会从缓存中查找传进来的event（消息事件类）的所有父类，如果没有则找到event的所有父类并存储入缓存中。接下来遍历这些父类找到它们的所有订阅者，并在注释2处将这些订阅者压入线程的事件队列中。并在注释3处调用dispatchQueuedEvents方法依次取出事件队列中的订阅者来处理相应event的事件。</p>
+<h4 id="取消注册"><a href="#取消注册" class="headerlink" title="取消注册"></a><strong>取消注册</strong></h4><p>取消注册时，我们会调用Bus的unregister方法，unregister方法如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">unregister</span><span class="params">(Object object)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (object == <span class="keyword">null</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">&quot;Object to unregister must not be null.&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  enforcer.enforce(<span class="keyword">this</span>);</span><br><span class="line">  Map&lt;Class&lt;?&gt;, EventProducer&gt; producersInListener = handlerFinder.findAllProducers(object);<span class="comment">//1</span></span><br><span class="line">  <span class="keyword">for</span> (Map.Entry&lt;Class&lt;?&gt;, EventProducer&gt; entry : producersInListener.entrySet()) &#123;</span><br><span class="line">    <span class="keyword">final</span> Class&lt;?&gt; key = entry.getKey();</span><br><span class="line">    EventProducer producer = getProducerForEventType(key);</span><br><span class="line">    EventProducer value = entry.getValue();</span><br><span class="line">    <span class="keyword">if</span> (value == <span class="keyword">null</span> || !value.equals(producer)) &#123;</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(</span><br><span class="line">          <span class="string">&quot;Missing event producer for an annotated method. Is &quot;</span> + object.getClass()</span><br><span class="line">              + <span class="string">&quot; registered?&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    producersByType.remove(key).invalidate();<span class="comment">//2</span></span><br><span class="line">  &#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>取消注册分为两部分，一部分是订阅者取消注册，另一部分是发布者取消注册。这两部分的代码类似，因此，上面的代码只列出了发布者取消注册的代码。在注释1处得到所有使用@Produce注解的方法，并遍历这些方法，调用注释2处的代码从缓存中清除所有和传进来的注册类相关的发布者，来完成发布者的取消注册操作。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/eventbus/4-otto-sourcecode.html">http://liuwangshu.cn/application/eventbus/4-otto-sourcecode.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a><a class="post-meta__tags" href="/tags/EventBus/">EventBus</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/system-architecture.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android系统架构与系统源码目录</div></div></a></div><div class="next-post pull-right"><a href="/application/eventbus/3-otto-sourcecode.html"><img class="next-cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info"> Android事件总线（三）otto用法全解析</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/eventbus/1-eventbus.html" title="Android事件总线（一）EventBus3.0用法全解析"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-08-17</div><div class="title">Android事件总线（一）EventBus3.0用法全解析</div></div></a></div><div><a href="/application/eventbus/3-otto-sourcecode.html" title=" Android事件总线（三）otto用法全解析"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-12-16</div><div class="title"> Android事件总线（三）otto用法全解析</div></div></a></div><div><a href="/application/eventbus/2-eventbus-sourcecode.html" title="Android事件总线（二）EventBus3.0源码解析"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2016-08-22</div><div class="title">Android事件总线（二）EventBus3.0源码解析</div></div></a></div><div><a href="/application/feature/5x-cardview.html" title="Android5.x CardView 应用解析"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-12-03</div><div class="title">Android5.x CardView 应用解析</div></div></a></div><div><a href="/application/feature/5x-notification.html" title=" Android5.x Notification应用解析"><img class="cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-12-04</div><div class="title"> Android5.x Notification应用解析</div></div></a></div><div><a href="/application/feature/5x-recyclerview.html" title="Android5.x RecyclerView 应用解析"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2015-12-02</div><div class="title">Android5.x RecyclerView 应用解析</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

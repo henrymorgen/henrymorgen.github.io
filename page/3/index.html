@@ -1,0 +1,307 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BATcoder - 刘望舒 - Android进阶三部曲番外篇</title><meta name="description" content="Android进阶三部曲系列图书作者腾讯云最具价值专家TVP 公众号：「刘望舒」"><meta name="keywords" content="刘望舒, 刘望舒的博客，刘望舒学堂，BATcoder，刘望舒课堂，望舒学院，望舒课堂，Android进阶三部曲，Android进阶三部曲番外篇，liuwangshu, Android, Java, Android开发，Android进阶之光，设计模式，Android网络编程，Android源码分析，热修复，插件化，进阶之光，刘望舒，Android进阶，知识体系，性能优化，JNI，包管理机制，四大组件启动过程，AMS，PMS，WMS，Binder，进阶三部曲，Android进阶解密，Android进阶之光，Android进阶指北"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/page/3/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="website"><meta property="og:title" content="BATcoder - 刘望舒"><meta property="og:url" content="http://liuwangshu.cn/page/3/"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="Android进阶三部曲系列图书作者腾讯云最具价值专家TVP 公众号：「刘望舒」"><meta property="og:image" content="http://liuwangshu.cn/img/my.jpg"><meta property="article:published_time" content="2021-12-17T12:18:37.118Z"><meta property="article:modified_time" content="2021-12-17T12:18:37.118Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: false,
+  isHome: true,
+  isHighlightShrink: false,
+  isSidebar: false,
+  postUpdate: '2021-12-17 20:18:37'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(https://pic.imgdb.cn/item/5f5fa816160a154a67fe5c0d.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="site-info"><h1 id="site_title">BATcoder - 刘望舒</h1><div id="site_subtitle"><span id="subtitle"></span></div><div id="site_social_icons"><a class="social-icon" href="https://github.com/henrymorgen" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div><div id="scroll_down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout_page" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="post_cover left_radius"><a href="/flutter/primer/9-assets-images.html" title="Flutter基础（九）资源和图片">     <img class="post_bg" src="https://s2.ax1x.com/2019/06/23/ZCkO1g.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（九）资源和图片"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/9-assets-images.html" title="Flutter基础（九）资源和图片">Flutter基础（九）资源和图片</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-06-22T16:18:00.000Z" title="发表于 2019-06-23 00:18:00">2019-06-23</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+ReactNative入门系列React Native组件Flutter基础系列
+和Android开发一样，Flutter也有asset这一概念，asset是打包到程序安装包中的，可在运行时访问。常见的asset类型包括静态数据（例如JSON文件）、配置文件、图标和图片（JPEG，WebP，GIF，动画WebP / GIF，PNG，BMP和WBMP）。本文会通过例子，来简单介绍在Flutter中如何添加资源和图片。
+1.指定assets要想使用asset，需要先让asset被识别，在项目根目录中的pubspec.yaml中定义图片就可以了。
+flutter:  assets:    - assets/1.png    - assets/2.png
+在构建期间，Flutter会将asset放置到称为asset bundle的特殊存档中，应用程序可以在运行时读取它们。 如果想要包含某一个目录中的所有的资源，直接指定目录的名称：
+flutter:  assets:    - assets/
+这种指定只包含直接位于目录中的文件，如果想要添加位于子目录中 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/flutter/primer/8-gesture-widget.html" title="Flutter基础（八）手势相关Widget：GestureDetector和Dismissible">     <img class="post_bg" src="https://s2.ax1x.com/2019/06/15/VIzBWt.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（八）手势相关Widget：GestureDetector和Dismissible"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/8-gesture-widget.html" title="Flutter基础（八）手势相关Widget：GestureDetector和Dismissible">Flutter基础（八）手势相关Widget：GestureDetector和Dismissible</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-06-14T16:18:00.000Z" title="发表于 2019-06-15 00:18:00">2019-06-15</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+ReactNative入门系列React Native组件Flutter基础系列
+前言移动开发中，用户交互是一个重要的环节，在Android中的触摸、点击、滑动等事件处理都提供了相关的Api，在Flutter中也是一样的，是由Widget来实现的。Flutter中的手势系统有两个独立的层。第一层是原始指针事件（pointer events），它描述了屏幕上指针，比如触摸、鼠标、触控笔的位置和移动。 第二层是手势，由一个或多个指针移动组成的动作会被识别为不同的手势。
+1.指针事件指针表示用户与设备屏幕交互的原始数据。有四种类型的指针事件：
+
+PointerDownEvent：指针接触到屏幕的特定位置。
+PointerMoveEvent： 指针已从屏幕上的一个位置移动到另一个位置。
+PointerUpEvent： 指针已停止接触屏幕。
+PointerCancelEvent：此指针的输入不再指向此应用，通俗来讲就是事件取消。
+
+在指针按下时，Flutter框架会对当前应用程序执行命中测试，以确定指针与屏幕接触的位置存在哪个Widget上，然后将Po ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/flutter/primer/7-scrolling-widget.html" title="Flutter基础（七）Scrolling Widget之ListView、GridView、PageView">     <img class="post_bg" src="https://s2.ax1x.com/2019/06/08/VD22rD.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（七）Scrolling Widget之ListView、GridView、PageView"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/7-scrolling-widget.html" title="Flutter基础（七）Scrolling Widget之ListView、GridView、PageView">Flutter基础（七）Scrolling Widget之ListView、GridView、PageView</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-06-07T16:18:00.000Z" title="发表于 2019-06-08 00:18:00">2019-06-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+ReactNative入门系列React Native组件Flutter基础系列
+前言我们知道Widget的分类有很多种，比如：Basics、Material Components、Cupertino、Scrolling等等，在前面的文章我介绍了Basics和Material Components，这一篇讲一下Scrolling分类中比较常用的ListView、GridView、PageView。
+1 ListViewListView可以说是Flutter中最常用的Scrolling Widget。ListView有四种构造函数：
+
+默认构造函数ListView。
+ListView.builder，适用于具有大量（或无限）列表项。
+ListView.separated，可以配置分割线，适用于具有固定数量列表项的ListView。
+ListView.custom，提供了自定义子Widget的能力。
+
+1.1 默认构造函数用默认构造函数的方式来实现一个简单的列表。
+import &#x27;package:flutter/material.dar ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/flutter/primer/6-material-components-2.html" title="Flutter基础（六）Material组件之BottomNavigationBar、TabBar、Drawer">     <img class="post_bg" src="https://s2.ax1x.com/2019/06/06/VUjGh4.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（六）Material组件之BottomNavigationBar、TabBar、Drawer"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/6-material-components-2.html" title="Flutter基础（六）Material组件之BottomNavigationBar、TabBar、Drawer">Flutter基础（六）Material组件之BottomNavigationBar、TabBar、Drawer</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-06-05T16:18:00.000Z" title="发表于 2019-06-06 00:18:00">2019-06-06</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+ReactNative入门系列React Native组件Flutter基础系列
+前言在上一篇 Flutter基础（五）Material组件最佳入门（前篇）中，我介绍了Material组件的MaterialApp、Scaffold、AppBar，这篇文章接着介绍Material组件中的BottomNavigationBar、TabBar、Drawer。
+1.BottomNavigationBarBottomNavigationBar是底部的导航栏，用于在3到5个的少量视图中进行选择。一般情况下，导航栏的选项卡由文本标签、图标或两者结合的形式组成。底部导航栏通常与javaScaffold结合使用，它会作为Scaffold.bottomNavigationBar参数。
+import &#x27;package:flutter/material.dart&#x27;;void main() =&gt; runApp(MyApp());class MyApp extends StatelessWidget &#123;  static const S ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/flutter/primer/5-material-components.html" title="Flutter基础（五）Material组件之MaterialApp、Scaffold、AppBar">     <img class="post_bg" src="https://s2.ax1x.com/2019/06/03/VJZhSU.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（五）Material组件之MaterialApp、Scaffold、AppBar"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/5-material-components.html" title="Flutter基础（五）Material组件之MaterialApp、Scaffold、AppBar">Flutter基础（五）Material组件之MaterialApp、Scaffold、AppBar</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-05-24T16:18:00.000Z" title="发表于 2019-05-25 00:18:00">2019-05-25</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+关联系列ReactNative入门系列React Native组件Flutter基础系列
+前言在上一篇文章Flutter基础（四）开发Flutter应用前需要掌握的Basics Widget，我们学习了Basics Widget，除了Basics Widget，我们还需要了解Material Components，也就是Material组件。它提供了实现Material Design准则的视觉、行为和动作的Widget。官方将Material组件分为为几个类型：
+
+应用程序结构和导航
+Button
+输入和选择
+对话框，警告弹框和面板
+信息显示
+布局
+
+主要介绍应用程序结构和导航，会分为两篇文章进行介绍，这一篇介绍应用程序结构和导航分类中的MaterialApp、Scaffold、AppBar。
+1.MaterialApp说到Material组件，不得不提到MaterialApp，它包含了许多Widget，这些Widget通常是实现Material Design的应用程序所必需的。MaterialApp在此前的文章都用过，简单的使用这里就不介绍 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/flutter/primer/4-basics-widget.html" title="Flutter基础（四）开发Flutter应用前需要掌握的Basic Widget">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZr0gK.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（四）开发Flutter应用前需要掌握的Basic Widget"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/4-basics-widget.html" title="Flutter基础（四）开发Flutter应用前需要掌握的Basic Widget">Flutter基础（四）开发Flutter应用前需要掌握的Basic Widget</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-05-17T16:18:00.000Z" title="发表于 2019-05-18 00:18:00">2019-05-18</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+关联系列ReactNative入门系列React Native组件Flutter基础系列
+前言学完了Dart语言，接下来就可以学习Widget了，Flutter的UI界面就是由Widget组成的，Widget的数量繁多，因此我会用几篇文章来专门介绍它，本篇就来介绍Basics Widget。
+1.什么是WidgetFlutter的Widget的设计灵感来自于React，主要目的就是使用Widget构建UI。Widget根据其当前配置和状态来描述视图，当Widget的状态发生更改时，Widget会重建其描述。framework将根据前面的描述进行对比，以确定底层渲染树从一个状态转换到下一个状态所需的最小更改。在Flutter中，除了Basics 的文本、图片、卡片、输入框这些基础控件，布局方式和动画等也都是由Widget组成的。通过使用不同类型的Widget，就可以实现复杂的界面。Widget可以翻译为部件，粗略的相当于Android中的View。Widget和View不同的是：Widget具有不同的生命周期：它是不可变的，每当Widget或者其 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/flutter/primer/3-dart.html" title="Flutter基础（三）Dart快速入门">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZDAoR.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（三）Dart快速入门"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/3-dart.html" title="Flutter基础（三）Dart快速入门">Flutter基础（三）Dart快速入门</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-05-05T16:18:00.000Z" title="发表于 2019-05-06 00:18:00">2019-05-06</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+关联系列ReactNative入门系列React Native组件Flutter基础系列
+前言Dart是Flutter SDK指定的语言，因此要学习Flutter，Dart是必须掌握的。关于Dart可以写一本书了，这里用一篇文章来介绍下Dart的精髓，带你快速入门。和Java语言类似的部分，这篇文章就尽量不再讲了。
+1. Dart开发环境搭建学习Dart语法最好需要用一个编辑器来实践，这里推荐使用IntelliJ IDEA。先下载Dart SDK，地址为：http://www.gekorm.com/dart-windows/打开IntelliJ IDEA，菜单中点击File–&gt;Settings–&gt;plugins，在plugins的搜索框中搜索Dart并安装，然后重启IntelliJ IDEA。点击File–&gt;New Project–&gt;Dart，按照下图配置Dart SDK。注意要选择第三个选项Constole Application,否则会默认创建一个Web项目。点击Next然后配置项目的名称就可以创建项目了。在项目中的 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/flutter/primer/2-start.html" title="Flutter基础（二）Flutter开发环境搭建和Hello World">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZe4C6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（二）Flutter开发环境搭建和Hello World"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/2-start.html" title="Flutter基础（二）Flutter开发环境搭建和Hello World">Flutter基础（二）Flutter开发环境搭建和Hello World</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-04-24T16:18:00.000Z" title="发表于 2019-04-25 00:18:00">2019-04-25</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+关联系列ReactNative入门系列React Native组件Flutter基础系列
+前言其实没想写Flutter的相关文章的，因为这些看官方文档就够了，但是有不少同学就想看我写的，因此我也写个Flutter系列，顺便自己也梳理下知识点。这个Flutter基础系列是Flutter系列的入门系列，后面还会有其他的Flutter系列。既然要学习Flutter肯定要先学习环境的搭建，可以在Windows、MAC、Linux上来进行Flutter开发，由于本系列文章是面向Android开发来编写的，因此选择大部分人的都有的Windows平台。
+本篇文章的目录为：
+
+Flutter概述
+Flutter开发环境搭建
+运行一个Flutter Demo
+Hello World
+
+1.Flutter概述Flutter是谷歌的移动UI框架，可以快速在Android和iOS上构建高质量的原生用户界面， 它的前身是谷歌试验项目Sky。主要有以下几个特点：符合各个平台的用户体验Flutter内置了Material Design和Cupertino风格（iOS风格） ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/flutter/primer/1-cross-platform-evolution.html" title="Flutter基础（一）移动开发的跨平台技术演进">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZEens.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Flutter基础（一）移动开发的跨平台技术演进"></a></div><div class="recent-post-info"><a class="article-title" href="/flutter/primer/1-cross-platform-evolution.html" title="Flutter基础（一）移动开发的跨平台技术演进">Flutter基础（一）移动开发的跨平台技术演进</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-04-17T16:18:00.000Z" title="发表于 2019-04-18 00:18:00">2019-04-18</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Flutter/">Flutter</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+
+
+关联系列ReactNative入门系列React Native组件
+
+本文首发于公众号「刘望舒」
+
+前言本来这一篇应该介绍如何搭建Flutter开发环境的，但我想在了解Flutter前，不妨了解一下跨平台技术的演进，这样更有助于学习Flutter，也能认清Flutter的优势和本质。这篇文章还有一个目的，就是希望大家是玩技术的人，而不是被技术玩的人，对于不同的技术要有自己的判断。
+1. 跨平台技术的诞生我是2010年开始从事的Android开发，当时会Android和iOS开发的很少，也不火，所有人都在“摸着河底过河”，项目更没有第三方框架一说，大都是自己写的，不像现在各种的框架满天飞。随着移动开发的发展，互联网公司也是层出不穷，有些公司迫于竞争，想要更迅速的更省成本的进行开发，就不再满足Android端一套代码，iOS端一套代码。与此同时，其他技术领域和各大公司也都觊觎着这份大蛋糕，纷纷推出相关的技术，这样跨平台技术应运而生，并且开始在公司中生根发芽。Android和iOS生态太大了，我们可以把它们比作第一级生态，想要颠覆这两个系统的曾经出 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/framework/aosp/5-debug-aosp.html" title="Android AOSP基础（五）Android Studio调试系统源码的三种方式">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZhKZ6.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android AOSP基础（五）Android Studio调试系统源码的三种方式"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/aosp/5-debug-aosp.html" title="Android AOSP基础（五）Android Studio调试系统源码的三种方式">Android AOSP基础（五）Android Studio调试系统源码的三种方式</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-04-07T16:18:00.000Z" title="发表于 2019-04-08 00:18:00">2019-04-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列Android AOSP基础系列Android系统启动系列Android深入四大组件系列
+
+
+
+前言作为应用开发，我们将AOSP源码下载下来后，去查看源码已经足够用，如果想更进一步，可以学习调试源码，这样有助于了解系统源码和原理。调试系统源码的方式有很多种，今天分享出来的是比较适合应用开发的三种，分别是AOSP源码项目调试、导入部分源码调试、新建Android项目调试。
+需要注意的是，这三种方法都不需要整编系统源码，甚至有的方法只需要下载部分源码就可以了，哪个方法更适合你呢？看完本篇文章就会有答案了。
+1. AOSP源码项目调试这种调试方法的前提是要将AOSP源码下载下来，关于下载AOSP源码，可以查看Android AOSP基础（二）AOSP源码下载这篇文章，另外还需要将AOSP源码导入到Android Studio中，并且配置SDK和JDK，这个在Android AOSP基础（四）Source Insight和Android Studio导入系统源码讲过，因为这篇文章多次用到配置SDK和JDK这一知识点，再次讲一遍。
+1.1 配置SD ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/aosp/4-import-aosp.html" title="Android AOSP基础（四）Source Insight和Android Studio导入系统源码">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android AOSP基础（四）Source Insight和Android Studio导入系统源码"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/aosp/4-import-aosp.html" title="Android AOSP基础（四）Source Insight和Android Studio导入系统源码">Android AOSP基础（四）Source Insight和Android Studio导入系统源码</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-04-02T16:18:00.000Z" title="发表于 2019-04-03 00:18:00">2019-04-03</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列Android AOSP基础系列Android系统启动系列
+
+
+前言在上一篇文章Android AOSP基础（三）Android系统源码的整编和单编中，我们对系统源码进行了编译，这篇文章我们接着来学习如何将系统源码导入到编辑器中，以便于查看和调试源码。关于查看源码，可以使用Android Studio、Eclipse、Sublime、Source Insight等软件，这里我推荐使用Source Insight，但是有的同学可能不是很习惯，而且Source Insight是Windows平台的软件，Mac平台用不了，那么使用Android Studio是一个不错的选择，而且使用Android Studio还可以调试源码。
+1. Source Insight导入系统源码在《Android进阶解密》的第一章，我讲解了Source Insight如何导入系统源码，可能有的同学没有买这本书，这里再来讲一遍。Source Insight只能查看源码，不能调试源码，如果只想在Source Insight中查看源码，可以直接从百度网盘：https:// ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/application/android-gradle/1-gradle-plug-in.html" title="Android Gradle （一）Gradle的Android插件入门">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VepHcn.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android Gradle （一）Gradle的Android插件入门"></a></div><div class="recent-post-info"><a class="article-title" href="/application/android-gradle/1-gradle-plug-in.html" title="Android Gradle （一）Gradle的Android插件入门">Android Gradle （一）Gradle的Android插件入门</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-03-25T16:18:00.000Z" title="发表于 2019-03-26 00:18:00">2019-03-26</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+相关文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解Gradle核心思想（六）自定义Gradle插件的三种方式
+
+
+前言在Gradle核心思想这个系列中我尽量避免了Gradle和Android之间的关联，这是因为在了解Gradle的核心思想后，可以更好的理解Android Gradle，因此这里强烈建议先阅读Gradle核心思想系列。Android Gradle或者Gradle for Android，实际上指的就是Gradle的Android插件，这一篇我们入个门。
+1.什么是Gradle的Android插件在Gradle核心思想（五）通俗易懂的Gradle插件讲解这篇文章中我们知道，Gradle有很多插件，为了支持Android项目的构建，谷歌为Gradle编写了Android插件，新的Android构建系统就 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/aosp/3-compiling-aosp.html" title="Android AOSP基础（三）Android系统源码的整编和单编">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android AOSP基础（三）Android系统源码的整编和单编"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/aosp/3-compiling-aosp.html" title="Android AOSP基础（三）Android系统源码的整编和单编">Android AOSP基础（三）Android系统源码的整编和单编</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-03-16T16:18:00.000Z" title="发表于 2019-03-17 00:18:00">2019-03-17</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列Android AOSP基础系列Android系统启动系列
+
+
+前言在上一篇文章Android AOSP基础（二）AOSP 源码下载中，我们顺利的将AOSP下载了下来，很多时候我们不仅仅需要去查看源码，还有以下的几个需求：
+
+动态调试Android系统源码
+定制Android系统
+将最新版本的Android系统刷入到自己的Android设备中
+将系统源码导入到Android Studio中
+
+为了实现这些需求，就需要我们去编译系统源码。
+1.编译系统概述了解以下一些概念，会对Android编译系统有大概的了解。MakefileAndroid平台的编译系统，其实就是用Makefile写出来的一个独立项目。它定义了编译的规则，实现了“自动化编译”，不仅把分散在数百个Git库中的代码整合起来、统一编译， 而且还把产物分门别类地输出到一个目录，打包成手机ROM，还可以生成应用开发时所使用的SDK、NDK等。因此，采用Makefile编写的编译系统，也可以称为Makefile编译系统。Android.mkMakefile编译系统的一部分，定义了一个 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/framework/aosp/2-download-aosp.html" title="Android AOSP基础（二）AOSP源码和内核源码下载">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZRBi4.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android AOSP基础（二）AOSP源码和内核源码下载"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/aosp/2-download-aosp.html" title="Android AOSP基础（二）AOSP源码和内核源码下载">Android AOSP基础（二）AOSP源码和内核源码下载</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-03-08T16:18:00.000Z" title="发表于 2019-03-09 00:18:00">2019-03-09</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+前言这篇文章我们来学习如何下载AOSP 源码，如果你还没有Linux 环境，请查看Android AOSP基础（一）VirtualBox 安装 Ubuntu这篇文章，另外如果你不需要编译源码，或者不需要最新的源码，可以直接从百度网盘：https://pan.baidu.com/s/1ngsZs 将源码下载下来。
+
+1.关于AOSPAOSP(Android Open Source Project)是Google开放的Android 开源项目，中文官网为：https://source.android.google.cn/。AOSP通俗来讲就是一个Android系统源码项目，通过它可以定制 Android 操作系统，国内手机厂商都是在此基础上开发的定制系统。因为墙的缘故，如果无法连接谷歌服务器获取AOSP源码，可以从 清华大学镜像站或者  中科大镜像。本篇文章以清华大学镜像站为例。
+2. 下载 repo工具Android源码包含数百个git库，光是下载这么多的git库就是一项繁重的任务，所以Google开发了repo，它是用于管理Android版本库的 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/aosp/1-install-ubuntu.html" title="Android AOSP基础（一）VirtualBox 安装 Ubuntu">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZg6h9.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android AOSP基础（一）VirtualBox 安装 Ubuntu"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/aosp/1-install-ubuntu.html" title="Android AOSP基础（一）VirtualBox 安装 Ubuntu">Android AOSP基础（一）VirtualBox 安装 Ubuntu</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-03-01T16:18:00.000Z" title="发表于 2019-03-02 00:18:00">2019-03-02</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+前言在Android进阶三部曲第二部《Android进阶解密》的第一章，我介绍了两种阅读源码的方式，其中一种是从百度网盘：https://pan.baidu.com/s/1ngsZs 将源码下载下来，然后用SouceInsight来查看，这种方式很便捷，适合去阅读源码，但是有两个弊端，一个是无法获取最新的源码，另一个是不能够编译源码。本系列就是来讲解下载和编译源码相关知识的。编译源码需要在 Linux 环境下进行，很多同学的系统不是Ubuntu，但是可以在Windows和Mac上使用VirtualBox 来安装 Ubuntu，这篇文章会讲解Windows10环境下的安装过程，Mac环境也是大同小异。另外Windows 10下也可以在Microsoft Store中下载Ubuntu软件，可以去尝试下。
+
+准备工作需要下载两个文件：
+
+VirtualBox：下载地址为：https://www.virtualbox.org/wiki/Downloads，我的版本为VirtualBox 6.0.4。
+Ubuntu桌面版：下载地址为：https://www ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/application/gradle/6-custonplugin.html" title="Gradle核心思想（六）自定义Gradle插件的三种方式">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZzVAg.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Gradle核心思想（六）自定义Gradle插件的三种方式"></a></div><div class="recent-post-info"><a class="article-title" href="/application/gradle/6-custonplugin.html" title="Gradle核心思想（六）自定义Gradle插件的三种方式">Gradle核心思想（六）自定义Gradle插件的三种方式</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-02-23T16:18:00.000Z" title="发表于 2019-02-24 00:18:00">2019-02-24</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+相关文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解
+
+
+前言在上一篇文章Gradle核心思想（五）通俗易懂的Gradle插件讲解中，我介绍了什么是Gradle插件、如何使用Gradle插件、Gradle插件的作用和好处，由于篇幅的原因，还有一个重要的知识点没有讲，那就是自定义Gradle插件（自定义Gradle对象插件）。自定义Gradle插件主要有三种方式，分别是build.gradle中编写、buildSrc工程项目中编写、独立项目中编写。建议阅读本文前，先阅读开头列出的本系列相关文章。
+1.build.gradle对象插件是实现了org.gradle.api.plugins接口的插件，这个接口中只定义个一个简单的apply方法，想要实现自定义插件就需要去实现org.gradle.api.plugins接口。 ...</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/2/"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/4/"><i class="fas fa-chevron-right fa-fw"></i></a></div></nav></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/my.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">刘望舒</div><div class="author-info__description">Android进阶三部曲系列图书作者<br>腾讯云最具价值专家TVP <br>公众号：「刘望舒」</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/henrymorgen" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div></div><div class="sticky_layout"><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">Android进阶三部曲第三部《Android进阶指北》已出版！</div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！"><img src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="进阶三部曲第一部《Android进阶之光》第2版出版！"/></a><div class="content"><a class="title" href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！">进阶三部曲第一部《Android进阶之光》第2版出版！</a><time datetime="2021-04-03T16:16:16.000Z" title="发表于 2021-04-04 00:16:16">2021-04-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"><img src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"/></a><div class="content"><a class="title" href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！">『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！</a><time datetime="2021-03-06T16:16:16.000Z" title="发表于 2021-03-07 00:16:16">2021-03-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！"><img src="https://pic.imgdb.cn/item/5e02594376085c3289aeb21b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候下载Android11系统源码和内核源码了！"/></a><div class="content"><a class="title" href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！">『BATcoder』 是时候下载Android11系统源码和内核源码了！</a><time datetime="2021-01-14T16:16:16.000Z" title="发表于 2021-01-15 00:16:16">2021-01-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"><img src="https://pic.imgdb.cn/item/5fdad1733ffa7d37b3289c28.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"/></a><div class="content"><a class="title" href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！">『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！</a><time datetime="2020-12-16T16:16:16.000Z" title="发表于 2020-12-17 00:16:16">2020-12-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"><img src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"/></a><div class="content"><a class="title" href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！">『BATcoder』一个视频帮你突破系统底层学习瓶颈！</a><time datetime="2020-12-03T16:16:16.000Z" title="发表于 2020-12-04 00:16:16">2020-12-04</time></div></div></div></div></div><div class="card-widget card-categories"><div class="card-content"><div class="item-headline"><i class="fas fa-folder-open"></i><span>分类</span></div><ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/"><span class="card-category-list-name">Android应用层</span><span class="card-category-list-count">67</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/"><span class="card-category-list-name">Android框架层</span><span class="card-category-list-count">49</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/BATcoder/"><span class="card-category-list-name">BATcoder</span><span class="card-category-list-count">5</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Flutter/"><span class="card-category-list-name">Flutter</span><span class="card-category-list-count">13</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Java/"><span class="card-category-list-name">Java</span><span class="card-category-list-count">11</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/React-Native/"><span class="card-category-list-name">React Native</span><span class="card-category-list-count">9</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Swift/"><span class="card-category-list-name">Swift</span><span class="card-category-list-count">5</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%9C%9B%E8%88%92%E6%9D%82%E8%B0%88/"><span class="card-category-list-name">望舒杂谈</span><span class="card-category-list-count">2</span></a></li>
+            <li class="card-category-list-item more is-center"><a class="card-category-list-link-more" href="/categories/">
+                <span>查看更多</span><i class="fas fa-angle-right"></i></a></li>
+            </ul></div></div><div class="card-widget card-archives"><div class="card-content"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/04/"><span class="card-archive-list-date">四月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/03/"><span class="card-archive-list-date">三月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/01/"><span class="card-archive-list-date">一月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/12/"><span class="card-archive-list-date">十二月 2020</span><span class="card-archive-list-count">2</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/11/"><span class="card-archive-list-date">十一月 2020</span><span class="card-archive-list-count">3</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/10/"><span class="card-archive-list-date">十月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/09/"><span class="card-archive-list-date">九月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/03/"><span class="card-archive-list-date">三月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item more is-center"><a class="card-archive-list-link-more" href="/archives/">
+              <span>查看更多</span><i class="fas fa-angle-right"  ></i></a></li></ul></div></div><div class="card-widget card-webinfo"><div class="card-content"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">197</div></div><div class="webinfo-item"><div class="item-name">已运行时间 :</div><div class="item-count" id="runtimeshow" data-publishDate="2017-04-12T16:00:00.000Z"></div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2021-12-17T12:18:36.212Z"></div></div></div></div></div></div></div></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function subtitleType () {
+  if (true) { 
+    var typed = new Typed("#subtitle", {
+      strings: "Android进阶三部曲番外篇".split(","),
+      startDelay: 300,
+      typeSpeed: 150,
+      loop: true,
+      backSpeed: 50
+    })
+  } else {
+    document.getElementById("subtitle").innerHTML = 'A'
+  }
+}
+
+if (true) {
+  if (typeof Typed === 'function') subtitleType()
+  else $.getScript('https://cdn.jsdelivr.net/npm/typed.js/lib/typed.min.js', subtitleType)
+} else {
+  subtitleType()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

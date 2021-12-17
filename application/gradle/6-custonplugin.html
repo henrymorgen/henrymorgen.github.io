@@ -1,0 +1,191 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Gradle核心思想（六）自定义Gradle插件的三种方式 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  相关文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解   前言在上一篇文章Gradle核心思想（五）通俗易懂的Gradle插"><meta name="keywords" content="Gradle核心思想"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/gradle/6-custonplugin.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Gradle核心思想（六）自定义Gradle插件的三种方式"><meta property="og:url" content="http://liuwangshu.cn/application/gradle/6-custonplugin.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  相关文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解   前言在上一篇文章Gradle核心思想（五）通俗易懂的Gradle插"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZzVAg.jpg"><meta property="article:published_time" content="2019-02-23T16:18:00.000Z"><meta property="article:modified_time" content="2020-09-16T13:13:37.791Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-16 21:13:37'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-build-gradle"><span class="toc-number">2.</span> <span class="toc-text">1.build.gradle</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-%E7%AE%80%E5%8D%95%E7%9A%84%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8F%92%E4%BB%B6"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 简单的自定义插件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-2-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8F%92%E4%BB%B6%E6%89%A9%E5%B1%95"><span class="toc-number">2.2.</span> <span class="toc-text">1.2 自定义插件扩展</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-buildSrc%E5%B7%A5%E7%A8%8B%E9%A1%B9%E7%9B%AE"><span class="toc-number">3.</span> <span class="toc-text">2.buildSrc工程项目</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E7%8B%AC%E7%AB%8B%E9%A1%B9%E7%9B%AE"><span class="toc-number">4.</span> <span class="toc-text">3.独立项目</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8F%92%E4%BB%B6"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 自定义插件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E5%9C%A8%E5%8F%A6%E4%B8%80%E4%B8%AA%E9%A1%B9%E7%9B%AE%E4%B8%AD%E4%BD%BF%E7%94%A8%E6%8F%92%E4%BB%B6"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 在另一个项目中使用插件</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%80%BB%E7%BB%93"><span class="toc-number">5.</span> <span class="toc-text">总结</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZzVAg.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Gradle核心思想（六）自定义Gradle插件的三种方式</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-02-23T16:18:00.000Z" title="发表于 2019-02-24 00:18:00">2019-02-24</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-16T13:13:37.791Z" title="更新于 2020-09-16 21:13:37">2020-09-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>相关文章<br><a href="http://liuwangshu.cn/application/gradle/1-study-gradle.html">Gradle核心思想（一）为什么现在要用Gradle？</a><br><a href="http://liuwangshu.cn/application/gradle/2-primer.html">Gradle核心思想（二）Gradle入门前奏</a><br><a href="http://liuwangshu.cn/application/gradle/3-groovy.html">Gradle核心思想（三）Groovy快速入门指南</a><br><a href="http://liuwangshu.cn/application/gradle/4-wrapper.html">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</a><br><a href="http://liuwangshu.cn/application/gradle/5-plugins.html">Gradle核心思想（五）通俗易懂的Gradle插件讲解</a></p>
+<a id="more"></a>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>在上一篇文章<a href="http://liuwangshu.cn/application/gradle/5-plugins.html">Gradle核心思想（五）通俗易懂的Gradle插件讲解</a>中，我介绍了什么是Gradle插件、如何使用Gradle插件、Gradle插件的作用和好处，由于篇幅的原因，还有一个重要的知识点没有讲，那就是自定义Gradle插件（自定义Gradle对象插件）。自定义Gradle插件主要有三种方式，分别是build.gradle中编写、buildSrc工程项目中编写、独立项目中编写。建议阅读本文前，先阅读开头列出的本系列相关文章。</p>
+<h3 id="1-build-gradle"><a href="#1-build-gradle" class="headerlink" title="1.build.gradle"></a><strong>1.build.gradle</strong></h3><p>对象插件是实现了org.gradle.api.plugins<Project>接口的插件，这个接口中只定义个一个简单的apply方法，想要实现自定义插件就需要去实现org.gradle.api.plugins<Project>接口。<br>Groovy、Java、Kotlin都可以作为实现插件的语言，在本文的示例中，使用Groovy作为实现语言。<br>在实际工作中我们很少会在build.gradle中编写自定义插件，这里是为了带大家写个最简单的例子，可以最快最直接的了解什么是自定义插件。</p>
+<h4 id="1-1-简单的自定义插件"><a href="#1-1-简单的自定义插件" class="headerlink" title="1.1 简单的自定义插件"></a><strong>1.1 简单的自定义插件</strong></h4><p>这里使用IntelliJ来编辑（AS也可以），首先新建一个Groovy工程：<br><img src="https://s2.ax1x.com/2019/05/27/VZzPjP.png" alt="VZzPjP.png"></p>
+<p>定义项目的GroupId和ArtifactId：<br><img src="https://s2.ax1x.com/2019/05/27/VZzPjP.png" alt="VZzPjP.png"></p>
+<p><strong>build.gradle</strong></p>
+<figure class="highlight gradle"><table><tr><td class="code"><pre><span class="line">apply plugin:CustomPlugin</span><br><span class="line"><span class="keyword">class</span> CustomPlugin <span class="keyword">implements</span> Plugin&lt;<span class="keyword">Project</span>&gt; &#123;</span><br><span class="line">    @Override</span><br><span class="line">    <span class="keyword">void</span> apply(<span class="keyword">Project</span> <span class="keyword">project</span>) &#123;</span><br><span class="line">        <span class="keyword">project</span>.<span class="keyword">task</span>(<span class="string">&#x27;CustomPluginTask&#x27;</span>) &#123;</span><br><span class="line">            <span class="keyword">doLast</span> &#123;</span><br><span class="line">                <span class="keyword">println</span> <span class="string">&quot;自定义插件&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在build.gradle中自定义了一个插件CustomPlugin，在apply方法中创建一个名称为CustomPluginTask的任务。在IntelliJ的Terminal中输入gradlew.bat CustomPluginTask来执行CustomPluginTask任务。<br><img src="https://s2.ax1x.com/2019/05/27/VZzAHS.png" alt="VZzAHS.png"></p>
+<h4 id="1-2-自定义插件扩展"><a href="#1-2-自定义插件扩展" class="headerlink" title="1.2 自定义插件扩展"></a><strong>1.2 自定义插件扩展</strong></h4><p>再举一个简单的插件拓展例子，通过插件拓展来配置CustomPluginTask的输出字符串，如下所示。<br><strong>build.gradle</strong></p>
+<figure class="highlight gradle"><table><tr><td class="code"><pre><span class="line"><span class="keyword">class</span> CustomPluginPluginExtension &#123;</span><br><span class="line">    String message = <span class="string">&#x27;from CustomPlugin&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">class</span> CustomPlugin <span class="keyword">implements</span> Plugin&lt;<span class="keyword">Project</span>&gt; &#123;</span><br><span class="line">    @Override</span><br><span class="line">    <span class="keyword">void</span> apply(<span class="keyword">Project</span> <span class="keyword">project</span>) &#123;</span><br><span class="line">        <span class="keyword">def</span> extension = <span class="keyword">project</span>.extensions.create(<span class="string">&#x27;custom&#x27;</span>, CustomPluginPluginExtension)<span class="comment">//1</span></span><br><span class="line">        <span class="keyword">project</span>.<span class="keyword">task</span>(<span class="string">&#x27;CustomPluginTask&#x27;</span>) &#123;</span><br><span class="line">            <span class="keyword">doLast</span> &#123;</span><br><span class="line">                <span class="keyword">println</span> extension.message</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">apply plugin: CustomPlugin</span><br><span class="line">custom.message = <span class="string">&quot;自定义插件拓展&quot;</span><span class="comment">//2</span></span><br></pre></td></tr></table></figure>
+<p>CustomPluginPluginExtension类中定义了message变量，CustomPluginPluginExtension是一个Groovy Bean(类似于JavaBean)。注释1处用于添加拓展插件CustomPluginPluginExtension到插件列表中，名称为custom。注释2处设置CustomPluginPluginExtension的message值。<br>Terminal中输入gradlew.bat CustomPluginTask来执行CustomPluginTask任务。<br><img src="https://s2.ax1x.com/2019/05/27/VZzp9A.png" alt="VZzp9A.png"></p>
+<h3 id="2-buildSrc工程项目"><a href="#2-buildSrc工程项目" class="headerlink" title="2.buildSrc工程项目"></a><strong>2.buildSrc工程项目</strong></h3><p>除了在build.gradle中编写的自定义插件，还可以将插件的源代码放在rootProjectDir/buildSrc/src/main/groovy目录中，Gradle会自动识别来完成编译和测试。<br>在第一节的工程根目录下建立/buildSrc/src/main/groovy目录，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/27/VZz91I.png" alt="VZz91I.png"><br>在groovy目录中创建一个groovy文件，比如我的是CustomPlugin.groovy：<br><strong>buildSrc/src/main/groovy/CustomPlugin.groovy</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> org.gradle.api.Plugin;</span><br><span class="line"><span class="keyword">import</span> org.gradle.api.Project;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomPlugin</span> <span class="keyword">implements</span> <span class="title">Plugin</span>&lt;<span class="title">Project</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">apply</span><span class="params">(Project project)</span> </span>&#123;</span><br><span class="line">        project.task(<span class="string">&#x27;CustomPluginTask&#x27;</span>) &#123;</span><br><span class="line">            doLast &#123;</span><br><span class="line">                println <span class="string">&quot;自定义插件&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>修改build.gradle为如下的内容：<br><strong>build.gradle</strong></p>
+<figure class="highlight gradle"><table><tr><td class="code"><pre><span class="line">apply plugin: CustomPlugin</span><br></pre></td></tr></table></figure>
+<p>Terminal中输入gradlew.bat CustomPluginTask来执行CustomPluginTask任务，会打印出我们想要的结果。</p>
+<h3 id="3-独立项目"><a href="#3-独立项目" class="headerlink" title="3.独立项目"></a><strong>3.独立项目</strong></h3><p>无论是在build.gradle中编写自定义插件，还是buildSrc项目中编写自定义插件，都只能在自己的项目中进行使用。如果想要分享给其他人或者自己用，可以在一个独立的项目中编写插件，这个项目会生成一个包含插件类的JAR文件，有了JAR文件就很容易进行分享了。</p>
+<h4 id="3-1-自定义插件"><a href="#3-1-自定义插件" class="headerlink" title="3.1 自定义插件"></a><strong>3.1 自定义插件</strong></h4><p>为了和前两种方式进行区分，用IntelliJ新建一个Groovy工程，我的工程名为CustomPluginShare，后面会用到。<br><strong>配置build.gradle</strong></p>
+<figure class="highlight gradle"><table><tr><td class="code"><pre><span class="line">apply plugin: <span class="string">&#x27;groovy&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">    <span class="keyword">compile</span> gradleApi()</span><br><span class="line">    <span class="keyword">compile</span> localGroovy()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>应用Groovy插件，并将Gradle API添加为编译时依赖项，build工程，会在External Libraries中生成三个jar文件：<br><img src="https://s2.ax1x.com/2019/05/27/VZzFnf.png" alt="VZzFnf.png"></p>
+<p>这样我们可以在非buildSrc工程项目中使用groovy语法和Gradle的api了。<br><strong>创建自定义插件</strong><br>在src/main/groovy/ 目录中创建一个包，我的是com.example.plugins，在com.example.plugins创建一个groovy文件：<br><strong>src/main/groovy/com/example/plugins/CustomPlugin.groovy</strong></p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example.plugins</span><br><span class="line"><span class="keyword">import</span> org.gradle.api.Plugin</span><br><span class="line"><span class="keyword">import</span> org.gradle.api.Project</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CustomPlugin</span> <span class="keyword">implements</span> <span class="title">Plugin</span>&lt;<span class="title">Project</span>&gt; </span>&#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">void</span> <span class="title">apply</span><span class="params">(Project project)</span> </span>&#123;</span><br><span class="line">        project.task(<span class="string">&#x27;CustomPluginTask&#x27;</span>) &#123;</span><br><span class="line">            doLast &#123;</span><br><span class="line">                println <span class="string">&quot;自定义插件&quot;</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>配置properties文件</strong><br>在buildSrc工程项目中，Gradle可以自动的去识别插件，独立项目中的插件是如何被Gradle识别的呢？答案是需要在生成的JAR文件中提供一个属性文件，这个属性文件名要与插件id相匹配。在resources中创建src/main/resources/META-INF/gradle-plugins/com.example.plugins.customplugin.properties，这个属性文件的名称实际就是插件的id。将properties文件的内容改为：</p>
+<p><strong>src/main/resources/META-INF/gradle-plugins/com.example.plugins.properties</strong></p>
+<figure class="highlight xml"><table><tr><td class="code"><pre><span class="line">implementation-class=com.example.plugins.CustomPlugin</span><br></pre></td></tr></table></figure>
+<p>implementation-class属性为自定义插件的名称。<br><strong>上传插件</strong><br>这里为了方便举例直接将插件上传到本地，如果想要发布到Maven、ivy等仓库，见下面的文档：<br><a target="_blank" rel="noopener" href="https://docs.gradle.org/4.4/userguide/publishing_ivy.html">https://docs.gradle.org/4.4/userguide/publishing_ivy.html</a><br><a target="_blank" rel="noopener" href="https://docs.gradle.org/4.4/userguide/publishing_maven.html">https://docs.gradle.org/4.4/userguide/publishing_maven.html</a><br>想要发布到Gradle插件门户上，见下面的文档：<br><a target="_blank" rel="noopener" href="https://docs.gradle.org/4.4/userguide/plugins.html#sec:plugins_block">https://docs.gradle.org/4.4/userguide/plugins.html#sec:plugins_block</a><br>在build.gradle文件中添加如下内容：</p>
+<figure class="highlight gradle"><table><tr><td class="code"><pre><span class="line">apply plugin: <span class="string">&#x27;maven&#x27;</span></span><br><span class="line"><span class="keyword">group</span> = <span class="string">&#x27;com.example.plugins&#x27;</span></span><br><span class="line">version = <span class="string">&#x27;1.0.0&#x27;</span></span><br><span class="line">uploadArchives &#123;</span><br><span class="line">    <span class="keyword">repositories</span> &#123;</span><br><span class="line">        mavenDeployer &#123;</span><br><span class="line">            repository(url: uri(<span class="string">&#x27;../repo&#x27;</span>))</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这段代码会将生成的插件上传到项目的平级目录repo下。定义了group和version的名称，这些值会在其他项目依赖该插件时用到。我们Build后会在Gradle窗口中看到uploadArchives，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/27/VZzFnf.png" alt="VZzFnf.png"><br>点击uploadArchives会在本地生成插件相关的文件，比如我的目录和文件如下图所示。<br><img src="https://s2.ax1x.com/2019/05/27/VZzZNQ.png" alt="VZzZNQ.png"><br>图中的CustomPluginShare-1.0.0.rar就是我们需要的插件jar包。</p>
+<h4 id="3-2-在另一个项目中使用插件"><a href="#3-2-在另一个项目中使用插件" class="headerlink" title="3.2 在另一个项目中使用插件"></a><strong>3.2 在另一个项目中使用插件</strong></h4><p>新建一个Groovy项目，我取名为Projet，build.gradle的代码如下：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">apply plugin: <span class="string">&#x27;com.example.plugins.customplugin&#x27;</span></span><br><span class="line"></span><br><span class="line">buildscript &#123;</span><br><span class="line">    repositories &#123;</span><br><span class="line">        maven &#123;</span><br><span class="line">            <span class="function">url <span class="title">uri</span><span class="params">(<span class="string">&#x27;../repo&#x27;</span>)</span></span></span><br><span class="line"><span class="function">        &#125;</span></span><br><span class="line"><span class="function">    &#125;</span></span><br><span class="line"><span class="function">    dependencies </span>&#123;</span><br><span class="line">        classpath <span class="string">&#x27;com.example.plugins:CustomPluginShare:1.0.0&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>其中com.example.plugins是group，CustomPluginShare是自定义插件的名称，1.0.0是版本号，也可以这么写：</p>
+<figure class="highlight gradle"><table><tr><td class="code"><pre><span class="line"><span class="keyword">dependencies</span> &#123;</span><br><span class="line">     <span class="keyword">classpath</span> <span class="keyword">group</span>: <span class="string">&#x27;com.example.plugins&#x27;</span>, name: <span class="string">&#x27;CustomPluginShare&#x27;</span>,</span><br><span class="line">             version: <span class="string">&#x27;1.0.0&#x27;</span></span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+<p>Terminal中输入gradlew.bat CustomPluginTask来执行CustomPluginTask任务，大功告成。<br>如果我们将自定义插件发布到Gradle插件门户上，就可以使用插件DSL了：<br><strong>build.gradle</strong></p>
+<figure class="highlight gradle"><table><tr><td class="code"><pre><span class="line">plugins &#123;</span><br><span class="line">    id <span class="string">&#x27;com.example.plugins.customplugin&#x27;</span> version <span class="string">&#x27;1.0.0&#x27;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>虽然讲解独立项目的例子超级简单，但我还是将代码上传到GitHub上了，也许会有同学用的上：<br><a target="_blank" rel="noopener" href="https://github.com/henrymorgen/CustomPlugin">https://github.com/henrymorgen/CustomPlugin</a></p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a><strong>总结</strong></h3><p>本篇文章介绍了自定义Gradle插件的3种方式，旨在以最简单的例子来让大家快速掌握，如果还想了解复杂的自定义插件可以去查看一些开源的Gradle插件，或者在工作中去实践。本篇文章也为学习Android Gradle插件打下了伏笔。</p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/gradle/6-custonplugin.html">http://liuwangshu.cn/application/gradle/6-custonplugin.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Gradle%E6%A0%B8%E5%BF%83%E6%80%9D%E6%83%B3/">Gradle核心思想</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZzVAg.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/aosp/1-install-ubuntu.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VZg6h9.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android AOSP基础（一）VirtualBox 安装 Ubuntu</div></div></a></div><div class="next-post pull-right"><a href="/application/gradle/5-plugins.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VZxypn.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Gradle核心思想（五）通俗易懂的Gradle插件讲解</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/gradle/1-study-gradle.html" title="Gradle核心思想（一）为什么现在要用Gradle？"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZO95n.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-08-08</div><div class="title">Gradle核心思想（一）为什么现在要用Gradle？</div></div></a></div><div><a href="/application/gradle/2-primer.html" title="Gradle核心思想（二）Gradle入门前奏"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZvkxP.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-27</div><div class="title">Gradle核心思想（二）Gradle入门前奏</div></div></a></div><div><a href="/application/gradle/3-groovy.html" title="Gradle核心思想（三）Groovy快速入门指南"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZvBxx.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-04</div><div class="title">Gradle核心思想（三）Groovy快速入门指南</div></div></a></div><div><a href="/application/gradle/4-wrapper.html" title="Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZvIQP.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-01-20</div><div class="title">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</div></div></a></div><div><a href="/application/gradle/5-plugins.html" title="Gradle核心思想（五）通俗易懂的Gradle插件讲解"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZxypn.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-02-14</div><div class="title">Gradle核心思想（五）通俗易懂的Gradle插件讲解</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

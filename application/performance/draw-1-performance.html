@@ -1,0 +1,285 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android绘制优化（一）绘制性能分析 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  相关文章Android性能优化系列 前言一个优秀的应用不仅仅是要有吸引人的功能和交互，同时在性能上也有很高的要求。运行Android系统的手机，虽然配置在不断的提升，但仍旧无法和PC相比，无法做到PC那样拥有超大的内存以及高性能的CPU，因此在开发Android应用程序时也不可能无限制的使用CPU和内存，如果对CPU和内存使用不当也会造成应用的卡顿和内存溢出"><meta name="keywords" content="Android性能优化,Android绘制优化"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/application/performance/draw-1-performance.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android绘制优化（一）绘制性能分析"><meta property="og:url" content="http://liuwangshu.cn/application/performance/draw-1-performance.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  相关文章Android性能优化系列 前言一个优秀的应用不仅仅是要有吸引人的功能和交互，同时在性能上也有很高的要求。运行Android系统的手机，虽然配置在不断的提升，但仍旧无法和PC相比，无法做到PC那样拥有超大的内存以及高性能的CPU，因此在开发Android应用程序时也不可能无限制的使用CPU和内存，如果对CPU和内存使用不当也会造成应用的卡顿和内存溢出"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><meta property="article:published_time" content="2017-03-13T03:40:00.000Z"><meta property="article:modified_time" content="2020-09-16T14:32:12.050Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-16 22:32:12'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E7%BB%98%E5%88%B6%E5%8E%9F%E7%90%86"><span class="toc-number">2.</span> <span class="toc-text">1.绘制原理</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-1-%E6%B8%B2%E6%9F%93%E6%97%B6%E9%97%B4%E7%BA%BF"><span class="toc-number">2.1.</span> <span class="toc-text">1.1 渲染时间线</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Profile-GPU-Rendering"><span class="toc-number">3.</span> <span class="toc-text">2.Profile GPU Rendering</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Systrace"><span class="toc-number">4.</span> <span class="toc-text">3.Systrace</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-%E4%BD%BF%E7%94%A8Systrace"><span class="toc-number">4.1.</span> <span class="toc-text">3.1 使用Systrace</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-%E7%94%A8Chrome%E5%88%86%E6%9E%90Systrace"><span class="toc-number">4.2.</span> <span class="toc-text">3.2 用Chrome分析Systrace</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-Traceview"><span class="toc-number">5.</span> <span class="toc-text">4.Traceview</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-%E4%BD%BF%E7%94%A8Traceview"><span class="toc-number">5.1.</span> <span class="toc-text">4.1 使用Traceview</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-%E5%88%86%E6%9E%90Traceview"><span class="toc-number">5.2.</span> <span class="toc-text">4.2 分析Traceview</span></a></li></ol></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZWhn0.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android绘制优化（一）绘制性能分析</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2017-03-13T03:40:00.000Z" title="发表于 2017-03-13 11:40:00">2017-03-13</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-16T14:32:12.050Z" title="更新于 2020-09-16 22:32:12">2020-09-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>相关文章<br><a href="http://liuwangshu.cn/tags/Android%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">Android性能优化系列</a></p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>一个优秀的应用不仅仅是要有吸引人的功能和交互，同时在性能上也有很高的要求。运行Android系统的手机，虽然配置在不断的提升，但仍旧无法和PC相比，无法做到PC那样拥有超大的内存以及高性能的CPU，因此在开发Android应用程序时也不可能无限制的使用CPU和内存，如果对CPU和内存使用不当也会造成应用的卡顿和内存溢出等问题。因此，应用的性能优化对于开发人员有着更高的要求。Android性能优化分为很多种，比较常用的有绘制优化、内存优化、耗电优化和稳定性优化等，这个系列我们就来学习性能优化中的绘制优化。</p>
+<a id="more"></a>
+<h3 id="1-绘制原理"><a href="#1-绘制原理" class="headerlink" title="1.绘制原理"></a><strong>1.绘制原理</strong></h3><p>Android绘制View有三个主要的步骤，分别是measure、layout和draw。关于它们的原理请查看我的文章<a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85/article/details/50931348">Android View体系（七）从源码解析View的measure流程</a>和<a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85/article/details/50971964">Android View体系（八）从源码解析View的layout和draw流程</a>，这里就不在赘述。measure、layout和draw方法主要是运行在系统的应用框架层，而真正将数据渲染到屏幕上的则是系统Nativie层的SurfaceFlinger服务来完成的。</p>
+<p>绘制过程主要是由CPU 来进行Measure、Layout、Record、Execute的数据计算工作，GPU负责栅格化、渲染。CPU和GPU是通过图形驱动层来进行连接的。图形驱动层维护了一个队列，CPU将display list添加到该队列中，这样GPU就可以从这个队列中取出数据进行绘制。</p>
+<h4 id="1-1-渲染时间线"><a href="#1-1-渲染时间线" class="headerlink" title="1.1 渲染时间线"></a><strong>1.1 渲染时间线</strong></h4><p>FPS(Frames Per Second)这个名词我想很多同学都知道，它是指画面每秒传输帧数，通俗来讲就是指动画或视频的画面数，最简单的举例就是我们玩游戏时，如果画面在60fps则不会感觉到卡顿，如果低于60fps，比如50fps则会感觉到卡顿，你就可以考虑要换显卡或者采取其他一些措施了。<br>要想画面保持在60fps，则需要每个绘制时长在16ms以内，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/30/VKJl6g.png" alt="VKJl6g.png"></p>
+<p>Android系统每隔16ms发出VSYNC信号，触发对UI进行渲染， 如果每次渲染都成功，这样就能够达到流畅的画面所需要的60fps，那什么是VSYNC呢？VSYNC是Vertical Synchronization(垂直同步)的缩写，是一种定时中断，一旦收到VSYNC信号，CPU就开始处理各帧数据。<br>如果某个操作要花费24ms，这样系统在得到VSYNC信号时无法进行正常的渲染，会发生丢帧。用户会在32ms中看到同一帧的画面，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJQ1S.png" alt="VKJQ1S.png"></p>
+<p>产生卡顿原因有很多，主要有以下几点：</p>
+<ul>
+<li>布局Layout过于复杂，无法在16ms内完成渲染。</li>
+<li>同一时间动画执行的次数过多，导致CPU或GPU负载过重。</li>
+<li>View过度绘制，导致某些像素在同一帧时间内被绘制多次。</li>
+<li>UI线程中做了稍微耗时的操作。</li>
+</ul>
+<p>为了解决上述的问题，除了我们要在写代码时要注意外，也可以借助一些工具来分析和解决卡顿问题。</p>
+<h3 id="2-Profile-GPU-Rendering"><a href="#2-Profile-GPU-Rendering" class="headerlink" title="2.Profile GPU Rendering"></a><strong>2.Profile GPU Rendering</strong></h3><p>Profile GPU Rendering是Android 4.1系统提供的开发辅助功能，我们可以在开发者选项中打开这一功能，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/30/VKJ1XQ.png" alt="VKJ1XQ.png"><br>我们点击Profile GPU Rendering选项并选择On screen as bars即开启Profile GPU Rendering功能。接着屏幕会显示出彩色的柱状图，如下所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJG0s.png" alt="VKJG0s.png"><br>上面的彩色的图的横轴代表时间，纵轴表示某一帧的耗时。绿色的横线为警戒线，超过这条线则意味着时长超过了16m，尽量要保证垂直的彩色柱状图保持在绿线下面。这些垂直的彩色柱状图代表着一帧，不同颜色的彩色柱状图代表不同的含义：</p>
+<ul>
+<li><strong>橙色</strong>代表处理的时间，是CPU告诉GPU渲染一帧的地方，这是一个阻塞调用，因为CPU会一直等待GPU发出接到命令的回复，如果橙色柱状图很高，则表明GPU很繁忙。</li>
+<li><strong>红色</strong>代表执行的时间，这部分是Android进行2D渲染 Display List的时间。如果红色柱状图很高，可能是由重新提交了视图而导致的。还有复杂的自定义View也会导致红的柱状图变高。</li>
+<li><strong>蓝色</strong>代表测量绘制的时间，也就是需要多长时间去创建和更新DisplayList。如果蓝色柱状图很高，可能是需要重新绘制，或者View的onDraw方法处理事情太多。</li>
+</ul>
+<p>在Android 6.0中，有更多的颜色被加了进来，如下图所示：<br><img src="https://s2.ax1x.com/2019/05/30/VKJ8mj.png" alt="VKJ8mj.png"></p>
+<p>下面来分别介绍它们的含义：</p>
+<ul>
+<li>Swap Buffers：表示处理的时间，和上面讲到的橙色一样。</li>
+<li>Command Issue：表示执行的时间，和上面讲到的红色一样。</li>
+<li>Sync &amp; Upload：表示的是准备当前界面上有待绘制的图片所耗费的时间，为了减少该段区域的执行时间，我们可以减少屏幕上的图片数量或者是缩小图片的大小。</li>
+<li>Draw：表示测量和绘制视图列表所需要的时间，和上面讲到的蓝色一样。</li>
+<li>Measure/Layout：表示布局的onMeasure与onLayout所花费的时间，一旦时间过长，就需要仔细检查自己的布局是不是存在严重的性能问题。</li>
+<li>Animation：表示计算执行动画所需要花费的时间，包含的动画有ObjectAnimator，ViewPropertyAnimator，Transition等。一旦这里的执行时间过长，就需要检查是不是使用了非官方的动画工具或者是检查动画执行的过程中是不是触发了读写操作等等。</li>
+<li>Input Handling：表示系统处理输入事件所耗费的时间，粗略等于对事件处理方法所执行的时间。一旦执行时间过长，意味着在处理用户的输入事件的地方执行了复杂的操作。</li>
+<li>Misc Time/Vsync Delay：表示在主线程执行了太多的任务，导致UI渲染跟不上VSYNC的信号而出现掉帧的情况。</li>
+</ul>
+<p>Profile GPU Rendering可以找到渲染有问题的界面，但是想要修复的话，只依赖Profile GPU Rendering是不够的，可以用另一个工具Hierarchy Viewer来查看布局层次和每个View所花的时间，这个工具会在下一篇文章进行介绍。</p>
+<h3 id="3-Systrace"><a href="#3-Systrace" class="headerlink" title="3.Systrace"></a><strong>3.Systrace</strong></h3><p>Systrace是Android4.1中新增的性能数据采样和分析工具。它可帮助开发者收集Android关键子系统（SurfaceFlinger、WindowManagerService等Framework部分关键模块、服务，View体系系统等）的运行信息。Systrace的功能包括跟踪系统的I/O操作、内核工作队列、CPU负载以及Android各个子系统的运行状况等。对于UI显示性能，比如动画播放不流畅、渲染卡顿等问题提供了分析数据。</p>
+<h4 id="3-1-使用Systrace"><a href="#3-1-使用Systrace" class="headerlink" title="3.1 使用Systrace"></a><strong>3.1 使用Systrace</strong></h4><p>Systrace跟踪的设备要在Android4.1版本以上，对于Android4.3版本之前和4.3版本之后使用上有点区别，现在也很少有人用Android4.3之前的版本，因此这里只讲Android4.3版本的使用方法。Systrace可以在DDMS上使用，可以使用命令行来使用，也可以在代码中进行跟踪。接下来分别来介绍这三种方式。<br><strong>在DDMS中使用Systrace</strong><br>1.首先我们要打开Android Studio的Tool中的Android Device Monitor，并连接手机。<br>2.点击Systrace按钮进入抓取设置界面，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/30/VKJy7R.png" alt="VKJy7R.png"><br>抓取设置界面可以设置跟踪的时间，以及trace文件输出的地址等内容。如下图所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJJ7n.png" alt="VKJJ7n.png"></p>
+<p>3.设置完成后，我们就来操作的跟踪的过程。跟踪时间结束后，生成trace.html文件。<br>4.用Chrome打开trace.html文件进行分析。分析的方法，后文会讲到。</p>
+<p><strong>用命令行使用Systrace</strong><br>Android 提供一个python脚本文件 systrace.py，它位于Android SDK 目录 /tools/systrace 中，我们可以执行以下命令来使用Systrace：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">$ cd android-sdk&#x2F;platform-tools&#x2F;systrace</span><br><span class="line">$ python systrace.py --time&#x3D;10 -o newtrace.html sched gfx view wm</span><br></pre></td></tr></table></figure>
+
+<p><strong>在代码中使用Systrace</strong><br>Systrace并不会追踪应用的所有工作，在Android4.3及以上版本的代码中，可以使用Trace类对应用中的具体活动进行追踪。<br>Android源码中也引用了Trace类，比如RecyclerView：</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">...</span><br><span class="line"> <span class="keyword">private</span> <span class="keyword">final</span> Runnable mUpdateChildViewsRunnable = <span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">            <span class="keyword">if</span> (!mFirstLayoutComplete) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (mDataSetHasChangedAfterLayout) &#123;</span><br><span class="line">                TraceCompat.beginSection(TRACE_ON_DATA_SET_CHANGE_LAYOUT_TAG);</span><br><span class="line">                dispatchLayout();</span><br><span class="line">                TraceCompat.endSection();</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mAdapterHelper.hasPendingUpdates()) &#123;</span><br><span class="line">                TraceCompat.beginSection(TRACE_HANDLE_ADAPTER_UPDATES_TAG);</span><br><span class="line">                eatRequestLayout();</span><br><span class="line">                mAdapterHelper.preProcess();</span><br><span class="line">                <span class="keyword">if</span> (!mLayoutRequestEaten) &#123;</span><br><span class="line">                    rebindUpdatedViewHolders();</span><br><span class="line">                &#125;</span><br><span class="line">                resumeRequestLayout(<span class="keyword">true</span>);</span><br><span class="line">                TraceCompat.endSection();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;;</span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
+<p>TraceCompat类对Trace类进行了封装，只会在Android4.3及以上版本才会使用Trace类，其中beginSection方法和endSection方法之间的代码会被追踪，endSection方法会只会结束最近的beginSection方法，因此要保证beginSection方法和endSection方法的调用次数要相同。</p>
+<h4 id="3-2-用Chrome分析Systrace"><a href="#3-2-用Chrome分析Systrace" class="headerlink" title="3.2 用Chrome分析Systrace"></a><strong>3.2 用Chrome分析Systrace</strong></h4><p>通过前面的方法生成的trace.html需要用Chrome打开，打开后效果如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/30/VKJtkq.png" alt="VKJtkq.png"></p>
+<p>我们可以使用W键和S键进行放大和缩小，A键和D键进行左右移动。<br><strong>Alert区域</strong><br>首先来看Alert区域，这一区域会标记处性能有问题的点，单击叹号图标就可以查看某一个Alert的问题描述，如下所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJUhV.png" alt="VKJUhV.png"><br>这个Alert指出了View在Measure/Layout时耗费了大量的时间，导致出现jank(同一帧画了多次)。给出的建议是避免在动画播放期间控制布局。</p>
+<p><strong>CPU区域</strong><br>接下来我们来查看CPU区域，每一行代表一个CPU核心和它执行任务的时间片，放大后会看到每个色块代表一个执行的进程，色块的长度代表其执行时间，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/30/VKJdpT.png" alt="VKJdpT.png"></p>
+<p>图中CPU 0主要执行adbb线程和InputReader线程，CPU 2主要执行了surfaceflinger线程和ordinatorlayout进程中的RenderThread线程，我们点击RenderThread色块，会给出RenderThread的相关信息，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/30/VKJNt0.png" alt="VKJNt0.png"><br>图中给出了当前色块所运行的线程和进程、开启时间和持续时间等信息。</p>
+<p><strong>应用区域</strong><br>应用区域会显示应用的帧数，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJrnJ.png" alt="VKJrnJ.png"></p>
+<p>Systrace会给出应用中的Frames分析，每一帧就是一个F圆圈，F圆圈有三种颜色，其中绿色表示Frame渲染流畅，黄色和红色则代表渲染时间超过了16.6ms，其中红的更严重些。我们点击红色F圆圈，会给出该Frame的信息，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJw1U.png" alt="VKJw1U.png"></p>
+<p>从图中可以看出，Frame给出了问题提示：Scheduling delay(调度延迟)，当一帧绘制时间超过19ms会触发该提示，更何况这一帧已经有将近40ms了。导致这一问题产生的原因主要是线程在绘制时，在很长一段时间都没有分配到CPU时间片，因此无法继续进行绘制。按m键来高亮该时间段，我们来查看CPU的情况，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/30/VKJ0cF.png" alt="VKJ0cF.png"></p>
+<p>可以看出这个时间段中两个CPU都在满负荷运行。至于具体是什么让CPU繁忙，则需要使用Traceview来进行分析。</p>
+<p><strong>Alerts总体分析</strong><br>点开最右边的Alerts按钮会给出Alert的总体分析，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJsB9.png" alt="VKJsB9.png"></p>
+<p>Alerts会给出Alert类型，以及出现的次数。有了这些总体的分析，方便开发者对该时间段的绘制性能有一个整体的大概了解，便于进行下一步分析。<br>由于Systrace 是以系统的角度返回一些信息，只能为我们提供一个概览，它的深度是有限的，我们可以用它来进行粗略的检查，以便了解大概的情况，但是如果要分析更详细的，比如要找到是什么让CPU繁忙，某些方法的调用次数等，则还要借助另一个工具：Traceview。</p>
+<h3 id="4-Traceview"><a href="#4-Traceview" class="headerlink" title="4.Traceview"></a><strong>4.Traceview</strong></h3><p>TraceView是Android SDK中自带的数据采集和分析工具。一般来说，通过TraceView我们可以得到以下两种数据：</p>
+<ul>
+<li>单次执行耗时的方法。</li>
+<li>执行次数多的方法。</li>
+</ul>
+<h4 id="4-1-使用Traceview"><a href="#4-1-使用Traceview" class="headerlink" title="4.1 使用Traceview"></a><strong>4.1 使用Traceview</strong></h4><p>要分析Traceview，则首先要得到一个trace文件，trace文件的获取有两种方式，分别是在DDMS中使用和在代码中加入调试语句，下面分别对这两种方式进行介绍。</p>
+<p><strong>DDMS中使用</strong><br>1.首先我们要打开Android Studio的Tool中的Android Device Monitor，并连接手机。<br>2.选择相应的进程，并单击Start Method Profiling按钮。<br>3.对应用中需要监控的点进行操作。<br>4.单击Stop Method Profiling按钮，会自动跳到TraceView视图。</p>
+<p><strong>代码中加入调试语句</strong><br>如果开发中出现不好复现的问题，则需要在代码中添加TraceView监控语句，代码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line">Debug.startMethodTracing();</span><br><span class="line">...</span><br><span class="line">Debug.stopMethodTracing();</span><br></pre></td></tr></table></figure>
+<p>在开始监控的地方调用startMethodTracing方法，在需要结束监控的地方调用stopMethodTracing方法。系统会在SD卡中生成trace文件，将trace文件导出并用SDK中的Traceview打开即可。当然不要忘了在manifest中加入 <code>&lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;/&gt;</code>权限。</p>
+<h4 id="4-2-分析Traceview"><a href="#4-2-分析Traceview" class="headerlink" title="4.2 分析Traceview"></a><strong>4.2 分析Traceview</strong></h4><p>为了分析Traceview，我们来举一个简单的例子来生成trace文件，这里采用第二种方式：代码中加入调试语句。代码如下所示。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CoordinatorLayoutActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> ViewPager mViewPager;</span><br><span class="line">    <span class="keyword">private</span> TabLayout mTabLayout;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</span><br><span class="line">        setContentView(R.layout.activity_tab_layout);</span><br><span class="line">        Debug.startMethodTracing(<span class="string">&quot;test&quot;</span>);<span class="comment">//1</span></span><br><span class="line">        initView();</span><br><span class="line">   ...</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initView</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onStop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onStop();</span><br><span class="line">        Debug.stopMethodTracing();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在注释1处调用了startMethodTracing方法开始监控，其中test是生成的trace文件的名称。在initView中我们特意调用sleep方法来做耗时操作。在onStop方法中我们调用了stopMethodTracing方法结束监控。这时会在SD卡根目录生成test.trace文件，我们将该文件导出到桌面，用Traceview来分析test.trace文件，我们在cmd中执行如下语句。<br><img src="https://s2.ax1x.com/2019/05/30/VKJBX4.png" alt="VKJBX4.png"></p>
+<p>我们进入traceview所在的目录(直接将traceview.bat拖入到cmd中)，并执行上图的traceview语句后会弹出Traceview视图，它分为两部分，分别是时间片面板和分析面板，我们先来看时间片面板，如下图所示。</p>
+<p><img src="https://s2.ax1x.com/2019/05/30/VKJ2h6.png" alt="VKJ2h6.png"><br>其中x轴代表时间的消耗，单位为ms，y轴代表各个线程。一般会查看色块的长度，明显比较长的方法重点去关注，具体的分析还得看分析面板，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJcA1.png" alt="VKJcA1.png"><br>每一列数据的代表的含义如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th align="center">列名</th>
+<th align="center">含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Name</td>
+<td align="center">该线程运行过程中调用的函数名</td>
+</tr>
+<tr>
+<td align="center">Incl Cpu Time%</td>
+<td align="center">某个方法包括其内部调用的方法所占用CPU时间百分比</td>
+</tr>
+<tr>
+<td align="center">Excl Cpu Time%</td>
+<td align="center">某个方法不包括其内部调用的方法所占用CPU时间百分比</td>
+</tr>
+<tr>
+<td align="center">Incl Real Time%</td>
+<td align="center">某个方法包括其内部调用的方法所占用真实时间百分比</td>
+</tr>
+<tr>
+<td align="center">Excl Real Time%</td>
+<td align="center">某个方法不包括其内部调用的方法所占用真实时间百分比</td>
+</tr>
+<tr>
+<td align="center">Calls + Recur Calls / Total</td>
+<td align="center">某个方法次数+递归调用次数</td>
+</tr>
+<tr>
+<td align="center">Cpu Time / Call</td>
+<td align="center">该方法平均占用CPU时间</td>
+</tr>
+<tr>
+<td align="center">Cpu Time / Call</td>
+<td align="center">该方法平均占用真实时间</td>
+</tr>
+<tr>
+<td align="center">Incl Cpu Time</td>
+<td align="center">某个方法包括其内部调用的方法所占用CPU时间</td>
+</tr>
+<tr>
+<td align="center">Excl Cpu Time</td>
+<td align="center">某个方法不包括其内部调用的方法所占用CPU时间</td>
+</tr>
+<tr>
+<td align="center">Incl Real Time</td>
+<td align="center">某个方法包括其内部调用的方法所占用真实时间</td>
+</tr>
+<tr>
+<td align="center">Excl Real Time</td>
+<td align="center">某个方法不包括其内部调用的方法所占用真实时间</td>
+</tr>
+</tbody></table>
+<p>因为我们用sleep方法来进行耗时操作，所以这里我们可以单击Incl Real Time来进行降序排列。其中有很多系统调用的方法，我们来进行一一过滤。最终我们发现了CoordinatorLayoutActivity的initView方法Incl Real Time的时间为1000.493ms，这显然有问题，如下图所示。<br><img src="https://s2.ax1x.com/2019/05/30/VKJgtx.png" alt="VKJgtx.png"><br>从图中我们可以看出是调用sleep方法导致的耗时。关于Traceview还有很多种分析情况，就需要大家在平时进行积累了。<br>好了关于绘制性能分析，就讲到这，如果觉得不过瘾，本系列的后续文章还有大波的内容会持续向你砸来。</p>
+<p>参考资料<br>《Android群英传 神兵利器》<br>《Android应用性能优化最佳实践》<br><a target="_blank" rel="noopener" href="http://blog.csdn.net/itachi85/article/details/6857324">http://blog.csdn.net/itachi85/article/details/6857324</a><br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/sunzn/p/3192231.html">http://www.cnblogs.com/sunzn/p/3192231.html</a><br><a target="_blank" rel="noopener" href="http://blog.csdn.net/androiddevelop/article/details/8223805">http://blog.csdn.net/androiddevelop/article/details/8223805</a><br><a target="_blank" rel="noopener" href="http://www.tuicool.com/articles/jMfiUjj">http://www.tuicool.com/articles/jMfiUjj</a><br><a target="_blank" rel="noopener" href="http://www.mobile-open.com/2015/85005.html">http://www.mobile-open.com/2015/85005.html</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/application/performance/draw-1-performance.html">http://liuwangshu.cn/application/performance/draw-1-performance.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Android%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/">Android性能优化</a><a class="post-meta__tags" href="/tags/Android%E7%BB%98%E5%88%B6%E4%BC%98%E5%8C%96/">Android绘制优化</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/framework/applicationprocess/1.html"><img class="prev-cover" src="https://p.pstatp.com/origin/ff850001720b5e8178e7" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android应用程序进程启动过程（前篇）</div></div></a></div><div class="next-post pull-right"><a href="/designpatterns/14-mediator.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">设计模式（十四）中介者模式</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/application/performance/draw-2-layout.html" title="Android绘制优化（二）布局优化"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-03-27</div><div class="title">Android绘制优化（二）布局优化</div></div></a></div><div><a href="/application/performance/ram-1-dvm-art.html" title="Android内存优化（一）DVM和ART原理初探"><img class="cover" src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-05</div><div class="title">Android内存优化（一）DVM和ART原理初探</div></div></a></div><div><a href="/application/performance/ram-3-memory-leak.html" title="Android内存优化（三）避免可控的内存泄漏"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-06-21</div><div class="title">Android内存优化（三）避免可控的内存泄漏</div></div></a></div><div><a href="/application/performance/ram-4-memory-tools.html" title="Android内存优化（四）解析Memory Monitor、Allocation Tracker和Heap Dump"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-07-10</div><div class="title">Android内存优化（四）解析Memory Monitor、Allocation Tracker和Heap Dump</div></div></a></div><div><a href="/application/performance/ram-5-mat.html" title="Android内存优化（五）详解内存分析工具MAT"><img class="cover" src="https://s2.ax1x.com/2019/08/05/ecRaRO.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-08-11</div><div class="title">Android内存优化（五）详解内存分析工具MAT</div></div></a></div><div><a href="/application/performance/ram-6-leakcanary.html" title="Android内存优化（六）LeakCanary使用详解"><img class="cover" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2017-09-04</div><div class="title">Android内存优化（六）LeakCanary使用详解</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

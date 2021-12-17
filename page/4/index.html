@@ -1,0 +1,289 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BATcoder - 刘望舒 - Android进阶三部曲番外篇</title><meta name="description" content="Android进阶三部曲系列图书作者腾讯云最具价值专家TVP 公众号：「刘望舒」"><meta name="keywords" content="刘望舒, 刘望舒的博客，刘望舒学堂，BATcoder，刘望舒课堂，望舒学院，望舒课堂，Android进阶三部曲，Android进阶三部曲番外篇，liuwangshu, Android, Java, Android开发，Android进阶之光，设计模式，Android网络编程，Android源码分析，热修复，插件化，进阶之光，刘望舒，Android进阶，知识体系，性能优化，JNI，包管理机制，四大组件启动过程，AMS，PMS，WMS，Binder，进阶三部曲，Android进阶解密，Android进阶之光，Android进阶指北"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/page/4/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="website"><meta property="og:title" content="BATcoder - 刘望舒"><meta property="og:url" content="http://liuwangshu.cn/page/4/"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="Android进阶三部曲系列图书作者腾讯云最具价值专家TVP 公众号：「刘望舒」"><meta property="og:image" content="http://liuwangshu.cn/img/my.jpg"><meta property="article:published_time" content="2021-12-17T12:18:37.125Z"><meta property="article:modified_time" content="2021-12-17T12:18:37.125Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: false,
+  isHome: true,
+  isHighlightShrink: false,
+  isSidebar: false,
+  postUpdate: '2021-12-17 20:18:37'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><header class="full_page" id="page-header" style="background-image: url(https://pic.imgdb.cn/item/5f5fa816160a154a67fe5c0d.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="site-info"><h1 id="site_title">BATcoder - 刘望舒</h1><div id="site_subtitle"><span id="subtitle"></span></div><div id="site_social_icons"><a class="social-icon" href="https://github.com/henrymorgen" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div><div id="scroll_down"><i class="fas fa-angle-down scroll-down-effects"></i></div></header><main class="layout_page" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="post_cover left_radius"><a href="/application/gradle/5-plugins.html" title="Gradle核心思想（五）通俗易懂的Gradle插件讲解">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZxypn.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Gradle核心思想（五）通俗易懂的Gradle插件讲解"></a></div><div class="recent-post-info"><a class="article-title" href="/application/gradle/5-plugins.html" title="Gradle核心思想（五）通俗易懂的Gradle插件讲解">Gradle核心思想（五）通俗易懂的Gradle插件讲解</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-02-13T16:18:00.000Z" title="发表于 2019-02-14 00:18:00">2019-02-14</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解
+
+
+前言在本系列的前作中，我们学习了为什么要用Gradle、Gradle的入门基础和Groovy的基础，这些文章为Gradle的入门打下了基础，这一篇我们要来学习Gradle的插件。
+1.Gradle插件概述说到Gradle插件前，我们先要了解下什么是插件。在Android进阶三部曲第二部《Android进阶解密》一书中，我为了讲解插件化的原理，讲解了什么是插件，我们先来看看下面这张图。可以看到初始的机器人只有照相、地图、浏览器、计算机等功能，这显然是比较乏味的，我们可以给这个机器人安装很多其他的应用，使它提供更多的功能，如下图所示
+
+我们给这个机器人安装了很多应用，这些应用不仅覆盖了人的衣食住行还提供了娱乐功能，我们可以玩游戏、听音乐和购物等等，机器人也得到了 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/application/gradle/4-wrapper.html" title="Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZvIQP.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper"></a></div><div class="recent-post-info"><a class="article-title" href="/application/gradle/4-wrapper.html" title="Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper">Gradle核心思想（四）看似无用，实则重要的Gradle Wrapper</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-01-19T16:18:00.000Z" title="发表于 2019-01-20 00:18:00">2019-01-20</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解
+
+
+
+前言在本系列的此前文章中，我们学习了为什么要用Gradle、Gradle的入门基础和Groovy的基础，这些文章为Gradle的入门打下了基础，这一篇我们接着学习Gradle Wrapper。有的同学可能有疑问，你不是要讲Android Gradle嘛，讲这个干啥？了解Gradle Wrapper可以更好的理解Gradle，Gradle Wrapper在日常开发中看似“不起眼”，实则超级重要。
+1.为什么需要Gradle WrapperGradle Wrapper称为Gradle包装器，是对Gradle的一层包装。为什么需要Gradle Wrapper呢？比如在一个开发团队中，如果每进来一个成员，都需要在计算机中安装Gradle，这个时候运行Gradle的 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/ims/4-inputtarget.html" title="Android输入系统（四）输入事件是如何分发到目标窗口的？">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZHOvF.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android输入系统（四）输入事件是如何分发到目标窗口的？"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/ims/4-inputtarget.html" title="Android输入系统（四）输入事件是如何分发到目标窗口的？">Android输入系统（四）输入事件是如何分发到目标窗口的？</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2019-01-03T16:16:00.000Z" title="发表于 2019-01-04 00:16:00">2019-01-04</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列解析WindowManager系列解析WMS系列深入理解JNI系列输入系统系列
+
+
+基于Android 8.1
+前言在Android输入系统（三）InputReader的加工类型和InputDispatcher的分发过程这篇文章中，由于文章篇幅的原因，InputDispatcher的分发过程还有一部分没有讲解，这一部分就是事件分发到目标窗口的过程。
+1. 为事件寻找合适的分发目标我们先来回顾上一篇文章讲解的InputDispatcher的dispatchOnceInnerLocked函数：frameworks/native/services/inputflinger/InputDispatcher.cpp
+void InputDispatcher::dispatchOnceInnerLocked(nsecs_t* nextWakeupTime) &#123;    ...    DropReason dropReason = DROP_REASON_NOT_DROPPED;//1   ...    switch (mPendingEven ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/framework/ims/3-inputdispatcher.html" title="Android输入系统（三）InputReader的加工类型和InputDispatcher的分发过程">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZq6l8.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android输入系统（三）InputReader的加工类型和InputDispatcher的分发过程"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/ims/3-inputdispatcher.html" title="Android输入系统（三）InputReader的加工类型和InputDispatcher的分发过程">Android输入系统（三）InputReader的加工类型和InputDispatcher的分发过程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-12-08T16:16:00.000Z" title="发表于 2018-12-09 00:16:00">2018-12-09</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列解析WMS系列深入理解JNI系列输入系统系列
+
+前言在上一篇文章中，我们学习了输入事件的处理，输入事件会交由InputDispatcher进行分发，那么InputDispatcher是如何进行分发的？这篇文章会给你答案。
+1.InputReader的加工类型在Android输入系统（二）IMS的启动过程和输入事件的处理这篇文章中，我们知道InputReader会对原始输入事件进行加工，如果事件的类型为按键类型的事件，就会调用如下一段代码。frameworks/native/services/inputflinger/InputDispatcher.cpp
+void InputDispatcher::notifyKey(const NotifyKeyArgs* args) &#123;  ...    bool needWake;    &#123;     ...    &#125; // release lock    if (needWake) &#123;        mLooper-&gt;wake();    &#125;&# ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/ims/2-inputevent.html" title="Android输入系统（二）IMS的启动过程和输入事件的处理">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZ4dXR.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android输入系统（二）IMS的启动过程和输入事件的处理"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/ims/2-inputevent.html" title="Android输入系统（二）IMS的启动过程和输入事件的处理">Android输入系统（二）IMS的启动过程和输入事件的处理</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-11-15T16:16:00.000Z" title="发表于 2018-11-16 00:16:00">2018-11-16</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列解析WMS系列深入理解JNI系列输入系统系列
+
+
+基于Android 8.1
+前言在上一篇文章中，我们学习了IMS的诞生（创建），IMS创建后还会进行启动，这篇文章我们来学习IMS的启动过程和输入事件的处理。
+1.IMS的启动过程IMS的创建在SystemServer的startOtherServices方法中，不了解请查看Android输入系统（一）输入事件传递流程和InputManagerService的诞生这篇文章。frameworks/base/services/java/com/android/server/SystemServer.java
+ private void startOtherServices() &#123; ...         traceBeginAndSlog(&quot;StartInputManagerService&quot;);         inputManager = new InputManagerService(context);         traceEnd(); ...      ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/life/android-wheretogo.html" title="寒冬已至？四面楚歌的Android工程师该何去何从">     <img class="post_bg" src="https://s2.ax1x.com/2019/11/11/MMSseK.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="寒冬已至？四面楚歌的Android工程师该何去何从"></a></div><div class="recent-post-info"><a class="article-title" href="/life/android-wheretogo.html" title="寒冬已至？四面楚歌的Android工程师该何去何从">寒冬已至？四面楚歌的Android工程师该何去何从</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-11-01T16:17:06.000Z" title="发表于 2018-11-02 00:17:06">2018-11-02</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/">程序人生</a></span></div><div class="content">寒冬真的来了吗？可能是吧，因为最近几年每年都说是寒冬，说的真的叫人焦虑。不过互联网的整体环境确实不如前几年，即使不说我想大家也能隐约的感受到了。作为曾经炙手可热的Android工程师，现在面临着以下的问题：
+
+
+互联网整体环境不乐观
+Android开发人员众多但岗位减少，导致要求越来越苛刻
+大前端趋势、跨平台方案频出、小程序肆虐，Android不再是应用开发唯一的方案
+人工智能、大数据、区块链等技术炒的火热，培训机构倾巢出动，学校学生疯狂学习，而培训Android出来就失业，大学学Android出来基本也失业。
+
+从上面几点来看，说Android工程师是四面楚歌真的不为过，本篇文章会从以下几个方面来进行分析，请轻拍。
+
+解除对Android的误解
+是否要转行
+如何提升竞争力
+
+1. 解除对Android的误解无论是Android同行还是其他技术领域，明显都对Android有些误解。作为Android开发来说，如果对Android有误解可能会影响到后续的发展和决定，我有必要来消除这个误解。
+1.1 Android系统的未来Android系统是根，没了它Android工程师也不存在了。在我 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/ims/1-ims-produce.html" title="Android输入系统（一）输入事件传递流程和InputManagerService的诞生">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZhfoT.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android输入系统（一）输入事件传递流程和InputManagerService的诞生"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/ims/1-ims-produce.html" title="Android输入系统（一）输入事件传递流程和InputManagerService的诞生">Android输入系统（一）输入事件传递流程和InputManagerService的诞生</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-10-28T16:16:00.000Z" title="发表于 2018-10-29 00:16:00">2018-10-29</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列解析WMS系列View体系系列
+
+前言很多同学可能会认为输入系统是不是和View的事件分发有些关联，确实是有些关联，只不过View事件分发只能算是输入系统事件传递的一部分。这个系列讲的输入系统主要是我们不常接触的，但还是需要去了解的那部分。
+1. 输入事件传递流程的组成部分输入系统是外界与Android设备交互的基础，仅凭输入系统是无法完成输入事件传递的，因此需要输入系统和Android系统的其他成员来共同完成事件传递。输入系统事件传递需要经过以下几个部分。
+输入事件传递流程可以大致的分为三个部分，分别是输入系统部分、WMS处理部分和View处理部分。下面分别对这几个部分进行简单的介绍。
+输入系统部分输入系统部分主要又分为输入子系统和InputManagerService组成（以下简称IMS），在Android中还有一个IMS(IP Multimedia Subsystem)意为为IP多媒体子系统，不要搞混了。Android的输入设备有很多种，比如屏幕、键盘、鼠标、游戏手柄、操纵杆等等，其中应用开发接触最多的屏幕。当输入设备可用时，Lin ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/life/android-advanced-decode-corrigendum.html" title="《Android进阶解密》勘误">     <img class="post_bg" src="https://s2.ax1x.com/2019/06/01/V1YrrT.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="《Android进阶解密》勘误"></a></div><div class="recent-post-info"><a class="article-title" href="/life/android-advanced-decode-corrigendum.html" title="《Android进阶解密》勘误">《Android进阶解密》勘误</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-10-27T16:17:06.000Z" title="发表于 2018-10-28 00:17:06">2018-10-28</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/">程序人生</a></span></div><div class="content">感谢提供勘误信息的读者，正是有了你们，《Android进阶解密》才会变得越来越好。目前最新印次：2019年4月 第5印。
+
+
+
+108页中间段落第1行，scheduleLaunchActivity方法改为scheduleCreateService方法，ActivityClientRecord改为CreateServiceData。第二行ActivityClientRecord改为CreateServiceData
+139页 第4行，我们查看ContentProvider的acquireUnstableProvider方法…，改为：查看acquireUnstableProvider方法…
+42页 第10行，RuntimeInit.java改为：ZygoteInit.java
+87页 中间段落，startActivityLocked方法，全部改为：startActivityMayWait方法
+130页(第5印），倒数第9行，enqueueOrderedBroadcastLocked(r);改为：enqueueParallelBroadcastLocked（r);
+114页(第5印），中间段 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/life/android-advanced-decode.html" title="Android进阶三部曲 第二部《Android进阶解密》已出版">     <img class="post_bg" src="https://s2.ax1x.com/2019/06/01/V1YrrT.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android进阶三部曲 第二部《Android进阶解密》已出版"></a></div><div class="recent-post-info"><a class="article-title" href="/life/android-advanced-decode.html" title="Android进阶三部曲 第二部《Android进阶解密》已出版">Android进阶三部曲 第二部《Android进阶解密》已出版</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-10-23T16:17:06.000Z" title="发表于 2018-10-24 00:17:06">2018-10-24</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/">程序人生</a></span></div><div class="content">勘误贴请点击这里本书源码地址：https://github.com/henrymorgen/android-advanced-decodeAndroid进阶三部曲第一部《Android进阶之光》介绍 ：点击这里
+
+为什么写这本书Android进阶三部曲包括《Android进阶之光》和本书，因此写这本书的原因和《Android进阶之光》有些关联，主要有以下几点：
+
+《Android进阶之光》适合初、中级工程师阅读，因此我需要写一本适合中、高级工程师阅读的进阶书。
+目前市场上的系统源码分析的书大部分不是专门为应用开发编写的，因此我要专门为Android应用开发编写一本系统源码分析的书，不仅如此，我还要将系统源码和应用开发相结合并融会贯通。
+目前市面上的源码分析类书籍大多是基于Android 6.0以前版本的，需要有一本书籍来对更新版本的系统源码进行分析。
+
+内容简介本书主要针对Android 8.0系统源码并结合应用开发相关知识进行介绍。《Android进阶解密》共分为17章，从3个方面来组织内容。 一方面介绍Android应用开发所需要掌握的系统源码知识，第二方面介绍JNI、ClassL ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/framework/pms/5-packageparser.html" title="Android包管理机制（五）APK是如何被解析的">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VeiagH.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android包管理机制（五）APK是如何被解析的"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/pms/5-packageparser.html" title="Android包管理机制（五）APK是如何被解析的">Android包管理机制（五）APK是如何被解析的</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-10-16T16:16:00.000Z" title="发表于 2018-10-17 00:16:00">2018-10-17</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列包管理机制系列
+
+前言在本系列的前面文章中，我介绍了PackageInstaller的初始化和安装APK过程、PMS处理APK的安装和PMS的创建过程，这些文章中经常会涉及到一个类，那就是PackageParser，它用来在APK的安装过程中解析APK，那么APK是如何被解析的呢？这篇文章会给你答案。
+1.引入PackageParserAndroid世界中有很多包，比如应用程序的APK，Android运行环境的JAR包（比如framework.jar）和组成Android系统的各种动态库so等等，由于包的种类和数量繁多，就需要进行包管理，但是包管理需要在内存中进行，而这些包都是以静态文件的形式存在的，就需要一个工具类将这些包转换为内存中的数据结构，这个工具就是包解析器PackageParser。
+在Android包管理机制（三）PMS处理APK的安装这篇文章中，我们知道安装APK时需要调用PMS的installPackageLI方法：frameworks/base/services/core/java/com/android/server ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/application/gradle/3-groovy.html" title="Gradle核心思想（三）Groovy快速入门指南">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZvBxx.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Gradle核心思想（三）Groovy快速入门指南"></a></div><div class="recent-post-info"><a class="article-title" href="/application/gradle/3-groovy.html" title="Gradle核心思想（三）Groovy快速入门指南">Gradle核心思想（三）Groovy快速入门指南</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-10-03T16:18:00.000Z" title="发表于 2018-10-04 00:18:00">2018-10-04</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解
+
+
+前言在前面我们学习了为什么现在要用Gradle？和Gradle入门前奏两篇文章，对Gradle也有了大概的了解，这篇文章我们接着来学习Groovy的基础，要想学好Gradle，Groovy是必须要掌握的。Groovy仅凭一篇文章是介绍不完的，这里会带大家快速的入门Groovy，讲解Groovy和Java不同的部分，想要更多了解Groovy可以查看Groovy官方文档和Groovy API文档。
+1.Groovy概述Groovy是Apache 旗下的一种基于JVM的面向对象编程语言，既可以用于面向对象编程，也可以用作纯粹的脚本语言。在语言的设计上它吸纳了Python、Ruby 和 Smalltalk 语言的优秀特性，比如动态类型转换、闭包和元编程支持。Groo ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/application/gradle/2-primer.html" title="Gradle核心思想（二）Gradle入门前奏">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZvkxP.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Gradle核心思想（二）Gradle入门前奏"></a></div><div class="recent-post-info"><a class="article-title" href="/application/gradle/2-primer.html" title="Gradle核心思想（二）Gradle入门前奏">Gradle核心思想（二）Gradle入门前奏</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-09-26T16:18:00.000Z" title="发表于 2018-09-27 00:18:00">2018-09-27</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解
+前言在上一篇文章Gradle核心思想（一）为什么现在要用Gradle？中，我们学习了常见的构建工具，以及Gradle与这些构建工具相比有那些不同的特性。这一篇文章我们接着来学习Gradle入门需要掌握的知识，包括配置环境、实现Hello World、Gradle的任务、Gradle日志和Gradle命令行，掌握这些能够更好的理解Gradle。
+
+1.配置Gradle环境安装Gradle前要确保系统已经配置好JDK的环境，要求JDK的版本在1.7或更高。Gradle的安装有两种形式：
+
+通过包管理安装，比如Window平台的Chocolatey、Scoop，Mac平台的MacPortsl、Homebrew等等。
+手动安装。
+
+关于包管理器安装可以查看官方文档 ，这 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/application/gradle/1-study-gradle.html" title="Gradle核心思想（一）为什么现在要用Gradle？">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VZO95n.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Gradle核心思想（一）为什么现在要用Gradle？"></a></div><div class="recent-post-info"><a class="article-title" href="/application/gradle/1-study-gradle.html" title="Gradle核心思想（一）为什么现在要用Gradle？">Gradle核心思想（一）为什么现在要用Gradle？</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-08-07T16:18:00.000Z" title="发表于 2018-08-08 00:18:00">2018-08-08</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/">Android应用层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联文章Gradle核心思想（一）为什么现在要用Gradle？Gradle核心思想（二）Gradle入门前奏Gradle核心思想（三）Groovy快速入门指南Gradle核心思想（四）看似无用，实则重要的Gradle WrapperGradle核心思想（五）通俗易懂的Gradle插件讲解
+前言又要开启一个新系列了，这个系列我们来学习Gradle，它是一个基于JVM的新一代构建工具，关于Gradle完全可以写一本书，这个系列会针对Android开发来对Gradle的知识进行精简讲解。Gradle目前已经应用于多个Android开发的技术体系中，比如构建系统、插件化、热修复和组件化等等，如果你不了解Gradle，那么你对于上述技术体系的了解会大打折扣。为了让大家能够更好的学习Gradle，这篇文章不会介绍Gradle具体的技术细节，而是先介绍为什么现在要用Gradle？
+
+
+1.项目自动化Gradle是一个构建工具，那么为什么要用构建工具，这就需要先从项目自动化开始讲起。在我们开发软件时，会面临相似的情况就是，我们需要去用IDE来进行编码，当完成一些 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/framework/pms/4-pms-start.html" title="Android包管理机制（四）PMS的创建过程">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VeCIQs.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android包管理机制（四）PMS的创建过程"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/pms/4-pms-start.html" title="Android包管理机制（四）PMS的创建过程">Android包管理机制（四）PMS的创建过程</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-07-29T16:16:00.000Z" title="发表于 2018-07-30 00:16:00">2018-07-30</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列Android包管理机制系列
+
+前言PMS的创建过程分为两个部分进行讲解，分别是SyetemServer处理部分和PMS构造方法。其中SyetemServer处理部分和AMS和WMS的创建过程是类似的，可以将它们进行对比，这样可以更好的理解和记忆这一知识点。
+1. SyetemServer处理部分PMS是在SyetemServer进程中被创建的，SyetemServer进程用来创建系统服务，不了解它的可以查看Android系统启动流程（三）解析SyetemServer进程启动过程这篇文章。从SyetemServer的入口方法main方法开始讲起，如下所示。frameworks/base/services/java/com/android/server/SystemServer.java
+public static void main(String[] args) &#123;       new SystemServer().run();   &#125;
+
+main方法中只调用了SystemServer的run方法，如下所示。frame ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/framework/pms/3-pms-install.html" title="Android包管理机制（三）PMS处理APK的安装">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/VeC1z9.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android包管理机制（三）PMS处理APK的安装"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/pms/3-pms-install.html" title="Android包管理机制（三）PMS处理APK的安装">Android包管理机制（三）PMS处理APK的安装</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-07-12T16:16:00.000Z" title="发表于 2018-07-13 00:16:00">2018-07-13</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列Android包管理机制系列
+
+前言在上一篇文章Android包管理机制（二）PackageInstaller安装APK中，我们学习了PackageInstaller是如何安装APK的，最后会将APK的信息交由PMS处理。那么PMS是如何处理的呢？这篇文章会给你答案。
+1.PackageHandler处理安装消息APK的信息交由PMS后，PMS通过向PackageHandler发送消息来驱动APK的复制和安装工作。先来查看PackageHandler处理安装消息的调用时序图。
+
+接着上一篇文章的代码逻辑来查看PMS的installStage方法。frameworks/base/services/core/java/com/android/server/pm/PackageManagerService.java
+void installStage(String packageName, File stagedDir, String stagedCid,           IPackageInstallObserver2 observer, ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/framework/pms/2-packageinstaller-apk.html" title="Android包管理机制（二）PackageInstaller安装APK">     <img class="post_bg" src="https://s2.ax1x.com/2019/05/27/Ve9939.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Android包管理机制（二）PackageInstaller安装APK"></a></div><div class="recent-post-info"><a class="article-title" href="/framework/pms/2-packageinstaller-apk.html" title="Android包管理机制（二）PackageInstaller安装APK">Android包管理机制（二）PackageInstaller安装APK</a><div class="article-meta-wrap"><span class="post-meta-date"><i class="far fa-calendar-alt"></i><span class="article-meta-label">发表于</span><time datetime="2018-06-27T16:16:00.000Z" title="发表于 2018-06-28 00:16:00">2018-06-28</time></span><span class="article-meta"><span class="article-meta__separator">|</span><i class="fas fa-inbox article-meta__icon"></i><a class="article-meta__categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="content">
+本文首发于微信公众号「后厂技术官」
+
+关联系列Android包管理机制系列
+
+
+前言在本系列上一篇文章Android包管理机制（一）PackageInstaller的初始化中我们学习了PackageInstaller是如何初始化的，这一篇文章我们接着学习PackageInstaller是如何安装APK的。本系列文章的源码基于Android8.0。
+1.PackageInstaller中的处理紧接着上一篇的内容，在PackageInstallerActivity调用startInstallConfirm方法初始化安装确认界面后，这个安装确认界面就会呈现给用户，用户如果想要安装这个应用程序就会点击确定按钮，就会调用PackageInstallerActivity的onClick方法，如下所示。packages/apps/PackageInstaller/src/com/android/packageinstaller/PackageInstallerActivity.java
+public void onClick(View v) &#123;        if (v == mOk)  ...</div></div></div><nav id="pagination"><div class="pagination"><a class="extend prev" rel="prev" href="/page/3/"><i class="fas fa-chevron-left fa-fw"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="extend next" rel="next" href="/page/5/"><i class="fas fa-chevron-right fa-fw"></i></a></div></nav></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/my.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">刘望舒</div><div class="author-info__description">Android进阶三部曲系列图书作者<br>腾讯云最具价值专家TVP <br>公众号：「刘望舒」</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/henrymorgen" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div></div><div class="sticky_layout"><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">Android进阶三部曲第三部《Android进阶指北》已出版！</div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item"><a class="thumbnail" href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！"><img src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="进阶三部曲第一部《Android进阶之光》第2版出版！"/></a><div class="content"><a class="title" href="/life/android-advanced-light.2.html" title="进阶三部曲第一部《Android进阶之光》第2版出版！">进阶三部曲第一部《Android进阶之光》第2版出版！</a><time datetime="2021-04-03T16:16:16.000Z" title="发表于 2021-04-04 00:16:16">2021-04-04</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"><img src="https://pic.imgdb.cn/item/5e6fc2eee83c3a1e3abc1bac.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！"/></a><div class="content"><a class="title" href="/batcoder/aosp/3-compiling-aosp.html" title="『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！">『BATcoder』 做了多年安卓还没编译过源码？一个视频带你玩转！</a><time datetime="2021-03-06T16:16:16.000Z" title="发表于 2021-03-07 00:16:16">2021-03-07</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！"><img src="https://pic.imgdb.cn/item/5e02594376085c3289aeb21b.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候下载Android11系统源码和内核源码了！"/></a><div class="content"><a class="title" href="/batcoder/aosp/2-download-aosp.html" title="『BATcoder』 是时候下载Android11系统源码和内核源码了！">『BATcoder』 是时候下载Android11系统源码和内核源码了！</a><time datetime="2021-01-14T16:16:16.000Z" title="发表于 2021-01-15 00:16:16">2021-01-15</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"><img src="https://pic.imgdb.cn/item/5fdad1733ffa7d37b3289c28.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！"/></a><div class="content"><a class="title" href="/batcoder/aosp/1-install-ubuntu.html" title="『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！">『BATcoder』 是时候安装Ubuntu，开始研究系统源码了！</a><time datetime="2020-12-16T16:16:16.000Z" title="发表于 2020-12-17 00:16:16">2020-12-17</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"><img src="https://pic1.imgdb.cn/item/5fc948f8394ac52378a95b54.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="『BATcoder』一个视频帮你突破系统底层学习瓶颈！"/></a><div class="content"><a class="title" href="/batcoder/android-framework.html" title="『BATcoder』一个视频帮你突破系统底层学习瓶颈！">『BATcoder』一个视频帮你突破系统底层学习瓶颈！</a><time datetime="2020-12-03T16:16:16.000Z" title="发表于 2020-12-04 00:16:16">2020-12-04</time></div></div></div></div></div><div class="card-widget card-categories"><div class="card-content"><div class="item-headline"><i class="fas fa-folder-open"></i><span>分类</span></div><ul class="card-category-list" id="aside-cat-list">
+            <li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Android%E5%BA%94%E7%94%A8%E5%B1%82/"><span class="card-category-list-name">Android应用层</span><span class="card-category-list-count">67</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/"><span class="card-category-list-name">Android框架层</span><span class="card-category-list-count">49</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/BATcoder/"><span class="card-category-list-name">BATcoder</span><span class="card-category-list-count">5</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Flutter/"><span class="card-category-list-name">Flutter</span><span class="card-category-list-count">13</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Java/"><span class="card-category-list-name">Java</span><span class="card-category-list-count">11</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/React-Native/"><span class="card-category-list-name">React Native</span><span class="card-category-list-count">9</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/Swift/"><span class="card-category-list-name">Swift</span><span class="card-category-list-count">5</span></a></li><li class="card-category-list-item "><a class="card-category-list-link" href="/categories/%E6%9C%9B%E8%88%92%E6%9D%82%E8%B0%88/"><span class="card-category-list-name">望舒杂谈</span><span class="card-category-list-count">2</span></a></li>
+            <li class="card-category-list-item more is-center"><a class="card-category-list-link-more" href="/categories/">
+                <span>查看更多</span><i class="fas fa-angle-right"></i></a></li>
+            </ul></div></div><div class="card-widget card-archives"><div class="card-content"><div class="item-headline"><i class="fas fa-archive"></i><span>归档</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/04/"><span class="card-archive-list-date">四月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/03/"><span class="card-archive-list-date">三月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2021/01/"><span class="card-archive-list-date">一月 2021</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/12/"><span class="card-archive-list-date">十二月 2020</span><span class="card-archive-list-count">2</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/11/"><span class="card-archive-list-date">十一月 2020</span><span class="card-archive-list-count">3</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/10/"><span class="card-archive-list-date">十月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/09/"><span class="card-archive-list-date">九月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/03/"><span class="card-archive-list-date">三月 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item more is-center"><a class="card-archive-list-link-more" href="/archives/">
+              <span>查看更多</span><i class="fas fa-angle-right"  ></i></a></li></ul></div></div><div class="card-widget card-webinfo"><div class="card-content"><div class="item-headline"><i class="fas fa-chart-line"></i><span>网站资讯</span></div><div class="webinfo"><div class="webinfo-item"><div class="item-name">文章数目 :</div><div class="item-count">197</div></div><div class="webinfo-item"><div class="item-name">已运行时间 :</div><div class="item-count" id="runtimeshow" data-publishDate="2017-04-12T16:00:00.000Z"></div></div><div class="webinfo-item"><div class="item-name">本站访客数 :</div><div class="item-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="item-name">本站总访问量 :</div><div class="item-count" id="busuanzi_value_site_pv"></div></div><div class="webinfo-item"><div class="item-name">最后更新时间 :</div><div class="item-count" id="last-push-date" data-lastPushDate="2021-12-17T12:18:36.212Z"></div></div></div></div></div></div></div></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function subtitleType () {
+  if (true) { 
+    var typed = new Typed("#subtitle", {
+      strings: "Android进阶三部曲番外篇".split(","),
+      startDelay: 300,
+      typeSpeed: 150,
+      loop: true,
+      backSpeed: 50
+    })
+  } else {
+    document.getElementById("subtitle").innerHTML = 'A'
+  }
+}
+
+if (true) {
+  if (typeof Typed === 'function') subtitleType()
+  else $.getScript('https://cdn.jsdelivr.net/npm/typed.js/lib/typed.min.js', subtitleType)
+} else {
+  subtitleType()
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>

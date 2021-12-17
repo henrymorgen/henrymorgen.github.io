@@ -1,0 +1,236 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Android AOSP基础（三）Android系统源码的整编和单编 | BATcoder - 刘望舒</title><meta name="description" content="本文首发于微信公众号「后厂技术官」  关联系列Android AOSP基础系列Android系统启动系列   前言在上一篇文章Android AOSP基础（二）AOSP 源码下载中，我们顺利的将AOSP下载了下来，很多时候我们不仅仅需要去查看源码，还有以下的几个需求：  动态调试Android系统源码 定制Android系统 将最新版本的Android系统刷入到自己的Android设备中 将系统"><meta name="keywords" content="AOSP基础"><meta name="author" content="刘望舒"><meta name="copyright" content="刘望舒"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="shortcut icon" href="/img/favicon.jpg"><link rel="canonical" href="http://liuwangshu.cn/framework/aosp/3-compiling-aosp.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><meta property="og:type" content="article"><meta property="og:title" content="Android AOSP基础（三）Android系统源码的整编和单编"><meta property="og:url" content="http://liuwangshu.cn/framework/aosp/3-compiling-aosp.html"><meta property="og:site_name" content="BATcoder - 刘望舒"><meta property="og:description" content="本文首发于微信公众号「后厂技术官」  关联系列Android AOSP基础系列Android系统启动系列   前言在上一篇文章Android AOSP基础（二）AOSP 源码下载中，我们顺利的将AOSP下载了下来，很多时候我们不仅仅需要去查看源码，还有以下的几个需求：  动态调试Android系统源码 定制Android系统 将最新版本的Android系统刷入到自己的Android设备中 将系统"><meta property="og:image" content="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg"><meta property="article:published_time" content="2019-03-16T16:18:00.000Z"><meta property="article:modified_time" content="2020-09-16T14:38:20.081Z"><meta name="twitter:card" content="summary"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><script>var GLOBAL_CONFIG = { 
+  root: '/',
+  hexoversion: '5.1.1',
+  algolia: undefined,
+  localSearch: {"path":"search.xml","languages":{"hits_empty":"找不到您查询的内容：${query}"}},
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  bookmark: {
+    message_prev: '按',
+    message_next: '键将本页加入书签'
+  },
+  runtime: '天',
+  date_suffix: {"one_hour":"刚刚","hours":"小时前","day":"天前"},
+  copyright: undefined,
+  ClickShowText: undefined,
+  medium_zoom: false,
+  fancybox: true,
+  Snackbar: undefined,
+  justifiedGallery: {
+    js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+    css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+  },
+  baiduPush: false,
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isanchor: false
+};
+
+var saveToLocal = {
+  set: function setWithExpiry(key, value, ttl) {
+    const now = new Date()
+    const expiryDay = ttl * 86400000
+    const item = {
+      value: value,
+      expiry: now.getTime() + expiryDay,
+    }
+    localStorage.setItem(key, JSON.stringify(item))
+    },
+
+  get: function getWithExpiry(key) {
+    const itemStr = localStorage.getItem(key)
+
+    if (!itemStr) {
+      return undefined
+    }
+    const item = JSON.parse(itemStr)
+    const now = new Date()
+
+    if (now.getTime() > item.expiry) {
+      localStorage.removeItem(key)
+      return undefined
+    }
+    return item.value
+  }
+}</script><script id="config_change">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isSidebar: true,
+  postUpdate: '2020-09-16 22:38:20'
+}</script><noscript><style type="text/css">
+#nav {
+  opacity: 1
+}
+.justified-gallery img {
+  opacity: 1
+}
+</style></noscript><script>var activateDarkMode = function () {
+  document.documentElement.setAttribute('data-theme', 'dark')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+  }
+}
+var activateLightMode = function () {
+  document.documentElement.setAttribute('data-theme', 'light')
+  if (document.querySelector('meta[name="theme-color"]') !== null) {
+    document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+  }
+}
+
+var autoChangeMode = 'false'
+var t = saveToLocal.get('theme')
+if (autoChangeMode === '1') {
+  var isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+  var isLightMode = window.matchMedia('(prefers-color-scheme: light)').matches
+  var isNotSpecified = window.matchMedia('(prefers-color-scheme: no-preference)').matches
+  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+
+  if (t === undefined) {
+    if (isLightMode) activateLightMode()
+    else if (isDarkMode) activateDarkMode()
+    else if (isNotSpecified || hasNoSupport) {
+      var now = new Date()
+      var hour = now.getHours()
+      var isNight = hour <= 6 || hour >= 18
+      isNight ? activateDarkMode() : activateLightMode()
+    }
+    window.matchMedia('(prefers-color-scheme: dark)').addListener(function (e) {
+      if (saveToLocal.get('theme') === undefined) {
+        e.matches ? activateDarkMode() : activateLightMode()
+      }
+    })
+  } else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else if (autoChangeMode === '2') {
+  now = new Date()
+  hour = now.getHours()
+  isNight = hour <= 6 || hour >= 18
+  if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+  else if (t === 'light') activateLightMode()
+  else activateDarkMode()
+} else {
+  if (t === 'dark') activateDarkMode()
+  else if (t === 'light') activateLightMode()
+}</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/my.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">文章</div><div class="length_num">197</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">标签</div><div class="length_num">51</div></a></div></div><div class="mobile_data_item is-center">     <div class="mobile_data_link"><a href="/categories/"><div class="headline">分类</div><div class="length_num">13</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div></div></div><div id="body-wrap"><div id="sidebar"><i class="fas fa-arrow-right on" id="toggle-sidebar"></i><div class="sidebar-toc"><div class="sidebar-toc__title">目录</div><div class="sidebar-toc__progress"><span class="progress-notice">你已经读了</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E7%BC%96%E8%AF%91%E7%B3%BB%E7%BB%9F%E6%A6%82%E8%BF%B0"><span class="toc-number">2.</span> <span class="toc-text">1.编译系统概述</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E7%BC%96%E8%AF%91%E6%BA%90%E7%A0%81%E7%9A%84%E6%96%B9%E5%BC%8F"><span class="toc-number">3.</span> <span class="toc-text">2.编译源码的方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%87%86%E5%A4%87%E7%BC%96%E8%AF%91%E7%8E%AF%E5%A2%83"><span class="toc-number">4.</span> <span class="toc-text">3.准备编译环境</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E6%BA%90%E7%A0%81%E6%95%B4%E7%BC%96"><span class="toc-number">5.</span> <span class="toc-text">4.源码整编</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-%E6%BA%90%E7%A0%81%E5%8D%95%E7%BC%96"><span class="toc-number">6.</span> <span class="toc-text">5.源码单编</span></a></li></ol></div></div></div><header class="post-bg" id="page-header" style="background-image: url(https://s2.ax1x.com/2019/05/27/VZWCyq.jpg)"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">BATcoder - 刘望舒</a></span><span id="menus"><div id="search_button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/system.html"><i class="fa-fw fas fa-list"></i><span> 知识体系</span></a></div><div class="menus_item"><a class="site-page" href="http://liuwangshu.cn/tags/%E6%88%91%E5%86%99%E7%9A%84%E4%B9%A6/"><i class="fa-fw fas fa-link"></i><span> 进阶三部曲</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间轴</span></a></div><div class="menus_item"><a class="site-page" target="_blank" rel="noopener" href="https://liuwangshu.blog.csdn.net/"><i class="fa-fw fas fa-folder-open"></i><span> CSDN</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div></div><span class="close" id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></span></span></nav><div id="post-info"><div id="post-title"><div class="posttitle">Android AOSP基础（三）Android系统源码的整编和单编</div></div><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-03-16T16:18:00.000Z" title="发表于 2019-03-17 00:18:00">2019-03-17</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2020-09-16T14:38:20.081Z" title="更新于 2020-09-16 22:38:20">2020-09-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/">Android框架层</a></span></div><div class="meta-secondline"> <span class="post-meta-separator">|</span><span class="post-meta-pv-cv"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"></span></span></div></div></div></header><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><blockquote>
+<p><strong>本文首发于微信公众号「后厂技术官」</strong></p>
+</blockquote>
+<p>关联系列<br><a href="http://liuwangshu.cn/tags/AOSP%E5%9F%BA%E7%A1%80/">Android AOSP基础系列</a><br><a href="http://liuwangshu.cn/tags/Android%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/">Android系统启动系列</a></p>
+<a id="more"></a>
+
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a><strong>前言</strong></h3><p>在上一篇文章<a href="http://liuwangshu.cn/framework/aosp/2.download-aosp.html">Android AOSP基础（二）AOSP 源码下载</a><br>中，我们顺利的将AOSP下载了下来，很多时候我们不仅仅需要去查看源码，还有以下的几个需求：</p>
+<ul>
+<li>动态调试Android系统源码</li>
+<li>定制Android系统</li>
+<li>将最新版本的Android系统刷入到自己的Android设备中</li>
+<li>将系统源码导入到Android Studio中</li>
+</ul>
+<p>为了实现这些需求，就需要我们去编译系统源码。</p>
+<h3 id="1-编译系统概述"><a href="#1-编译系统概述" class="headerlink" title="1.编译系统概述"></a><strong>1.编译系统概述</strong></h3><p>了解以下一些概念，会对Android编译系统有大概的了解。<br><strong>Makefile</strong><br>Android平台的编译系统，其实就是用Makefile写出来的一个独立项目。它定义了编译的规则，实现了“自动化编译”，不仅把分散在数百个Git库中的代码整合起来、统一编译， 而且还把产物分门别类地输出到一个目录，打包成手机ROM，还可以生成应用开发时所使用的SDK、NDK等。<br>因此，采用Makefile编写的编译系统，也可以称为Makefile编译系统。<br><strong>Android.mk</strong><br>Makefile编译系统的一部分，定义了一个模块的必要参数，使模块随着平台编译。通俗来讲就是告诉编译系统，以什么样的规则编译你的源代码，并生成对应的目标文件。</p>
+<p><strong>Ninja</strong><br>Ninja是一个致力于速度的小型编译系统，如果把其他的编译系统看作高级语言，那么Ninja 目标就是汇编。</p>
+<p><strong>Soong</strong><br>Soong是谷歌用来替代此前的Makefile编译系统的替代品，负责解析Android.bp文件，并将之转换为Ninja文件</p>
+<p><strong>Blueprint</strong><br>Blueprint用来解析Android.bp文件翻译成Ninja语法文件。</p>
+<p><strong>kati</strong><br>kati是谷歌专门为了Android而开发的一个小项目，基于Golang和C++。 目的是把Android中的Makefile，转换成Ninja文件。</p>
+<p><strong>Android.bp</strong><br>Android.bp，是用来替换Android.mk的配置文件。 </p>
+<p>Android.mk、Ninja、Soong、Blueprint、kati、Android.bp的概念之间的联系为：</p>
+<p><img src="https://s2.ax1x.com/2019/05/27/VZRxYQ.png" alt="VZRxYQ.png"></p>
+<p>Blueprint负责解析Android.bp文件内容，Blueprint类似一个处理相关语法的库文件，Soong则是定义具体如何处理相应的语法以及命令实现。通俗来讲就是Soong借助于Blueprint定义的Android.bp语法，完成Android.bp的解析，最终转换成Ninja文件。<br>Makefile文件会通过kati转换为Ninja文件。<br>随着Android工程越来越大，采用Makefile的编译系统花费的时间也越来越长，因此谷歌在Android 7.0开始引入了Ninja来编译系统，相对于Makefile来说Ninja在大的项目管理中速度和并行方面有突出的优势。<br>Makefile默认文件名为Makefile或makefile，也常用.make或.mk作为文件后缀。 Ninja的默认文件名是build.ninja，其它文件以.ninja为后缀。Makefile与Ninja的区别在于, Makefile是设计来给开发编写的，而Ninja设计出来是给其它程序生成的。如果Makefile是Java语言，那么Ninja就是汇编语言。</p>
+<h3 id="2-编译源码的方式"><a href="#2-编译源码的方式" class="headerlink" title="2.编译源码的方式"></a><strong>2.编译源码的方式</strong></h3><p>Androd系统源码编译有很多种方式，主要有以下几种：</p>
+<ul>
+<li>在Linux中直接进行系统源码编译（Android官方支持）</li>
+<li>在Mac OS中直接进行系统源码编译（Android官方支持）</li>
+<li>使用<a target="_blank" rel="noopener" href="https://www.docker.com/products">Docker</a>编译，支持Mac OS和Windows</li>
+</ul>
+<p>其中需要注意的是，Docker的最低支持版本为Windows7，建议用Windows10环境下使用Docker，因为在Windows7种还需要借助Docker Toolbox和VirtualBox中的容器进行通信，效率相对低些。<br>考虑到大多数人的设备和上手难易程度，本为讲解在Linux中直接进行系统源码编译，如果你的系统不是Ubuntu，可以查看<a href="http://liuwangshu.cn/framework/aosp/1-install-ubuntu.html">Android AOSP基础（一）VirtualBox 安装 Ubuntu</a>这篇文章。</p>
+<h3 id="3-准备编译环境"><a href="#3-准备编译环境" class="headerlink" title="3.准备编译环境"></a><strong>3.准备编译环境</strong></h3><p><strong>1.安装 jdk8</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install openjdk-8-jdk</span><br></pre></td></tr></table></figure>
+<p><strong>2.使用 ubuntu 14+，需要安装以下依赖包：</strong></p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">sudo apt-get install git-core gnupg flex bison gperf build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z-dev ccache libgl1-mesa-dev libxml2-utils xsltproc unzip</span><br></pre></td></tr></table></figure>
+<p><strong>3.设置处理器数量</strong><br>在设置–&gt;系统–&gt;处理器选项，设置处理器数量，建议选择能设置的最大值，这里设置的是6。</p>
+<h3 id="4-源码整编"><a href="#4-源码整编" class="headerlink" title="4.源码整编"></a><strong>4.源码整编</strong></h3><p>整编就是编译整个Android 源码，整编主要有三个步骤，下面分别就行介绍。</p>
+<p><strong>1.初始化环境</strong></p>
+<p>在AOSP的根目录，输入如下的命令：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source build&#x2F;envsetup.sh</span><br><span class="line">&#x2F;&#x2F; 编译前删除build文件夹A</span><br><span class="line">make clobber</span><br></pre></td></tr></table></figure>
+<p>使用 build目录中的envsetup.sh 脚本初始化环境，这个脚本会引入其他的执行脚本。</p>
+<p><strong>2. 选择编译目标</strong><br>输入命令：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">lunch</span><br></pre></td></tr></table></figure>
+<p>lunch命令是envsetup.sh里定义的一个命令，用来让用户选择编译目标。<br>会有以下信息输出：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">You&#39;re building on Linux</span><br><span class="line"></span><br><span class="line">Lunch menu... pick a combo:</span><br><span class="line">     1. aosp_arm-eng</span><br><span class="line">     2. aosp_arm64-eng</span><br><span class="line">     3. aosp_mips-eng</span><br><span class="line">     4. aosp_mips64-eng</span><br><span class="line">     5. aosp_x86-eng</span><br><span class="line">     6. aosp_x86_64-eng</span><br><span class="line">     7. aosp_car_arm-userdebug</span><br><span class="line">     8. aosp_car_arm64-userdebug</span><br><span class="line">     9. aosp_car_x86-userdebug</span><br><span class="line">     10. aosp_car_x86_64-userdebug</span><br><span class="line">     11. mini_emulator_arm64-userdebug</span><br><span class="line">     12. m_e_arm-userdebug</span><br><span class="line">     13. m_e_mips64-eng</span><br><span class="line">     14. m_e_mips-userdebug</span><br><span class="line">     15. mini_emulator_x86_64-userdebug</span><br><span class="line">     16. mini_emulator_x86-userdebug</span><br><span class="line">     17. uml-userdebug</span><br><span class="line">     18. aosp_cf_x86_auto-userdebug</span><br><span class="line">     19. aosp_cf_x86_phone-userdebug</span><br><span class="line">     20. aosp_cf_x86_tablet-userdebug</span><br><span class="line">     21. aosp_cf_x86_tablet_3g-userdebug</span><br><span class="line">     22. aosp_cf_x86_tv-userdebug</span><br><span class="line">     23. aosp_cf_x86_wear-userdebug</span><br><span class="line">     24. aosp_cf_x86_64_auto-userdebug</span><br><span class="line">     25. aosp_cf_x86_64_phone-userdebug</span><br><span class="line">     26. aosp_cf_x86_64_tablet-userdebug</span><br><span class="line">     27. aosp_cf_x86_64_tablet_3g-userdebug</span><br><span class="line">     28. aosp_cf_x86_64_tv-userdebug</span><br><span class="line">     29. aosp_cf_x86_64_wear-userdebug</span><br><span class="line">     30. cf_x86_auto-userdebug</span><br><span class="line">     31. cf_x86_phone-userdebug</span><br><span class="line">     32. cf_x86_tablet-userdebug</span><br><span class="line">     33. cf_x86_tablet_3g-userdebug</span><br><span class="line">     34. cf_x86_tv-userdebug</span><br><span class="line">     35. cf_x86_wear-userdebug</span><br><span class="line">     36. cf_x86_64_auto-userdebug</span><br><span class="line">     37. cf_x86_64_phone-userdebug</span><br><span class="line">     38. cf_x86_64_tablet-userdebug</span><br><span class="line">     39. cf_x86_64_tablet_3g-userdebug</span><br><span class="line">     40. cf_x86_64_tv-userdebug</span><br><span class="line">     41. cf_x86_64_wear-userdebug</span><br><span class="line">     42. aosp_marlin-userdebug</span><br><span class="line">     43. aosp_marlin_svelte-userdebug</span><br><span class="line">     44. aosp_sailfish-userdebug</span><br><span class="line">     45. aosp_walleye-userdebug</span><br><span class="line">     46. aosp_walleye_test-userdebug</span><br><span class="line">     47. aosp_taimen-userdebug</span><br><span class="line">     48. hikey-userdebug</span><br><span class="line">     49. hikey64_only-userdebug</span><br><span class="line">     50. hikey960-userdebug</span><br><span class="line"></span><br><span class="line">Which would you like? [aosp_arm-eng]</span><br></pre></td></tr></table></figure>
+
+<p>意思就是要你选择编译目标的格式，编译目标的格式组成为BUILD-BUILDTYPE，比如<code>aosp_arm-eng</code>的BUILD为aosp_arm，BUILDTYPE为eng。</p>
+<p>其中BUILD表示编译出的镜像可以运行在什么环境，aosp代表Android开源项目，arm表示系统是运行在arm架构的处理器上。<br>更多参考<a target="_blank" rel="noopener" href="https://source.android.google.cn/source/running.html#selecting-device-build">官方文档</a>。<br>BUILDTYPE 指的是编译类型，有以下三种：</p>
+<ul>
+<li>user：用来正式发布到市场的版本，权限受限，如没有 root 权限，不能 dedug，adb默认处于停用状态。</li>
+<li>userdebug：在user版本的基础上开放了 root 权限和 debug 权限，adb默认处于启用状态。一般用于调试真机。</li>
+<li>eng：开发工程师的版本，拥有最大的权限(root等)，具有额外调试工具的开发配置。一般用于模拟器。</li>
+</ul>
+<p>如果你没有Nexus设备，只想编译完后运行在模拟器查看，那么BUILD可以选择<code>aosp_x86</code>，BUILDTYPE选择eng，<code>Which would you like? [aosp_arm-eng]</code>后面直接输入对应序号5就可以。</p>
+<p>也可以直接指定编译的目标：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">lunch aosp_x86-eng</span><br></pre></td></tr></table></figure>
+<p>或者（不同的系统版本，序号的对应会有差别，建议不要直接用序号）</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">lunch 5</span><br></pre></td></tr></table></figure>
+
+<p><strong>3. 开始编译</strong><br>通过-jN参数来设置编译的并行任务数，以提高编译速度，在此前我的CPU核心数为6，这里N值最好选在6到12之间，这里我们设置6个并行任务进行编译:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">make -j6</span><br></pre></td></tr></table></figure>
+<p>整编成功后会打印类似如下内容：<br><img src="https://s2.ax1x.com/2019/05/27/VZWpSs.png"></p>
+<p>由于采用的是虚拟机整编，编译速度会慢一些，这里花费了2小时46分钟.<br>最终会在 out/target/product/generic_x86/目录生成了三个重要的镜像文件： system.img、userdata.img、ramdisk.img。大概介绍着三个镜像文件：<br>system.img：系统镜像，里面包含了Android系统主要的目录和文件，通过init.c进行解析并mount挂载到/system目录下。<br>userdata.img：用户镜像，是Android系统中存放用户数据的，通过init.c进行解析并mount挂载到/data目录下。<br>ramdisk.img：根文件系统镜像，包含一些启动Android系统的重要文件，比如init.rc。</p>
+<p><strong>运行模拟器</strong><br>在编译完成之后,就可以通过以下命令运行Android虚拟机了，命令如下:</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source build&#x2F;envsetup.sh</span><br><span class="line">lunch 5</span><br><span class="line">emulator</span><br></pre></td></tr></table></figure>
+<p>如果是在编译完后运行虚拟机，由于之前已经执行过source和lunch命令了，可以直接运行：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">emulator</span><br></pre></td></tr></table></figure>
+<p>如果不出意外就会启动模拟器，如果出现报错，网上也有很多的解决方案。</p>
+<h3 id="5-源码单编"><a href="#5-源码单编" class="headerlink" title="5.源码单编"></a><strong>5.源码单编</strong></h3><p>比如我们要编译系统的Settings应用模块，<br>在AOSP根目录执行：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">source build&#x2F;envsetup.sh</span><br><span class="line">lunch 5</span><br></pre></td></tr></table></figure>
+<p>进入Settings的目录：</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">cd packages&#x2F;apps&#x2F;Settings</span><br></pre></td></tr></table></figure>
+<p>mm编译当前目录下的模块，不编译依赖模块。</p>
+<figure class="highlight plain"><table><tr><td class="code"><pre><span class="line">mm</span><br></pre></td></tr></table></figure>
+<p>编译成功后会有提示生成文件的存放路径。<br><img src="https://s2.ax1x.com/2019/05/27/VZW9ln.png"></p>
+<p>除了Settings.odex文件，还会在out/target/product/generic_x86/system/priv-app/Settings目录下生成Settings.apk。</p>
+<p>此外还有以下命令可以进行单编：</p>
+<ul>
+<li>mmm：编译指定目录下的模块，不编译它所依赖的其它模块。</li>
+<li>mma：编译当前目录下的模块及其依赖项。</li>
+<li>mmma：编译指定路径下所有模块，并且包含依赖。</li>
+</ul>
+<p>如果你修改了源码，想查看生成的APK文件，有两种方式：</p>
+<ol>
+<li>通过adb push或者adb install 来安装APK。</li>
+<li>使用make snod命令，重新生成 system.img，运行模拟器查看。</li>
+</ol>
+<p>感谢：<br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/f514a9312656">https://www.jianshu.com/p/f514a9312656</a><br><a target="_blank" rel="noopener" href="http://wuxiaolong.me/2018/07/25/AOSP2/">http://wuxiaolong.me/2018/07/25/AOSP2/</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/nwpushuai/article/details/79372837">https://blog.csdn.net/nwpushuai/article/details/79372837</a><br><a target="_blank" rel="noopener" href="http://note.qidong.name/2017/08/android-blueprint/">http://note.qidong.name/2017/08/android-blueprint/</a><br><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/80013a768a45">https://www.jianshu.com/p/80013a768a45</a><br><a target="_blank" rel="noopener" href="http://note.qidong.name/2017/08/android-6.0-makefile/">http://note.qidong.name/2017/08/android-6.0-makefile/</a></p>
+</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">刘望舒</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://liuwangshu.cn/framework/aosp/3-compiling-aosp.html">http://liuwangshu.cn/framework/aosp/3-compiling-aosp.html</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://liuwangshu.cn" target="_blank">BATcoder - 刘望舒</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/AOSP%E5%9F%BA%E7%A1%80/">AOSP基础</a></div><div class="post_share"><div class="social-share" data-image="https://s2.ax1x.com/2019/05/27/VZWCyq.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/application/android-gradle/1-gradle-plug-in.html"><img class="prev-cover" src="https://s2.ax1x.com/2019/05/27/VepHcn.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">Android Gradle （一）Gradle的Android插件入门</div></div></a></div><div class="next-post pull-right"><a href="/framework/aosp/2-download-aosp.html"><img class="next-cover" src="https://s2.ax1x.com/2019/05/27/VZRBi4.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">Android AOSP基础（二）AOSP源码和内核源码下载</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/framework/aosp/1-install-ubuntu.html" title="Android AOSP基础（一）VirtualBox 安装 Ubuntu"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZg6h9.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-03-02</div><div class="title">Android AOSP基础（一）VirtualBox 安装 Ubuntu</div></div></a></div><div><a href="/framework/aosp/2-download-aosp.html" title="Android AOSP基础（二）AOSP源码和内核源码下载"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZRBi4.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-03-09</div><div class="title">Android AOSP基础（二）AOSP源码和内核源码下载</div></div></a></div><div><a href="/framework/aosp/4-import-aosp.html" title="Android AOSP基础（四）Source Insight和Android Studio导入系统源码"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZWhn0.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-04-03</div><div class="title">Android AOSP基础（四）Source Insight和Android Studio导入系统源码</div></div></a></div><div><a href="/framework/aosp/5-debug-aosp.html" title="Android AOSP基础（五）Android Studio调试系统源码的三种方式"><img class="cover" src="https://s2.ax1x.com/2019/05/27/VZhKZ6.jpg"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-04-08</div><div class="title">Android AOSP基础（五）Android Studio调试系统源码的三种方式</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div id="lv-container" data-id="city" data-uid="MTAyMC8yOTU2Ni82MTM0"></div></div></div></div></article></main><footer id="footer" data-type="color"><div id="footer-wrap"><div class="copyright">&copy;2020 - 2021 By 刘望舒</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><section id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></section><div class="search-dialog" id="local-search"><div class="search-dialog__title" id="local-search-title">本地搜索</div><div id="local-input-panel"><div id="local-search-input"><div class="local-search-box"><input class="local-search-box--input" placeholder="搜索文章" type="text"/></div></div></div><hr/><div id="local-search-results"><div id="local-hits"></div><div id="local-stats"><div class="local-search-stats__hr" id="hr"><span>由</span> <a target="_blank" rel="noopener" href="https://github.com/wzpan/hexo-generator-search" style="color:#49B1F5;">hexo-generator-search</a>
+ <span>提供支持</span></div></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div><div><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="/js/search/local-search.js"></script><div class="js-pjax"><script>function loadLivere () {
+  if (typeof LivereTower === 'object') {
+    window.LivereTower.init()
+  }
+  else {
+    (function(d, s) {
+        var j, e = d.getElementsByTagName(s)[0];
+        if (typeof LivereTower === 'function') { return; }
+        j = d.createElement(s);
+        j.src = 'https://cdn-city.livere.com/js/embed.dist.js';
+        j.async = true;
+        e.parentNode.insertBefore(j, e);
+    })(document, 'script');
+  }
+}
+
+if ('Livere' === 'Livere' || !false) {
+  if (false) btf.loadComment(document.getElementById('lv-container'), loadLivere)
+  else loadLivere()
+}
+else {
+  function loadOtherComment () {
+    loadLivere()
+  }
+}</script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div><script defer="defer" id="ribbon" src="/js/third-party/canvas-ribbon.js" size="150" alpha="0.6" zIndex="-1" mobile="true" data-click="true"></script><script src="/js/third-party/activate-power-mode.js"></script><script>POWERMODE.colorful = true;
+POWERMODE.shake = true;
+document.body.addEventListener('input', POWERMODE);
+</script></div></body></html>
