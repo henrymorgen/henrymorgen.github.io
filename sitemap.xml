@@ -1439,13 +1439,6 @@
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/tags/BATcoder/</loc>
-    <lastmod>2021-12-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://liuwangshu.cn/tags/%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
@@ -1453,14 +1446,7 @@
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/tags/Android%E6%A1%86%E6%9E%B6%E5%B1%82/</loc>
-    <lastmod>2021-12-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://liuwangshu.cn/tags/Android%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/</loc>
+    <loc>http://liuwangshu.cn/tags/BATcoder/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1495,14 +1481,14 @@
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/tags/%E6%9C%9B%E8%88%92%E6%9D%82%E8%B0%88/</loc>
+    <loc>http://liuwangshu.cn/tags/Android%E6%A1%86%E6%9E%B6%E5%B1%82/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/tags/Swift/</loc>
+    <loc>http://liuwangshu.cn/tags/Android%E7%B3%BB%E7%BB%9F%E5%90%AF%E5%8A%A8/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1523,6 +1509,20 @@
   </url>
   
   <url>
+    <loc>http://liuwangshu.cn/tags/%E6%9C%9B%E8%88%92%E6%9D%82%E8%B0%88/</loc>
+    <lastmod>2021-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://liuwangshu.cn/tags/Swift/</loc>
+    <lastmod>2021-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://liuwangshu.cn/tags/Android-Gradle/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
@@ -1537,6 +1537,13 @@
   </url>
   
   <url>
+    <loc>http://liuwangshu.cn/tags/Android%E6%96%B0%E7%89%B9%E6%80%A7/</loc>
+    <lastmod>2021-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://liuwangshu.cn/tags/EventBus/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
@@ -1545,13 +1552,6 @@
   
   <url>
     <loc>http://liuwangshu.cn/tags/Android%E6%9E%B6%E6%9E%84/</loc>
-    <lastmod>2021-12-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://liuwangshu.cn/tags/Android%E6%96%B0%E7%89%B9%E6%80%A7/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1579,14 +1579,14 @@
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/tags/Material-Design/</loc>
+    <loc>http://liuwangshu.cn/tags/Android-Jetpack/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/tags/Android-Jetpack/</loc>
+    <loc>http://liuwangshu.cn/tags/Material-Design/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1691,6 +1691,13 @@
   </url>
   
   <url>
+    <loc>http://liuwangshu.cn/tags/Android%E8%BE%93%E5%85%A5%E7%B3%BB%E7%BB%9F/</loc>
+    <lastmod>2021-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://liuwangshu.cn/tags/Android%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3JNI/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
@@ -1698,7 +1705,7 @@
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/tags/Android%E8%BE%93%E5%85%A5%E7%B3%BB%E7%BB%9F/</loc>
+    <loc>http://liuwangshu.cn/tags/WindowManager/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1712,7 +1719,14 @@
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/tags/WindowManager/</loc>
+    <loc>http://liuwangshu.cn/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
+    <lastmod>2021-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://liuwangshu.cn/tags/Java/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1727,20 +1741,6 @@
   
   <url>
     <loc>http://liuwangshu.cn/tags/Java%E8%99%9A%E6%8B%9F%E6%9C%BA/</loc>
-    <lastmod>2021-12-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://liuwangshu.cn/tags/Java/</loc>
-    <lastmod>2021-12-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://liuwangshu.cn/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1798,13 +1798,6 @@
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/categories/BATcoder/</loc>
-    <lastmod>2021-12-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>http://liuwangshu.cn/categories/%E7%AE%97%E6%B3%95/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
@@ -1812,7 +1805,7 @@
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/</loc>
+    <loc>http://liuwangshu.cn/categories/BATcoder/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1826,14 +1819,7 @@
   </url>
   
   <url>
-    <loc>http://liuwangshu.cn/categories/%E8%A7%86%E9%A2%91/</loc>
-    <lastmod>2021-12-20</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://liuwangshu.cn/categories/Swift/</loc>
+    <loc>http://liuwangshu.cn/categories/Android%E6%A1%86%E6%9E%B6%E5%B1%82/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
@@ -1847,7 +1833,21 @@
   </url>
   
   <url>
+    <loc>http://liuwangshu.cn/categories/%E8%A7%86%E9%A2%91/</loc>
+    <lastmod>2021-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>http://liuwangshu.cn/categories/%E6%9C%9B%E8%88%92%E6%9D%82%E8%B0%88/</loc>
+    <lastmod>2021-12-20</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://liuwangshu.cn/categories/Swift/</loc>
     <lastmod>2021-12-20</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
