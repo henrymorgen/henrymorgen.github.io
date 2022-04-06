@@ -4,8 +4,8 @@ http://liuwangshu.cn/batcoder/aosp/2-download-aosp.html
 http://liuwangshu.cn/batcoder/aosp/1-install-ubuntu.html
 http://liuwangshu.cn/batcoder/android-framework.html
 http://liuwangshu.cn/batcoder/android_future.html
-http://liuwangshu.cn/show/book-money.html
 http://liuwangshu.cn/show/workplace-pit.html
+http://liuwangshu.cn/show/book-money.html
 http://liuwangshu.cn/show/bilibili-show.html
 http://liuwangshu.cn/life/android-advanced-guide.html
 http://liuwangshu.cn/application/network/12-okhttp4-sourcecode.html
